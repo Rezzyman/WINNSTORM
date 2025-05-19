@@ -75,7 +75,7 @@ const Auth = () => {
         {/* WHITE HOT Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-2">
-            <img src="/white-hot-logo.png" alt="WHITE HOT" className="h-28" />
+            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-28" />
           </div>
           <p className="text-neutral-dark mt-2">THERMAL IMAGE REPORTS</p>
         </div>

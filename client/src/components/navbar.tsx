@@ -19,7 +19,7 @@ export const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <img src="/white-hot-logo.png" alt="WHITE HOT" className="h-8 mr-2" />
+          <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-8 mr-2" />
           <h1 className="text-xl font-semibold text-primary">WHITE HOT</h1>
         </div>
         <div className="flex items-center">
