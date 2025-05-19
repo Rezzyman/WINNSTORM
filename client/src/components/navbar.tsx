@@ -19,8 +19,8 @@ export const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <Flame className="text-secondary mr-1" />
-          <h1 className="text-xl font-semibold text-primary">ThermalRoof</h1>
+          <img src="/white-hot-logo.png" alt="WHITE HOT" className="h-8 mr-2" />
+          <h1 className="text-xl font-semibold text-primary">WHITE HOT</h1>
         </div>
         <div className="flex items-center">
           <span className="text-sm text-neutral-dark mr-2 hidden sm:inline-block">

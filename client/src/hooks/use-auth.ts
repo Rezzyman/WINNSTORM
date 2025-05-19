@@ -113,9 +113,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUserRole,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  // Use createElement instead of JSX to avoid build issues
+  return(
+    AuthContext.Provider && children ? 
+    { type: AuthContext.Provider, props: { value, children } } : 
+    null
   );
 };

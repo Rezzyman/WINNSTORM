@@ -72,13 +72,12 @@ const Auth = () => {
   return (
     <div className="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
-        {/* Logo */}
+        {/* WHITE HOT Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary flex items-center justify-center">
-            <Flame className="text-secondary mr-2" />
-            Thermal Roof Intelligence™
-          </h1>
-          <p className="text-neutral-dark mt-2">Commercial Roofing Analytics</p>
+          <div className="flex justify-center mb-2">
+            <img src="/white-hot-logo.png" alt="WHITE HOT" className="h-28" />
+          </div>
+          <p className="text-neutral-dark mt-2">THERMAL IMAGE REPORTS</p>
         </div>
 
         {/* Login Form */}
