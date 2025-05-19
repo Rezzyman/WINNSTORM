@@ -1,0 +1,121 @@
+🔥 You got it, Rez. Below is your **Replit prompt**—crafted to spark the perfect MVP build for a **Thermal Imaging Intelligence App** specifically for **commercial roofing**. This includes the core app description, tech requirements, and user flow. Just copy/paste this into your Replit project prompt field or send it directly to a dev.
+
+---
+
+### 🚀 **Replit Prompt: Thermal Roof Intelligence™ MVP Build**
+
+---
+
+**Project Title:**
+**Thermal Roof Intelligence™ – MVP App for Commercial Roofing**
+
+---
+
+**App Description:**
+Build a **cross-platform mobile app** (iOS & Android) that allows commercial roofing companies to **capture, upload, analyze, and report** thermal imagery from drones or handheld infrared cameras. The goal is to **visualize heat anomalies**, **score roof health**, and **generate AI-enhanced reports** for facility managers, insurance companies, and internal teams.
+
+---
+
+**Objective:**
+Create an MVP of **Thermal Roof Intelligence™**, a tool for field teams and sales reps to process thermal data into actionable insights in under 5 minutes per property.
+
+---
+
+### 📱 **User Roles**
+
+1. **Field Rep / Drone Pilot**
+2. **Sales Rep / Estimator**
+3. **Admin / Manager**
+
+---
+
+### 🔧 Core MVP Features (Phase 1)
+
+1. **User Login / Role Selection**
+   Firebase Auth or Google Login
+
+2. **Thermal Image Upload**
+   Upload JPEG/PNG thermal images or MP4 from drones (FLIR-compatible).
+   Add GPS + address manually or auto-fill via EXIF/location data.
+
+3. **AI Analysis Engine (Mocked in MVP)**
+   On upload, run mock AI logic (simulate backend analysis) to:
+
+   * Identify hot spots, cold zones
+   * Classify moisture, trapped insulation, and membrane degradation
+   * Assign a “Roof Health Score” (0–100)
+
+4. **Visual Overlay Tool**
+   View side-by-side image:
+
+   * Standard image
+   * Thermal image
+   * Annotated AI result
+     \[Can be static in MVP with mock data]
+
+5. **Report Generator (PDF + Shareable Link)**
+   Generate a branded report including:
+
+   * Job info
+   * AI annotations
+   * Roof health score
+   * Summary with recommendations
+     Include “Send to Email” and “Download” buttons
+
+6. **Client/Property History View**
+   List of previous scans, sortable by date or score.
+
+---
+
+### 🌐 Tech Stack Recommendations
+
+* **Frontend:** React Native (Expo for speed)
+* **Backend:** Node.js or Firebase Functions
+* **Storage:** Firebase or Supabase for files + Firestore for metadata
+* **PDF Generation:** react-pdf or backend Puppeteer
+* **Mock AI Engine:** Simulated rule-based analysis (replace with ML later)
+
+---
+
+### 💡 Future Features (Not in MVP)
+
+* Actual AI/ML model integration for thermal interpretation (TensorFlow Lite or OpenCV)
+* Realtime drone feed ingestion
+* Timeline degradation heatmap
+* CRM integrations (JobNimbus, GHL, etc.)
+* Thermal-to-3D map overlays
+* Push notification when rescan is needed
+
+---
+
+### 📲 MVP User Flow
+
+1. User logs in and selects role
+2. Uploads thermal scan and tags location
+3. App simulates AI analysis + generates annotated image
+4. “Roof Health Score” and issues displayed
+5. One-click report creation and email delivery
+6. Job is saved to property profile for history tracking
+
+---
+
+### ✅ Success Criteria for MVP
+
+* Working UI in React Native
+* Upload flow complete
+* Mock AI analysis triggered
+* PDF report generation functional
+* Data stored and retrievable
+
+---
+
+**Note to Replit Developer or AI Agent:**
+Start by building the upload flow and thermal image viewing component. Use mock data to simulate AI responses in MVP. Modularize so real AI can be swapped in later. Make the UX fast and clean—no extra clicks. This is for roofers *on-site* with limited time.
+
+---
+
+Let me know when you're ready for branding, icon sets, or full investor deck for this.
+
+And if you want this linked to **RoofIt.ai** or skinned under **ATERNA.AI**, I’ll wire it up.
+
+You’re building the next smart layer in roofing. Let’s go. 🛰️🔥
