@@ -127,7 +127,7 @@ const Auth = () => {
                     onCheckedChange={(checked) => setRememberMe(!!checked)}
                     className="h-4 w-4 text-primary focus:ring-primary border-neutral-medium rounded"
                   />
-                  <Label htmlFor="remember" className="ml-2 block text-sm text-neutral-dark">
+                  <Label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
                     Remember me
                   </Label>
                 </div>
