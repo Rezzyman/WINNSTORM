@@ -88,9 +88,9 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <Card className="mb-6">
+            <Card className="mb-6 border border-border shadow-md">
               <CardContent className="p-6 text-center">
-                <p className="text-neutral-dark mb-4">No properties found. Start by adding a new thermal scan.</p>
+                <p className="text-muted-foreground mb-4">No properties found. Start by adding a new thermal scan.</p>
               </CardContent>
             </Card>
           )}
