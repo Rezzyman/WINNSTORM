@@ -113,5 +113,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUserRole,
   };
 
-  return { provider: AuthContext.Provider, value, children };
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

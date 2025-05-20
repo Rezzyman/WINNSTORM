@@ -4,7 +4,25 @@ import {
   Card, 
   CardContent,
 } from '@/components/ui/card';
-import { Flame, Send, Settings } from 'lucide-react';
+import { Send, Settings } from 'lucide-react';
+
+// Custom Analytics icon component 
+const AnalyticsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className="lucide lucide-line-chart"
+    {...props}
+  >
+    <path d="M3 3v18h18" />
+    <path d="m19 9-5 5-4-4-3 3" />
+  </svg>
+);
 
 interface RoleOption {
   id: UserRole;
@@ -24,7 +42,7 @@ const roleOptions: RoleOption[] = [
     id: 'sales-rep',
     title: 'Sales Rep / Estimator',
     description: 'Generate reports & estimates',
-    icon: <Analytics className="text-neutral-dark" />
+    icon: <AnalyticsIcon className="text-neutral-dark" />
   },
   {
     id: 'admin',
@@ -33,23 +51,6 @@ const roleOptions: RoleOption[] = [
     icon: <Settings className="text-neutral-dark" />
   }
 ];
-
-const Analytics = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className="lucide lucide-line-chart"
-    {...props}
-  >
-    <path d="M3 3v18h18" />
-    <path d="m19 9-5 5-4-4-3 3" />
-  </svg>
-);
 
 export const RoleSelector = () => {
   const { setUserRole } = useAuth();
@@ -63,8 +64,12 @@ export const RoleSelector = () => {
   return (
     <div className="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
+        {/* WHITE HOT Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-primary">Select Your Role</h1>
+          <div className="flex justify-center mb-2">
+            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-20" />
+          </div>
+          <h1 className="text-2xl font-bold text-primary mt-4">Select Your Role</h1>
           <p className="text-neutral-dark mt-2">Access the features specific to your job</p>
         </div>
 
