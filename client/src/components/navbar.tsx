@@ -16,18 +16,18 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background shadow-md border-b border-border">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-8 mr-2" />
-          <h1 className="text-xl font-semibold text-primary">WHITE HOT</h1>
+          <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-10 mr-3" />
+          <h1 className="text-xl font-bold text-primary">WHITE HOT</h1>
         </div>
         <div className="flex items-center">
-          <span className="text-sm text-neutral-dark mr-2 hidden sm:inline-block">
+          <span className="text-sm text-muted-foreground mr-3 hidden sm:inline-block">
             {user?.email ? user.email.split('@')[0] : 'User'}
           </span>
           <button 
-            className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center"
+            className="w-9 h-9 bg-primary hover:bg-accent transition-colors text-white rounded-full flex items-center justify-center shadow-glow"
             onClick={logout}
           >
             {getUserInitials()}

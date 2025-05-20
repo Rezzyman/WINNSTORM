@@ -3,21 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
-  --muted: 210 40% 93%;
-  --muted-foreground: 215 16% 47%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --primary: 214 90% 42%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 16 100% 50%;
+  /* Dark theme for WHITE HOT brand */
+  --background: 220 20% 10%;
+  --foreground: 210 40% 98%;
+  --muted: 220 20% 20%;
+  --muted-foreground: 210 40% 80%;
+  --popover: 220 20% 12%;
+  --popover-foreground: 210 40% 98%;
+  --card: 220 20% 15%;
+  --card-foreground: 210 40% 98%;
+  --border: 220 20% 25%;
+  --input: 220 20% 25%;
+  --primary: 0 80% 50%; /* Hot red for "WHITE HOT" brand */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 30 100% 50%; /* Fiery orange accent */
   --secondary-foreground: 0 0% 100%;
-  --accent: 210 40% 93%;
+  --accent: 0 100% 60%;
   --accent-foreground: 222 47% 11%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
