@@ -41,9 +41,12 @@ const Dashboard = () => {
       
       <main className="flex-grow pb-20">
         <div className="p-4">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-neutral-darker">Recent Properties</h2>
-            <p className="text-neutral-dark text-sm">View and manage your thermal scans</p>
+          <div className="mb-6 flex items-center">
+            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-10 mr-3" />
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-darker">Recent Properties</h2>
+              <p className="text-neutral-dark text-sm">View and manage your thermal scans</p>
+            </div>
           </div>
 
           {/* Property Cards */}
