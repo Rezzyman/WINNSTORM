@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles for WHITE HOT brand */
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .menu-active {
+    @apply text-primary font-medium;
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
+  }
+}
+
 :root {
   /* Dark theme for WHITE HOT brand */
   --background: 220 20% 10%;

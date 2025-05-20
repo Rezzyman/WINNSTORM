@@ -42,35 +42,35 @@ export const Footer = () => {
   const [location, navigate] = useLocation();
   
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-light py-2 px-6 z-10">
+    <footer className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 z-10">
       <div className="flex flex-col">
         <div className="mb-2 flex justify-center items-center">
           <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-6" />
-          <span className="text-xs text-neutral-dark ml-2">© 2025 WHITE HOT</span>
+          <span className="text-xs text-muted-foreground ml-2">© 2025 WHITE HOT</span>
         </div>
         <div className="flex justify-around items-center">
           <button 
-            className={`flex flex-col items-center ${location === '/dashboard' ? 'menu-active' : 'text-neutral-dark'}`}
+            className={`flex flex-col items-center ${location === '/dashboard' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             onClick={() => navigate('/dashboard')}
           >
             <Home className="h-6 w-6" />
             <span className="text-xs mt-1">Home</span>
           </button>
           <button 
-            className={`flex flex-col items-center ${location === '/upload' ? 'menu-active' : 'text-neutral-dark'}`}
+            className={`flex flex-col items-center ${location === '/upload' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             onClick={() => navigate('/upload')}
           >
             <CloudUpload className="h-6 w-6" />
             <span className="text-xs mt-1">Upload</span>
           </button>
           <button 
-            className="flex flex-col items-center text-neutral-dark"
+            className="flex flex-col items-center text-muted-foreground hover:text-foreground"
           >
             <ChartScatter className="h-6 w-6" />
             <span className="text-xs mt-1">Reports</span>
           </button>
           <button 
-            className="flex flex-col items-center text-neutral-dark"
+            className="flex flex-col items-center text-muted-foreground hover:text-foreground"
           >
             <PersonStanding className="h-6 w-6" />
             <span className="text-xs mt-1">Profile</span>

@@ -36,16 +36,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative bg-background text-foreground">
       <Header />
       
       <main className="flex-grow pb-20">
-        <div className="p-4">
-          <div className="mb-6 flex items-center">
-            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-10 mr-3" />
+        <div className="p-6">
+          <div className="mb-8 flex items-center">
+            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-12 mr-3" />
             <div>
-              <h2 className="text-xl font-semibold text-neutral-darker">Recent Properties</h2>
-              <p className="text-neutral-dark text-sm">View and manage your thermal scans</p>
+              <h2 className="text-2xl font-bold text-foreground">Recent Properties</h2>
+              <p className="text-muted-foreground text-sm mt-1">View and manage your thermal scans</p>
             </div>
           </div>
 
@@ -99,7 +99,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {/* New Scan Card */}
             <Card 
-              className="bg-primary text-white cursor-pointer"
+              className="bg-primary text-white cursor-pointer shadow-glow hover:bg-accent transition-colors"
               onClick={() => navigate('/upload')}
             >
               <CardContent className="p-4">
@@ -122,23 +122,23 @@ const Dashboard = () => {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <h3 className="font-medium text-white">New Thermal Scan</h3>
-                    <p className="text-blue-100 text-sm">Upload and analyze new imagery</p>
+                    <h3 className="font-bold text-white">New Thermal Scan</h3>
+                    <p className="text-white text-sm opacity-80">Upload and analyze new imagery</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* View Reports Card */}
-            <Card className="bg-white rounded-lg shadow-sm cursor-pointer">
+            <Card className="bg-card border border-border hover:border-primary transition-colors cursor-pointer shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="bg-secondary bg-opacity-10 p-3 rounded-full">
+                  <div className="bg-secondary bg-opacity-20 p-3 rounded-full">
                     <FileText className="h-6 w-6 text-secondary" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="font-medium text-neutral-darker">Reports</h3>
-                    <p className="text-neutral-dark text-sm">View previously generated reports</p>
+                    <h3 className="font-medium text-foreground">Reports</h3>
+                    <p className="text-muted-foreground text-sm">View previously generated reports</p>
                   </div>
                 </div>
               </CardContent>
@@ -147,21 +147,21 @@ const Dashboard = () => {
 
           {/* Quick Stats */}
           {!isLoading && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-neutral-darker mb-3">Monthly Overview</h3>
+            <Card className="bg-card border border-border shadow-md">
+              <CardContent className="p-5">
+                <h3 className="font-bold text-foreground mb-4">Monthly Overview</h3>
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold text-primary">{stats.scans}</p>
-                    <p className="text-neutral-dark text-sm">Scans</p>
+                  <div className="text-center p-3 bg-background rounded-lg">
+                    <p className="text-2xl font-bold text-primary">{stats.scans}</p>
+                    <p className="text-muted-foreground text-sm mt-1">Scans</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold text-secondary">{stats.reports}</p>
-                    <p className="text-neutral-dark text-sm">Reports</p>
+                  <div className="text-center p-3 bg-background rounded-lg">
+                    <p className="text-2xl font-bold text-secondary">{stats.reports}</p>
+                    <p className="text-muted-foreground text-sm mt-1">Reports</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold text-success">{stats.avgScore}</p>
-                    <p className="text-neutral-dark text-sm">Avg Score</p>
+                  <div className="text-center p-3 bg-background rounded-lg">
+                    <p className="text-2xl font-bold text-accent">{stats.avgScore}</p>
+                    <p className="text-muted-foreground text-sm mt-1">Avg Score</p>
                   </div>
                 </div>
               </CardContent>
