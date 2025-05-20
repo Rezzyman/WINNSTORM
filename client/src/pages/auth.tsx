@@ -70,22 +70,22 @@ const Auth = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 bg-background z-40 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
         {/* WHITE HOT Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-2">
             <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-28" />
           </div>
-          <p className="text-neutral-dark mt-2">THERMAL IMAGE REPORTS</p>
+          <p className="text-muted-foreground mt-2">THERMAL IMAGE REPORTS</p>
         </div>
 
         {/* Login Form */}
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="border border-border shadow-md">
+          <CardContent className="pt-6 bg-card">
             <form onSubmit={handleLogin}>
               <div className="mb-6">
-                <Label htmlFor="email" className="block text-neutral-darker text-sm font-medium mb-2">
+                <Label htmlFor="email" className="block text-foreground text-sm font-medium mb-2">
                   Email
                 </Label>
                 <Input
@@ -93,13 +93,13 @@ const Auth = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground"
                   placeholder="your@email.com"
                   disabled={isLoading}
                 />
               </div>
               <div className="mb-6">
-                <Label htmlFor="password" className="block text-neutral-darker text-sm font-medium mb-2">
+                <Label htmlFor="password" className="block text-foreground text-sm font-medium mb-2">
                   Password
                 </Label>
                 <Input
@@ -107,7 +107,7 @@ const Auth = () => {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground"
                   placeholder="••••••••"
                   disabled={isLoading}
                 />
@@ -148,14 +148,14 @@ const Auth = () => {
               <div className="w-full border-t border-neutral-medium"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-neutral-dark">Or continue with</span>
+              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-1 gap-3">
             <Button
               type="button"
               variant="outline"
-              className="w-full inline-flex justify-center py-3 px-4 border border-neutral-medium rounded-lg shadow-sm bg-white text-sm font-medium text-neutral-darker hover:bg-neutral-light"
+              className="w-full inline-flex justify-center py-3 px-4 border border-border rounded-lg shadow-md bg-card text-sm font-medium text-foreground hover:bg-muted transition-colors"
               onClick={handleGoogleLogin}
               disabled={isLoading}
             >
