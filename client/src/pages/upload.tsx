@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/button';
 import {
   ArrowLeft, 
-  Upload, 
+  Upload as UploadIcon, 
   CloudUpload, 
   Check, 
   Image
@@ -39,7 +39,7 @@ interface FileUploadItem {
   error?: string;
 }
 
-const Upload = () => {
+const UploadPage = () => {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -339,7 +339,7 @@ const Upload = () => {
                 onClick={handleUpload}
                 disabled={uploadMutation.isPending}
               >
-                <Upload className="mr-2 h-5 w-5" />
+                <UploadIcon className="mr-2 h-5 w-5" />
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload & Analyze'}
               </Button>
             </CardContent>
@@ -373,4 +373,4 @@ const Upload = () => {
   );
 };
 
-export default Upload;
+export default UploadPage;
