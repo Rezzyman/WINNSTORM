@@ -1,7 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from 'firebase/auth';
-import { loginWithEmail, loginWithGoogle, registerWithEmail, logoutUser, onAuthChange } from '@/lib/firebase';
-import { useLocation } from 'wouter';
+import { 
+  loginWithEmail, 
+  registerWithEmail, 
+  logoutUser, 
+  loginWithGoogle as googleLogin, 
+  onAuthChange 
+} from '@/lib/firebase';
 
 export type UserRole = 'field-rep' | 'sales-rep' | 'admin' | null;
 
@@ -16,18 +21,9 @@ interface AuthContextType {
   setUserRole: (role: UserRole) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  role: null,
-  loading: true,
-  login: async () => { throw new Error('AuthContext not initialized'); },
-  loginWithGoogle: async () => { throw new Error('AuthContext not initialized'); },
-  register: async () => { throw new Error('AuthContext not initialized'); },
-  logout: async () => { throw new Error('AuthContext not initialized'); },
-  setUserRole: () => { throw new Error('AuthContext not initialized'); },
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext) as AuthContextType;
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -37,68 +33,77 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const [, navigate] = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthChange((authUser) => {
       setUser(authUser);
       setLoading(false);
       
-      // Get stored role if user is logged in
+      // Check for saved role in localStorage
       if (authUser) {
-        const storedRole = localStorage.getItem('userRole') as UserRole;
-        if (storedRole) {
-          setRole(storedRole);
+        const savedRole = localStorage.getItem(`role_${authUser.uid}`);
+        if (savedRole) {
+          setRole(savedRole as UserRole);
         }
+      } else {
+        setRole(null);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
-      const user = await loginWithEmail(email, password);
-      return user;
-    } catch (error) {
-      throw error;
+      setLoading(true);
+      const loggedInUser = await loginWithEmail(email, password);
+      setUser(loggedInUser);
+      return loggedInUser;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const googleLogin = async () => {
+  const register = async (email: string, password: string): Promise<User> => {
     try {
-      const user = await loginWithGoogle();
-      return user;
-    } catch (error) {
-      throw error;
+      setLoading(true);
+      const registeredUser = await registerWithEmail(email, password);
+      setUser(registeredUser);
+      return registeredUser;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const register = async (email: string, password: string) => {
+  const loginWithGoogle = async (): Promise<User> => {
     try {
-      const user = await registerWithEmail(email, password);
-      return user;
-    } catch (error) {
-      throw error;
+      setLoading(true);
+      const loggedInUser = await googleLogin();
+      setUser(loggedInUser);
+      return loggedInUser;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
+      setLoading(true);
       await logoutUser();
+      setUser(null);
       setRole(null);
-      localStorage.removeItem('userRole');
-      navigate('/');
-    } catch (error) {
-      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const setUserRole = (newRole: UserRole) => {
     setRole(newRole);
-    if (newRole) {
-      localStorage.setItem('userRole', newRole);
-      navigate('/dashboard');
+    if (user) {
+      // Save role to localStorage
+      localStorage.setItem(`role_${user.uid}`, newRole as string);
     }
   };
 
@@ -107,15 +112,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     role,
     loading,
     login,
-    loginWithGoogle: googleLogin,
+    loginWithGoogle,
     register,
     logout,
     setUserRole,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // Use createElement instead of JSX to avoid build issues
+  return React.createElement(AuthContext.Provider, { value }, children);
 };
