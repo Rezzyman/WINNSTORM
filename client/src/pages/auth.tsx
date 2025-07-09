@@ -19,7 +19,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { user, login, loginWithGoogle } = useAuth();
+  const { user, login, loginWithGoogle, testLogin } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   
@@ -73,7 +73,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-background z-40 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
         {/* WHITE HOT Logo */}
         <div className="text-center mb-8">
@@ -96,25 +96,8 @@ const Auth = () => {
                     console.log('Test login button clicked');
                     
                     try {
-                      // Create a mock user for testing
-                      const mockUser = {
-                        uid: 'test-user-123',
-                        email: 'test@example.com',
-                        displayName: 'Test User',
-                        photoURL: null,
-                        emailVerified: true
-                      } as User;
-                      
-                      console.log('Setting localStorage items...');
-                      
-                      // Set the user in localStorage for testing
-                      localStorage.setItem('test_user', JSON.stringify(mockUser));
-                      localStorage.setItem('userRole', 'field-rep');
-                      
-                      console.log('localStorage items set:', {
-                        test_user: localStorage.getItem('test_user'),
-                        userRole: localStorage.getItem('userRole')
-                      });
+                      // Use the auth context test login function
+                      testLogin();
                       
                       // Show success toast
                       toast({
@@ -124,12 +107,10 @@ const Auth = () => {
                       
                       console.log('Navigating to dashboard...');
                       
-                      // Navigate to dashboard using React router
+                      // Navigate to dashboard using direct URL change
                       setTimeout(() => {
                         navigate('/dashboard');
-                        // Force a page reload to ensure auth state is updated
-                        window.location.reload();
-                      }, 500);
+                      }, 100);
                     } catch (error) {
                       console.error('Test login error:', error);
                       toast({
