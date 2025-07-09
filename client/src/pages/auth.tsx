@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
 import { User } from 'firebase/auth';
 import { RoleSelector } from '@/components/role-selector';
@@ -20,6 +21,7 @@ const Auth = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const { user, login, loginWithGoogle } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,22 +91,53 @@ const Auth = () => {
               <div className="mb-6">
                 <Button 
                   type="button"
-                  onClick={() => {
-                    // Create a mock user for testing
-                    const mockUser = {
-                      uid: 'test-user-123',
-                      email: 'test@example.com',
-                      displayName: 'Test User',
-                      photoURL: null,
-                      emailVerified: true
-                    } as User;
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Test login button clicked');
                     
-                    // Set the user in localStorage for testing
-                    localStorage.setItem('test_user', JSON.stringify(mockUser));
-                    localStorage.setItem('userRole', 'field-rep');
-                    
-                    // Redirect to dashboard
-                    window.location.href = '/dashboard';
+                    try {
+                      // Create a mock user for testing
+                      const mockUser = {
+                        uid: 'test-user-123',
+                        email: 'test@example.com',
+                        displayName: 'Test User',
+                        photoURL: null,
+                        emailVerified: true
+                      } as User;
+                      
+                      console.log('Setting localStorage items...');
+                      
+                      // Set the user in localStorage for testing
+                      localStorage.setItem('test_user', JSON.stringify(mockUser));
+                      localStorage.setItem('userRole', 'field-rep');
+                      
+                      console.log('localStorage items set:', {
+                        test_user: localStorage.getItem('test_user'),
+                        userRole: localStorage.getItem('userRole')
+                      });
+                      
+                      // Show success toast
+                      toast({
+                        title: "Test Login Successful",
+                        description: "Redirecting to dashboard...",
+                      });
+                      
+                      console.log('Navigating to dashboard...');
+                      
+                      // Navigate to dashboard using React router
+                      setTimeout(() => {
+                        navigate('/dashboard');
+                        // Force a page reload to ensure auth state is updated
+                        window.location.reload();
+                      }, 500);
+                    } catch (error) {
+                      console.error('Test login error:', error);
+                      toast({
+                        title: "Test Login Failed",
+                        description: "Please try again",
+                        variant: "destructive",
+                      });
+                    }
                   }}
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
                 >
