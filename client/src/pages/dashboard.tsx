@@ -6,7 +6,7 @@ import { PropertyCard } from '@/components/property-card';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Property } from '@shared/schema';
-import { Flame, FileText } from 'lucide-react';
+import { Flame, FileText, Upload, BarChart3 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
@@ -96,51 +96,51 @@ const Dashboard = () => {
           )}
 
           {/* Action Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {/* New Scan Card */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {/* Winn Report Card - Featured */}
             <Card 
-              className="bg-primary text-white cursor-pointer shadow-glow hover:bg-accent transition-colors"
-              onClick={() => navigate('/upload')}
+              className="bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-primary/30 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              onClick={() => navigate('/winn-report/1')}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="bg-white bg-opacity-20 p-3 rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6"
-                    >
-                      <path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z" />
-                      <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" />
-                      <path d="M12 11v6" />
-                      <path d="M9 14h6" />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="font-bold text-white">New Thermal Scan</h3>
-                    <p className="text-white text-sm opacity-80">Upload and analyze new imagery</p>
-                  </div>
+              <CardContent className="p-6 text-center">
+                <div className="bg-primary/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2">Create Winn Report</h3>
+                <p className="text-muted-foreground text-sm mb-3">Generate comprehensive 300+ page inspection report</p>
+                <div className="flex justify-center space-x-1">
+                  <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+                    Blockchain
+                  </span>
+                  <span className="text-xs bg-secondary/20 text-secondary px-2 py-1 rounded-full">
+                    Digital Title
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* View Reports Card */}
-            <Card className="bg-card border border-border hover:border-primary transition-colors cursor-pointer shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="bg-secondary bg-opacity-20 p-3 rounded-full">
-                    <FileText className="h-6 w-6 text-secondary" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="font-medium text-foreground">Reports</h3>
-                    <p className="text-muted-foreground text-sm">View previously generated reports</p>
-                  </div>
+            {/* New Scan Card */}
+            <Card 
+              className="bg-card border border-border hover:border-secondary transition-colors cursor-pointer shadow-md"
+              onClick={() => navigate('/upload')}
+            >
+              <CardContent className="p-6 text-center">
+                <div className="bg-secondary/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="h-8 w-8 text-secondary" />
                 </div>
+                <h3 className="font-bold text-foreground mb-2">Upload New Scan</h3>
+                <p className="text-muted-foreground text-sm">Upload thermal images for analysis</p>
+              </CardContent>
+            </Card>
+
+            {/* View Reports Card */}
+            <Card className="bg-card border border-border hover:border-accent transition-colors cursor-pointer shadow-md">
+              <CardContent className="p-6 text-center">
+                <div className="bg-accent/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2">Analytics</h3>
+                <p className="text-muted-foreground text-sm">View insights and trends</p>
               </CardContent>
             </Card>
           </div>

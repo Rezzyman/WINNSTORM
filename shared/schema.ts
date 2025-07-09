@@ -92,21 +92,144 @@ export type Property = typeof properties.$inferSelect & {
 };
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 
-export interface Metric {
+// Comprehensive data structures for Winn reports
+export interface RoofComponent {
+  id: string;
   name: string;
-  value: number;
+  type: 'membrane' | 'insulation' | 'deck' | 'drainage' | 'flashing' | 'penetration' | 'equipment';
+  condition: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
+  installDate?: Date;
+  lastInspection?: Date;
+  estimatedLifespan?: number;
+  notes?: string;
+  images?: string[];
+  thermalData?: ThermalReading[];
 }
 
-export interface Issue {
+export interface ThermalReading {
+  location: string;
+  temperature: number;
+  timestamp: Date;
+  coordinates?: { x: number; y: number };
+  alertLevel: 'normal' | 'caution' | 'warning' | 'critical';
+}
+
+export interface WeatherCondition {
+  temperature: number;
+  humidity: number;
+  windSpeed: number;
+  precipitation: number;
+  visibility: number;
+  timestamp: Date;
+}
+
+export interface InspectionMetric {
+  category: string;
+  subcategory: string;
+  name: string;
+  value: number;
+  unit: string;
+  threshold?: number;
+  status: 'pass' | 'fail' | 'caution';
+  location?: string;
+  notes?: string;
+}
+
+export interface DetailedIssue {
+  id: string;
   title: string;
   description: string;
-  severity: 'critical' | 'warning' | 'info';
-  location?: string;
+  severity: 'critical' | 'major' | 'minor' | 'informational';
+  category: string;
+  location: string;
+  coordinates?: { x: number; y: number };
+  component?: string;
+  recommendedAction: string;
+  urgency: 'immediate' | 'short_term' | 'long_term' | 'monitoring';
+  estimatedCost?: number;
+  images?: string[];
+  thermalImages?: string[];
+  discoveredDate: Date;
+  reportedBy: string;
+}
+
+// Additional comprehensive data structures for Winn reports
+export interface BuildingInformation {
+  buildingName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  buildingType: string;
+  constructionYear: number;
+  roofArea: number; // in square feet
+  numberOfStories: number;
+  occupancyType: string;
+  ownerName: string;
+  ownerContact: string;
+  propertyManager?: string;
+  propertyManagerContact?: string;
+}
+
+export interface RoofSystemDetails {
+  roofType: 'flat' | 'sloped' | 'mixed';
+  primaryMembrane: string;
+  membraneAge: number;
+  insulationType: string;
+  insulationThickness: number;
+  deckType: string;
+  drainageType: string;
+  gutterSystem: string;
+  warranties: RoofWarranty[];
+  previousRepairs: RepairHistory[];
+}
+
+export interface RoofWarranty {
+  type: 'material' | 'labor' | 'system';
+  provider: string;
+  startDate: Date;
+  endDate: Date;
+  coverage: string;
+  status: 'active' | 'expired' | 'void';
+}
+
+export interface RepairHistory {
+  date: Date;
+  description: string;
+  contractor: string;
+  cost: number;
+  warrantyPeriod?: number;
+  documentation?: string[];
+}
+
+export interface InspectionSection {
+  sectionId: string;
+  name: string;
+  area: number;
+  condition: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
+  components: RoofComponent[];
+  observations: string[];
+  recommendations: string[];
+  photos: string[];
+  thermalImages: string[];
+}
+
+export interface CostEstimate {
+  itemDescription: string;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  totalCost: number;
+  priority: 'immediate' | 'within_1_year' | 'within_5_years' | 'monitoring';
+  laborHours?: number;
 }
 
 export type Scan = typeof scans.$inferSelect & {
-  metrics: Metric[];
-  issues: Issue[];
+  metrics: InspectionMetric[];
+  issues: DetailedIssue[];
+  roofComponents: RoofComponent[];
+  weatherConditions: WeatherCondition[];
+  thermalReadings: ThermalReading[];
 };
 export type InsertScan = z.infer<typeof insertScanSchema>;
 
