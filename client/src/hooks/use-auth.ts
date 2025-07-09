@@ -35,6 +35,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for test user first
+    const testUser = localStorage.getItem('test_user');
+    const testRole = localStorage.getItem('userRole');
+    
+    if (testUser && testRole) {
+      setUser(JSON.parse(testUser));
+      setRole(testRole as UserRole);
+      setLoading(false);
+      return;
+    }
+    
     const unsubscribe = onAuthChange((authUser) => {
       setUser(authUser);
       setLoading(false);
@@ -91,6 +102,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
+      
+      // Handle test user logout
+      if (localStorage.getItem('test_user')) {
+        localStorage.removeItem('test_user');
+        localStorage.removeItem('userRole');
+        setUser(null);
+        setRole(null);
+        return;
+      }
+      
       await logoutUser();
       setUser(null);
       setRole(null);

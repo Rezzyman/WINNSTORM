@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { User } from 'firebase/auth';
 import { RoleSelector } from '@/components/role-selector';
 import { 
   Card, 
@@ -84,6 +85,37 @@ const Auth = () => {
         <Card className="border border-border shadow-md">
           <CardContent className="pt-6 bg-card">
             <form onSubmit={handleLogin}>
+              {/* Test Login Button */}
+              <div className="mb-6">
+                <Button 
+                  type="button"
+                  onClick={() => {
+                    // Create a mock user for testing
+                    const mockUser = {
+                      uid: 'test-user-123',
+                      email: 'test@example.com',
+                      displayName: 'Test User',
+                      photoURL: null,
+                      emailVerified: true
+                    } as User;
+                    
+                    // Set the user in localStorage for testing
+                    localStorage.setItem('test_user', JSON.stringify(mockUser));
+                    localStorage.setItem('userRole', 'field-rep');
+                    
+                    // Redirect to dashboard
+                    window.location.href = '/dashboard';
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
+                >
+                  🧪 Test Login (No Registration Required)
+                </Button>
+              </div>
+
+              <div className="text-center mb-4">
+                <span className="text-muted-foreground text-sm">OR</span>
+              </div>
+
               <div className="mb-6">
                 <Label htmlFor="email" className="block text-foreground text-sm font-medium mb-2">
                   Email
