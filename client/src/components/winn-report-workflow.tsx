@@ -21,6 +21,7 @@ import {
   CostEstimate
 } from '@shared/schema';
 import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database } from 'lucide-react';
+import { ThermalAnalysis } from './thermal-analysis';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -258,72 +259,21 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
 
       case 2: // Thermal Analysis
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-foreground font-semibold">Thermal Readings</h3>
-              <Button onClick={addThermalReading} className="bg-primary text-primary-foreground">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Reading
-              </Button>
-            </div>
-            <div className="space-y-4">
-              {reportData.thermalReadings.map((reading, index) => (
-                <Card key={index} className="bg-card border-border">
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-foreground">Location</Label>
-                        <Input
-                          value={reading.location}
-                          onChange={(e) => {
-                            const newReadings = [...reportData.thermalReadings];
-                            newReadings[index].location = e.target.value;
-                            setReportData(prev => ({ ...prev, thermalReadings: newReadings }));
-                          }}
-                          className="bg-card text-foreground border-border"
-                          placeholder="e.g., North section, HVAC unit area"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-foreground">Temperature (°F)</Label>
-                        <Input
-                          type="number"
-                          value={reading.temperature}
-                          onChange={(e) => {
-                            const newReadings = [...reportData.thermalReadings];
-                            newReadings[index].temperature = parseFloat(e.target.value);
-                            setReportData(prev => ({ ...prev, thermalReadings: newReadings }));
-                          }}
-                          className="bg-card text-foreground border-border"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-foreground">Alert Level</Label>
-                        <Select
-                          value={reading.alertLevel}
-                          onValueChange={(value) => {
-                            const newReadings = [...reportData.thermalReadings];
-                            newReadings[index].alertLevel = value as 'normal' | 'caution' | 'warning' | 'critical';
-                            setReportData(prev => ({ ...prev, thermalReadings: newReadings }));
-                          }}
-                        >
-                          <SelectTrigger className="bg-card text-foreground border-border">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="normal">Normal</SelectItem>
-                            <SelectItem value="caution">Caution</SelectItem>
-                            <SelectItem value="warning">Warning</SelectItem>
-                            <SelectItem value="critical">Critical</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+          <ThermalAnalysis
+            location={reportData.buildingInfo?.address || "Unknown location"}
+            ambientTemp={reportData.weatherConditions[0]?.temperature}
+            humidity={reportData.weatherConditions[0]?.humidity}
+            onAnalysisComplete={(result) => {
+              setReportData(prev => ({
+                ...prev,
+                thermalReadings: [...prev.thermalReadings, ...result.thermalReadings],
+                issues: [...prev.issues, ...result.issues],
+                metrics: [...prev.metrics, ...result.metrics],
+                recommendations: result.summary,
+                thermalImages: [...prev.thermalImages, ...result.thermalReadings.map(r => r.location)]
+              }));
+            }}
+          />
         );
 
       case 3: // Roof Components
@@ -652,7 +602,7 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
       <Card className="bg-card border-border shadow-lg">
         <CardHeader>
           <CardTitle className="text-foreground flex items-center">
-            <WORKFLOW_STEPS[currentStep].icon className="h-5 w-5 mr-2" />
+            {React.createElement(WORKFLOW_STEPS[currentStep].icon, { className: "h-5 w-5 mr-2" })}
             {WORKFLOW_STEPS[currentStep].title}
           </CardTitle>
         </CardHeader>

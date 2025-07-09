@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertPropertySchema, insertScanSchema, insertReportSchema } from "@shared/schema";
+import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -210,6 +211,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to download report" });
+    }
+  });
+
+  // Thermal Analysis API routes
+  app.post("/api/thermal/analyze", async (req, res) => {
+    try {
+      const { imageBase64, metadata } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+      
+      if (!metadata || !metadata.location) {
+        return res.status(400).json({ message: "Image metadata with location is required" });
+      }
+      
+      const analysisResult = await analyzeThermalImage(imageBase64, {
+        location: metadata.location,
+        timestamp: metadata.timestamp ? new Date(metadata.timestamp) : new Date(),
+        ambientTemp: metadata.ambientTemp,
+        humidity: metadata.humidity
+      });
+      
+      res.json(analysisResult);
+    } catch (error) {
+      console.error('Thermal analysis error:', error);
+      res.status(500).json({ 
+        message: "Failed to analyze thermal image", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/thermal/generate-report", async (req, res) => {
+    try {
+      const { analysisResults, buildingInfo } = req.body;
+      
+      if (!analysisResults || !Array.isArray(analysisResults)) {
+        return res.status(400).json({ message: "Analysis results array is required" });
+      }
+      
+      if (!buildingInfo) {
+        return res.status(400).json({ message: "Building information is required" });
+      }
+      
+      const reportSummary = await generateThermalReport(analysisResults, buildingInfo);
+      
+      res.json({ summary: reportSummary });
+    } catch (error) {
+      console.error('Thermal report generation error:', error);
+      res.status(500).json({ 
+        message: "Failed to generate thermal report", 
+        error: error.message 
+      });
     }
   });
 
