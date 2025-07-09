@@ -235,3 +235,56 @@ export type InsertScan = z.infer<typeof insertScanSchema>;
 
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+// CRM Integration schemas
+export const crmConfigs = pgTable("crm_configs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(), // User-defined name for this integration
+  type: text("type").notNull(), // 'jobnimbus', 'gohighlevel', etc.
+  apiKey: text("api_key").notNull(),
+  baseUrl: text("base_url").notNull(),
+  webhookUrl: text("webhook_url"),
+  customFields: jsonb("custom_fields").$type<Record<string, string>>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const crmSyncLogs = pgTable("crm_sync_logs", {
+  id: serial("id").primaryKey(),
+  crmConfigId: integer("crm_config_id").notNull().references(() => crmConfigs.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  scanId: integer("scan_id").references(() => scans.id),
+  reportId: integer("report_id").references(() => reports.id),
+  syncType: text("sync_type").notNull(), // 'contact', 'job', 'document'
+  externalId: text("external_id"), // ID in the external CRM
+  status: text("status").notNull(), // 'success', 'failed', 'pending'
+  errorMessage: text("error_message"),
+  syncedAt: timestamp("synced_at").defaultNow(),
+});
+
+export const insertCrmConfigSchema = createInsertSchema(crmConfigs).pick({
+  name: true,
+  type: true,
+  apiKey: true,
+  baseUrl: true,
+  webhookUrl: true,
+  customFields: true,
+  isActive: true,
+});
+
+export const insertCrmSyncLogSchema = createInsertSchema(crmSyncLogs).pick({
+  crmConfigId: true,
+  propertyId: true,
+  scanId: true,
+  reportId: true,
+  syncType: true,
+  externalId: true,
+  status: true,
+  errorMessage: true,
+});
+
+export type CrmConfig = typeof crmConfigs.$inferSelect;
+export type InsertCrmConfig = z.infer<typeof insertCrmConfigSchema>;
+export type CrmSyncLog = typeof crmSyncLogs.$inferSelect;
+export type InsertCrmSyncLog = z.infer<typeof insertCrmSyncLogSchema>;

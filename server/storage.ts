@@ -1,4 +1,4 @@
-import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, Metric, Issue } from "@shared/schema";
+import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, Metric, Issue, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog } from "@shared/schema";
 
 // Interface for storage
 export interface IStorage {
@@ -22,6 +22,18 @@ export interface IStorage {
   getReport(id: number): Promise<Report | undefined>;
   getReportsByScan(scanId: number): Promise<Report[]>;
   createReport(report: InsertReport): Promise<Report>;
+  
+  // CRM methods
+  getCrmConfig(id: number): Promise<CrmConfig | undefined>;
+  getCrmConfigsByUser(userId: number): Promise<CrmConfig[]>;
+  createCrmConfig(config: InsertCrmConfig & { userId: number }): Promise<CrmConfig>;
+  updateCrmConfig(id: number, config: Partial<CrmConfig>): Promise<CrmConfig | undefined>;
+  deleteCrmConfig(id: number): Promise<boolean>;
+  
+  // CRM sync log methods
+  getCrmSyncLog(id: number): Promise<CrmSyncLog | undefined>;
+  getCrmSyncLogsByConfig(crmConfigId: number): Promise<CrmSyncLog[]>;
+  createCrmSyncLog(log: InsertCrmSyncLog): Promise<CrmSyncLog>;
 }
 
 // In-memory storage implementation
@@ -30,20 +42,28 @@ export class MemStorage implements IStorage {
   private properties: Map<number, Property>;
   private scans: Map<number, Scan>;
   private reports: Map<number, Report>;
+  private crmConfigs: Map<number, CrmConfig>;
+  private crmSyncLogs: Map<number, CrmSyncLog>;
   private userId: number;
   private propertyId: number;
   private scanId: number;
   private reportId: number;
+  private crmConfigId: number;
+  private crmSyncLogId: number;
 
   constructor() {
     this.users = new Map();
     this.properties = new Map();
     this.scans = new Map();
     this.reports = new Map();
+    this.crmConfigs = new Map();
+    this.crmSyncLogs = new Map();
     this.userId = 1;
     this.propertyId = 1;
     this.scanId = 1;
     this.reportId = 1;
+    this.crmConfigId = 1;
+    this.crmSyncLogId = 1;
     
     // Add some initial demo data
     this.initDemoData();
@@ -409,6 +429,63 @@ export class MemStorage implements IStorage {
     };
     this.reports.set(id, newReport);
     return newReport;
+  }
+
+  // CRM Configuration methods
+  async getCrmConfig(id: number): Promise<CrmConfig | undefined> {
+    return this.crmConfigs.get(id);
+  }
+
+  async getCrmConfigsByUser(userId: number): Promise<CrmConfig[]> {
+    return Array.from(this.crmConfigs.values()).filter(
+      (config) => config.userId === userId
+    );
+  }
+
+  async createCrmConfig(config: InsertCrmConfig & { userId: number }): Promise<CrmConfig> {
+    const id = this.crmConfigId++;
+    const newConfig: CrmConfig = { 
+      ...config, 
+      id, 
+      createdAt: new Date() 
+    };
+    this.crmConfigs.set(id, newConfig);
+    return newConfig;
+  }
+
+  async updateCrmConfig(id: number, updates: Partial<CrmConfig>): Promise<CrmConfig | undefined> {
+    const config = this.crmConfigs.get(id);
+    if (!config) return undefined;
+    
+    const updatedConfig = { ...config, ...updates };
+    this.crmConfigs.set(id, updatedConfig);
+    return updatedConfig;
+  }
+
+  async deleteCrmConfig(id: number): Promise<boolean> {
+    return this.crmConfigs.delete(id);
+  }
+
+  // CRM Sync Log methods
+  async getCrmSyncLog(id: number): Promise<CrmSyncLog | undefined> {
+    return this.crmSyncLogs.get(id);
+  }
+
+  async getCrmSyncLogsByConfig(crmConfigId: number): Promise<CrmSyncLog[]> {
+    return Array.from(this.crmSyncLogs.values()).filter(
+      (log) => log.crmConfigId === crmConfigId
+    );
+  }
+
+  async createCrmSyncLog(log: InsertCrmSyncLog): Promise<CrmSyncLog> {
+    const id = this.crmSyncLogId++;
+    const newLog: CrmSyncLog = { 
+      ...log, 
+      id, 
+      syncedAt: new Date() 
+    };
+    this.crmSyncLogs.set(id, newLog);
+    return newLog;
   }
 }
 

@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertPropertySchema, insertScanSchema, insertReportSchema } from "@shared/schema";
+import { insertPropertySchema, insertScanSchema, insertReportSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
+import { crmManager } from './crm-integrations';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -211,6 +212,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to download report" });
+    }
+  });
+
+  // CRM Configuration routes
+  app.get("/api/crm/configs", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const configs = await storage.getCrmConfigsByUser(demoUser.id);
+      res.json(configs);
+    } catch (error) {
+      console.error('Error fetching CRM configs:', error);
+      res.status(500).json({ message: "Failed to fetch CRM configurations" });
+    }
+  });
+
+  app.post("/api/crm/configs", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const configData = insertCrmConfigSchema.parse(req.body);
+      const config = await storage.createCrmConfig({
+        ...configData,
+        userId: demoUser.id
+      });
+      
+      // Add configuration to CRM manager
+      crmManager.addIntegration(config.name, {
+        type: config.type as any,
+        apiKey: config.apiKey,
+        baseUrl: config.baseUrl,
+        webhookUrl: config.webhookUrl || undefined,
+        customFields: config.customFields || undefined
+      });
+      
+      res.json(config);
+    } catch (error) {
+      console.error('Error creating CRM config:', error);
+      res.status(500).json({ message: "Failed to create CRM configuration" });
+    }
+  });
+
+  app.put("/api/crm/configs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid configuration ID" });
+      }
+      
+      const updateData = insertCrmConfigSchema.partial().parse(req.body);
+      const updatedConfig = await storage.updateCrmConfig(id, updateData);
+      
+      if (!updatedConfig) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json(updatedConfig);
+    } catch (error) {
+      console.error('Error updating CRM config:', error);
+      res.status(500).json({ message: "Failed to update CRM configuration" });
+    }
+  });
+
+  app.delete("/api/crm/configs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid configuration ID" });
+      }
+      
+      const deleted = await storage.deleteCrmConfig(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json({ message: "Configuration deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting CRM config:', error);
+      res.status(500).json({ message: "Failed to delete CRM configuration" });
+    }
+  });
+
+  // CRM Sync routes
+  app.post("/api/crm/sync/property", async (req, res) => {
+    try {
+      const { crmConfigId, propertyId, ownerInfo } = req.body;
+      
+      if (!crmConfigId || !propertyId || !ownerInfo) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const config = await storage.getCrmConfig(crmConfigId);
+      if (!config) {
+        return res.status(404).json({ message: "CRM configuration not found" });
+      }
+      
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Get the latest scan for the property
+      const scans = await storage.getScansByProperty(propertyId);
+      if (scans.length === 0) {
+        return res.status(400).json({ message: "No scans found for property" });
+      }
+      
+      const latestScan = scans.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+      
+      // Sync to CRM
+      const syncResults = await crmManager.syncPropertyToCRM(
+        config.name,
+        property,
+        latestScan,
+        ownerInfo
+      );
+      
+      // Log sync results
+      for (const result of syncResults) {
+        await storage.createCrmSyncLog({
+          crmConfigId: config.id,
+          propertyId: property.id,
+          scanId: latestScan.id,
+          syncType: result.contactId ? 'contact' : 'job',
+          externalId: result.contactId || result.jobId,
+          status: result.success ? 'success' : 'failed',
+          errorMessage: result.error
+        });
+      }
+      
+      res.json({ results: syncResults });
+    } catch (error) {
+      console.error('Error syncing to CRM:', error);
+      res.status(500).json({ message: "Failed to sync to CRM" });
+    }
+  });
+
+  app.get("/api/crm/sync/logs/:configId", async (req, res) => {
+    try {
+      const configId = parseInt(req.params.configId);
+      if (isNaN(configId)) {
+        return res.status(400).json({ message: "Invalid configuration ID" });
+      }
+      
+      const logs = await storage.getCrmSyncLogsByConfig(configId);
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching sync logs:', error);
+      res.status(500).json({ message: "Failed to fetch sync logs" });
     }
   });
 

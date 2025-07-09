@@ -16,6 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Property, Scan } from '@shared/schema';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CrmSync } from '@/components/crm-sync';
 
 const PropertyDetail = () => {
   const params = useParams();
@@ -194,6 +195,13 @@ const PropertyDetail = () => {
                 No scan history available. Add your first scan.
               </CardContent>
             </Card>
+          )}
+
+          {/* CRM Sync Component */}
+          {property && sortedScans && sortedScans.length > 0 && (
+            <div className="mb-6">
+              <CrmSync property={property} scan={sortedScans[0]} />
+            </div>
           )}
 
           {/* Action Buttons */}
