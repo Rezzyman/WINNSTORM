@@ -48,7 +48,7 @@ const Dashboard = () => {
             <div className="flex items-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
-                <img src="/attached_assets/Untitled design (72)_1753994849250.png" alt="WinnStorm" className="h-12 relative z-10" />
+                <img src="/winnstorm-logo.png" alt="WinnStorm" className="h-12 relative z-10" />
               </div>
               <div className="ml-4">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">WinnStorm™</h1>

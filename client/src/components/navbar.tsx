@@ -20,7 +20,7 @@ export const Header = () => {
     <header className="bg-gradient-to-r from-background to-background/95 shadow-md border-b border-primary/20 backdrop-blur-sm">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <img src="/attached_assets/Untitled design (72)_1753994849250.png" alt="WinnStorm Restoration Pro" className="h-10 mr-3" />
+          <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-10 mr-3" />
           <div className="flex flex-col">
             <h1 className="text-lg font-bold text-foreground leading-tight">WinnStorm™</h1>
             <span className="text-xs text-muted-foreground -mt-1">Restoration Pro</span>
@@ -50,7 +50,7 @@ export const Footer = () => {
     <footer className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 z-10">
       <div className="flex flex-col">
         <div className="mb-2 flex justify-center items-center">
-          <img src="/attached_assets/Untitled design (72)_1753994849250.png" alt="WinnStorm Restoration Pro" className="h-5 mr-2" />
+          <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-5 mr-2" />
           <span className="text-xs text-muted-foreground">© 2025 WinnStorm™ Restoration Pro</span>
         </div>
         <div className="flex justify-around items-center">

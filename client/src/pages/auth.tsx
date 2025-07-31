@@ -79,7 +79,7 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-xl"></div>
-            <img src="/attached_assets/Untitled design (72)_1753994849250.png" alt="WinnStorm Restoration Pro" className="h-32 relative z-10" />
+            <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-32 relative z-10" />
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent mb-1">WinnStorm™</h1>
           <p className="text-muted-foreground">Restoration Pro - Damage Assessment Platform</p>
