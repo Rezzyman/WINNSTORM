@@ -24,6 +24,7 @@ import {
 import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database } from 'lucide-react';
 import { ThermalAnalysis } from './thermal-analysis';
 import { GoogleMapsDrawing } from './google-maps-drawing';
+import { AIInspectionAssistant } from './ai-inspection-assistant';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -715,7 +716,7 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-foreground">Winn Report Generation</h1>
@@ -734,42 +735,64 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
         </div>
       </div>
 
-      <Card className="bg-card border-border shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-foreground flex items-center">
-            {React.createElement(WORKFLOW_STEPS[currentStep].icon, { className: "h-5 w-5 mr-2" })}
-            {WORKFLOW_STEPS[currentStep].title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="min-h-[500px]">
-          {renderStepContent()}
-        </CardContent>
-      </Card>
+      {/* Main Content Grid: Workflow Steps + AI Assistant */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Workflow Content - Takes 2/3 of the width */}
+        <div className="xl:col-span-2">
+          <Card className="bg-card border-border shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center">
+                {React.createElement(WORKFLOW_STEPS[currentStep].icon, { className: "h-5 w-5 mr-2" })}
+                {WORKFLOW_STEPS[currentStep].title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="min-h-[500px]">
+              {renderStepContent()}
+            </CardContent>
+          </Card>
 
-      <div className="flex justify-between mt-6">
-        <Button 
-          onClick={prevStep} 
-          disabled={currentStep === 0}
-          variant="outline"
-          className="border-border text-foreground"
-        >
-          Previous
-        </Button>
-        {currentStep === WORKFLOW_STEPS.length - 1 ? (
-          <Button 
-            onClick={() => onComplete(reportData)}
-            className="bg-primary text-primary-foreground"
-          >
-            Generate Winn Report
-          </Button>
-        ) : (
-          <Button 
-            onClick={nextStep}
-            className="bg-primary text-primary-foreground"
-          >
-            Next
-          </Button>
-        )}
+          <div className="flex justify-between mt-6">
+            <Button 
+              onClick={prevStep} 
+              disabled={currentStep === 0}
+              variant="outline"
+              className="border-border text-foreground"
+            >
+              Previous
+            </Button>
+            {currentStep === WORKFLOW_STEPS.length - 1 ? (
+              <Button 
+                onClick={() => onComplete(reportData)}
+                className="bg-primary text-primary-foreground"
+              >
+                Generate Winn Report
+              </Button>
+            ) : (
+              <Button 
+                onClick={nextStep}
+                className="bg-primary text-primary-foreground"
+              >
+                Next
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* AI Assistant Panel - Takes 1/3 of the width */}
+        <div className="xl:col-span-1">
+          <div className="sticky top-6">
+            <AIInspectionAssistant
+              currentStep={WORKFLOW_STEPS[currentStep]?.id}
+              propertyData={reportData.buildingInfo}
+              thermalData={reportData.thermalReadings}
+              roofSections={reportData.buildingInfo.roofSections}
+              onGuidanceReceived={(guidance) => {
+                // Optional: Update notes or recommendations based on AI guidance
+                console.log('AI Guidance received:', guidance);
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

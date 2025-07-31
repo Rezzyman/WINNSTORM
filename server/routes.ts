@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertPropertySchema, insertReportSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
+import { insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
+import { getAIAssistance, analyzeInspectionData, AIAssistantRequest } from './ai-assistant';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -395,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Thermal analysis error:', error);
       res.status(500).json({ 
         message: "Failed to analyze thermal image", 
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });
@@ -419,7 +420,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Thermal report generation error:', error);
       res.status(500).json({ 
         message: "Failed to generate thermal report", 
-        error: error.message 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // AI Assistant routes
+  app.post("/api/ai-assistant", async (req, res) => {
+    try {
+      const { message, context, conversationHistory } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      
+      const assistantRequest: AIAssistantRequest = {
+        message,
+        context: context || "General roof inspection assistance",
+        conversationHistory: conversationHistory || []
+      };
+      
+      const response = await getAIAssistance(assistantRequest);
+      
+      res.json(response);
+    } catch (error) {
+      console.error('AI Assistant error:', error);
+      res.status(500).json({ 
+        message: "Failed to get AI assistance", 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post("/api/ai-assistant/analyze-inspection", async (req, res) => {
+    try {
+      const { thermalReadings, roofSections, weatherData, inspectionType } = req.body;
+      
+      if (!inspectionType) {
+        return res.status(400).json({ message: "Inspection type is required" });
+      }
+      
+      const analysisResult = await analyzeInspectionData({
+        thermalReadings,
+        roofSections,
+        weatherData,
+        inspectionType
+      });
+      
+      res.json(analysisResult);
+    } catch (error) {
+      console.error('AI Inspection analysis error:', error);
+      res.status(500).json({ 
+        message: "Failed to analyze inspection data", 
+        error: (error as Error).message 
       });
     }
   });
