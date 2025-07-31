@@ -20,8 +20,11 @@ export const Header = () => {
     <header className="bg-background shadow-md border-b border-border">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <Cloud className="h-8 w-8 text-blue-500 mr-3" />
-          <h1 className="text-xl font-bold text-foreground">WinnStorm™</h1>
+          <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-10 mr-3" />
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold text-foreground leading-tight">WinnStorm™</h1>
+            <span className="text-xs text-muted-foreground -mt-1">Restoration Pro</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -47,8 +50,8 @@ export const Footer = () => {
     <footer className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 z-10">
       <div className="flex flex-col">
         <div className="mb-2 flex justify-center items-center">
-          <Cloud className="h-4 w-4 text-blue-500 mr-2" />
-          <span className="text-xs text-muted-foreground">© 2025 WinnStorm™</span>
+          <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-5 mr-2" />
+          <span className="text-xs text-muted-foreground">© 2025 WinnStorm™ Restoration Pro</span>
         </div>
         <div className="flex justify-around items-center">
           <button 

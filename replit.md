@@ -39,6 +39,9 @@ Building a comprehensive online application that serves as the central hub for D
 - **File Management**: Support for photos, thermal images, drone data, and document storage
 
 ## Recent Changes
+- **2025-01-09**: INTEGRATED OFFICIAL WINNSTORM™ RESTORATION PRO LOGO - Professional shield design with lightning elements now used throughout application
+- **2025-01-09**: FIXED DEMO ACCOUNT BLANK SCANS - Resolved schema mismatches and storage implementation for proper thermal scan display
+- **2025-01-09**: IMPLEMENTED LIGHT/DARK MODE TOGGLE - Complete theme system with localStorage persistence and system preference detection
 - **2025-01-09**: MAJOR TRANSFORMATION - Rebranded from WHITE HOT to WinnStorm™ based on comprehensive requirements
 - **2025-01-09**: Updated data schema for complete damage assessment consulting system with training, certification, and project management
 - **2025-01-09**: Redesigned dashboard with WinnStorm™ branding, consultant certification tracking, and project-focused interface
@@ -46,8 +49,6 @@ Building a comprehensive online application that serves as the central hub for D
 - **2025-01-09**: Added support for multi-stage consultant certification system (Junior → Senior) with training progress tracking
 - **2025-01-09**: Built project-based workflow system supporting client management, property assessment, and comprehensive reporting
 - **2025-01-09**: Integrated Winn Methodology data collection including core samples, moisture tests, soft metals, and compliance tracking
-- **2025-01-09**: Updated application branding and navigation to reflect damage assessment consulting focus
-- **2025-01-09**: Maintained existing CRM integration capabilities while expanding to support consulting workflow
 
 ## Test Login
 - **Test Login Button**: Green button on auth page bypasses Firebase authentication

@@ -75,12 +75,13 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
-        {/* WHITE HOT Logo */}
+        {/* WinnStorm Logo */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-2">
-            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-28" />
+          <div className="flex justify-center mb-4">
+            <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-32" />
           </div>
-          <p className="text-muted-foreground mt-2">THERMAL IMAGE REPORTS</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">WinnStorm™</h1>
+          <p className="text-muted-foreground">Restoration Pro - Damage Assessment Platform</p>
         </div>
 
         {/* Login Form */}
