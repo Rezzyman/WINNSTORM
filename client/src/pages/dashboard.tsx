@@ -46,15 +46,18 @@ const Dashboard = () => {
           {/* WinnStorm™ Dashboard Header */}
           <div className="mb-8">
             <div className="flex items-center mb-4">
-              <Cloud className="h-8 w-8 text-blue-500 mr-3" />
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">WinnStorm™</h1>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
+                <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm" className="h-12 relative z-10" />
+              </div>
+              <div className="ml-4">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">WinnStorm™</h1>
                 <p className="text-muted-foreground text-sm">Damage Assessment Platform</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="bg-blue-500/10 px-3 py-1 rounded-full">
-                <span className="text-blue-400 text-sm font-medium">{stats.certificationLevel} Consultant</span>
+              <div className="bg-gradient-to-r from-primary/20 to-cyan-500/20 px-4 py-2 rounded-full border border-primary/30">
+                <span className="text-primary text-sm font-medium">{stats.certificationLevel} Consultant</span>
               </div>
               <div className="text-muted-foreground text-sm">
                 Welcome back, {user?.firstName || user?.email}
@@ -64,49 +67,57 @@ const Dashboard = () => {
 
           {/* Dashboard Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card>
+            <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <Briefcase className="h-8 w-8 text-blue-500 mr-3" />
-                  <div>
+                  <div className="p-2 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-lg">
+                    <Briefcase className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="ml-3">
                     <p className="text-sm text-muted-foreground">Active Projects</p>
-                    <p className="text-2xl font-bold">{stats.activeProjects}</p>
+                    <p className="text-2xl font-bold text-primary">{stats.activeProjects}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-br from-card to-cyan-500/5 border-cyan-500/20">
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <FileText className="h-8 w-8 text-green-500 mr-3" />
-                  <div>
+                  <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg">
+                    <FileText className="h-6 w-6 text-cyan-500" />
+                  </div>
+                  <div className="ml-3">
                     <p className="text-sm text-muted-foreground">Assessments</p>
-                    <p className="text-2xl font-bold">{stats.completedAssessments}</p>
+                    <p className="text-2xl font-bold text-cyan-600">{stats.completedAssessments}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-br from-card to-blue-500/5 border-blue-500/20">
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <BarChart3 className="h-8 w-8 text-orange-500 mr-3" />
-                  <div>
+                  <div className="p-2 bg-gradient-to-br from-blue-500/20 to-primary/20 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-blue-500" />
+                  </div>
+                  <div className="ml-3">
                     <p className="text-sm text-muted-foreground">Avg. Condition</p>
-                    <p className="text-2xl font-bold">{stats.avgCondition}</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.avgCondition}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <GraduationCap className="h-8 w-8 text-purple-500 mr-3" />
-                  <div>
+                  <div className="p-2 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-lg">
+                    <GraduationCap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="ml-3">
                     <p className="text-sm text-muted-foreground">Certification</p>
-                    <p className="text-lg font-bold">{stats.certificationLevel}</p>
+                    <p className="text-lg font-bold text-primary">{stats.certificationLevel}</p>
                   </div>
                 </div>
               </CardContent>
@@ -119,7 +130,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Button 
                 onClick={() => navigate('/upload')} 
-                className="bg-blue-600 hover:bg-blue-700 text-white p-4 h-auto flex flex-col items-center"
+                className="bg-gradient-to-br from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white p-4 h-auto flex flex-col items-center shadow-lg border-0"
               >
                 <Upload className="h-6 w-6 mb-2" />
                 <span>New Assessment</span>
@@ -127,28 +138,28 @@ const Dashboard = () => {
               
               <Button 
                 variant="outline" 
-                className="p-4 h-auto flex flex-col items-center"
+                className="p-4 h-auto flex flex-col items-center border-primary/30 hover:bg-primary/10 hover:border-primary/50"
                 onClick={() => navigate('/training')}
               >
-                <GraduationCap className="h-6 w-6 mb-2" />
+                <GraduationCap className="h-6 w-6 mb-2 text-primary" />
                 <span>Training Portal</span>
               </Button>
               
               <Button 
                 variant="outline" 
-                className="p-4 h-auto flex flex-col items-center"
+                className="p-4 h-auto flex flex-col items-center border-cyan-500/30 hover:bg-cyan-500/10 hover:border-cyan-500/50"
                 onClick={() => navigate('/projects')}
               >
-                <Briefcase className="h-6 w-6 mb-2" />
+                <Briefcase className="h-6 w-6 mb-2 text-cyan-500" />
                 <span>Manage Projects</span>
               </Button>
               
               <Button 
                 variant="outline" 
-                className="p-4 h-auto flex flex-col items-center"
+                className="p-4 h-auto flex flex-col items-center border-blue-500/30 hover:bg-blue-500/10 hover:border-blue-500/50"
                 onClick={() => navigate('/crm-integrations')}
               >
-                <Users className="h-6 w-6 mb-2" />
+                <Users className="h-6 w-6 mb-2 text-blue-500" />
                 <span>CRM Integration</span>
               </Button>
             </div>

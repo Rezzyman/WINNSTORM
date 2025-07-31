@@ -73,20 +73,21 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/20 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
         {/* WinnStorm Logo */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-32" />
+          <div className="flex justify-center mb-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-xl"></div>
+            <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-32 relative z-10" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">WinnStorm™</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent mb-1">WinnStorm™</h1>
           <p className="text-muted-foreground">Restoration Pro - Damage Assessment Platform</p>
         </div>
 
         {/* Login Form */}
-        <Card className="border border-border shadow-md">
-          <CardContent className="pt-6 bg-card">
+        <Card className="border border-border shadow-lg bg-gradient-to-b from-card to-card/95 backdrop-blur-sm">
+          <CardContent className="pt-6">
             <form onSubmit={handleLogin}>
               {/* Test Login Button */}
               <div className="mb-6">

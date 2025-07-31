@@ -17,7 +17,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-background shadow-md border-b border-border">
+    <header className="bg-gradient-to-r from-background to-background/95 shadow-md border-b border-primary/20 backdrop-blur-sm">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
           <img src="/attached_assets/WINN.zip - 8_1753994302574.PNG" alt="WinnStorm Restoration Pro" className="h-10 mr-3" />

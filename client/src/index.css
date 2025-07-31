@@ -20,80 +20,80 @@
 }
 
 :root {
-  /* Light mode theme for WinnStorm™ */
-  --background: 0 0% 100%; /* White background */
-  --foreground: 222 47% 11%; /* Dark text */
-  --muted: 210 40% 96%; /* Light gray */
-  --muted-foreground: 215 16% 47%; /* Medium gray text */
-  --popover: 0 0% 100%; /* White */
-  --popover-foreground: 222 47% 11%; /* Dark text */
-  --card: 0 0% 100%; /* White cards */
-  --card-foreground: 222 47% 11%; /* Dark text */
-  --border: 214 32% 91%; /* Light border */
-  --input: 214 32% 91%;
-  --primary: 214 90% 42%; /* Professional blue for WinnStorm™ */
+  /* Light mode theme for WinnStorm™ - Inspired by shield logo blues */
+  --background: 210 50% 98%; /* Soft blue-white background */
+  --foreground: 215 30% 15%; /* Deep navy text */
+  --muted: 210 40% 93%; /* Light steel blue */
+  --muted-foreground: 215 20% 45%; /* Medium blue-gray text */
+  --popover: 210 50% 99%; /* Near white with blue tint */
+  --popover-foreground: 215 30% 15%; /* Deep navy text */
+  --card: 210 50% 99%; /* Light blue-white cards */
+  --card-foreground: 215 30% 15%; /* Deep navy text */
+  --border: 210 30% 85%; /* Soft blue border */
+  --input: 210 30% 90%;
+  --primary: 195 100% 50%; /* Bright cyan blue from logo */
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96%; /* Light gray accent */
-  --secondary-foreground: 222 47% 11%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --secondary: 210 60% 85%; /* Light blue accent */
+  --secondary-foreground: 215 30% 15%;
+  --accent: 200 80% 88%; /* Soft cyan accent */
+  --accent-foreground: 215 30% 15%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
-  --ring: 214 90% 42%;
+  --ring: 195 100% 50%;
   --radius: 0.5rem;
   
-  --chart-1: 214 90% 42%;
-  --chart-2: 16 100% 50%;
-  --chart-3: 142 71% 45%;
-  --chart-4: 48 96% 53%;
-  --chart-5: 0 84% 60%;
+  --chart-1: 195 100% 50%; /* Bright cyan from logo */
+  --chart-2: 210 80% 60%; /* Medium blue */
+  --chart-3: 200 70% 55%; /* Teal blue */
+  --chart-4: 180 65% 50%; /* Deep cyan */
+  --chart-5: 170 60% 45%; /* Blue-green */
   
-  --sidebar-background: 214 90% 42%;
-  --sidebar-foreground: 0 0% 100%;
-  --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 214 90% 42%;
-  --sidebar-accent: 0 0% 100%;
-  --sidebar-accent-foreground: 214 90% 42%;
-  --sidebar-border: 213 79% 27%;
-  --sidebar-ring: 0 0% 100%;
+  --sidebar-background: 195 100% 50%; /* Logo cyan */
+  --sidebar-foreground: 215 30% 15%; /* Deep navy text */
+  --sidebar-primary: 215 30% 15%; /* Deep navy */
+  --sidebar-primary-foreground: 195 100% 50%; /* Logo cyan */
+  --sidebar-accent: 210 60% 85%; /* Light blue */
+  --sidebar-accent-foreground: 215 30% 15%; /* Deep navy */
+  --sidebar-border: 200 80% 88%; /* Soft cyan border */
+  --sidebar-ring: 215 30% 15%; /* Deep navy ring */
 }
 
 .dark {
-  /* Dark mode theme for WinnStorm™ */
-  --background: 0 0% 0%; /* Pure black background */
-  --foreground: 0 0% 100%; /* Pure white text */
-  --muted: 0 0% 13%; /* Dark gray */
-  --muted-foreground: 0 0% 80%; /* Light gray text */
-  --popover: 0 0% 5%; /* Near black */
-  --popover-foreground: 0 0% 100%; /* White text */
-  --card: 0 0% 7%; /* Very dark gray for cards */
-  --card-foreground: 0 0% 100%; /* White text */
-  --border: 0 0% 20%; /* Lighter border for contrast */
-  --input: 0 0% 20%;
-  --primary: 214 90% 42%; /* Professional blue for WinnStorm™ */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 20%; /* Dark gray accent */
-  --secondary-foreground: 0 0% 100%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --ring: 214 90% 42%;
+  /* Dark mode theme for WinnStorm™ - Professional consulting with logo blues */
+  --background: 215 35% 8%; /* Deep navy background */
+  --foreground: 200 50% 95%; /* Light cyan-white text */
+  --muted: 215 30% 15%; /* Dark navy-gray */
+  --muted-foreground: 200 20% 70%; /* Light blue-gray text */
+  --popover: 215 35% 10%; /* Deep navy popover */
+  --popover-foreground: 200 50% 95%; /* Light cyan-white text */
+  --card: 215 40% 12%; /* Dark navy-blue cards */
+  --card-foreground: 200 50% 95%; /* Light cyan-white text */
+  --border: 210 40% 20%; /* Medium dark blue border */
+  --input: 210 40% 18%;
+  --primary: 195 100% 60%; /* Bright cyan blue from logo */
+  --primary-foreground: 215 35% 8%;
+  --secondary: 210 50% 25%; /* Medium blue accent */
+  --secondary-foreground: 200 50% 95%;
+  --accent: 200 60% 30%; /* Deep cyan accent */
+  --accent-foreground: 200 50% 95%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 200 50% 95%;
+  --ring: 195 100% 60%;
   
-  --chart-1: 214 90% 42%;
-  --chart-2: 16 100% 50%;
-  --chart-3: 142 71% 45%;
-  --chart-4: 48 96% 53%;
-  --chart-5: 0 84% 60%;
+  --chart-1: 195 100% 60%; /* Bright cyan from logo */
+  --chart-2: 210 70% 65%; /* Medium blue */
+  --chart-3: 200 80% 70%; /* Light teal */
+  --chart-4: 180 75% 65%; /* Deep cyan */
+  --chart-5: 170 70% 60%; /* Blue-green */
   
-  --sidebar-background: 214 90% 42%;
-  --sidebar-foreground: 0 0% 100%;
-  --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 214 90% 42%;
-  --sidebar-accent: 0 0% 100%;
-  --sidebar-accent-foreground: 214 90% 42%;
-  --sidebar-border: 213 79% 27%;
-  --sidebar-ring: 0 0% 100%;
+  --sidebar-background: 195 100% 60%; /* Logo cyan */
+  --sidebar-foreground: 215 35% 8%; /* Deep navy text */
+  --sidebar-primary: 215 35% 8%; /* Deep navy */
+  --sidebar-primary-foreground: 195 100% 60%; /* Logo cyan */
+  --sidebar-accent: 210 50% 25%; /* Medium blue accent */
+  --sidebar-accent-foreground: 200 50% 95%; /* Light cyan-white */
+  --sidebar-border: 200 60% 30%; /* Deep cyan border */
+  --sidebar-ring: 215 35% 8%; /* Deep navy ring */
 }
 
 @layer base {
