@@ -1,4 +1,4 @@
-import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, Metric, Issue, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog } from "@shared/schema";
+import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, Metric, Issue } from "@shared/schema";
 
 // Interface for storage
 export interface IStorage {
@@ -76,6 +76,16 @@ export class MemStorage implements IStorage {
       email: "demo@example.com",
       password: "password",
       role: "field-rep",
+      firstName: "Demo",
+      lastName: "User",
+      phone: null,
+      certificationLevel: "junior",
+      certificationDate: null,
+      certificationExpiry: null,
+      inspectionHours: 0,
+      approvedDARs: 0,
+      trainingProgress: null,
+      performanceMetrics: null,
       createdAt: new Date(),
     };
     this.users.set(demoUser.id, demoUser);
@@ -83,28 +93,30 @@ export class MemStorage implements IStorage {
     // Create demo properties
     const property1: Property = {
       id: this.propertyId++,
+      projectId: null,
       name: "Office Complex",
       address: "123 Business Ave, Austin, TX",
+      buildingInfo: null,
+      roofSystemDetails: null,
       imageUrl: "https://cdn.pixabay.com/photo/2012/05/07/18/57/skyscrapers-49592_960_720.jpg",
-      healthScore: 68,
-      lastScanDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      overallCondition: "good",
+      lastInspectionDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       createdAt: new Date(),
       userId: demoUser.id,
-      scans: [],
-      reports: [],
     };
     
     const property2: Property = {
       id: this.propertyId++,
+      projectId: null,
       name: "Distribution Center",
       address: "456 Industrial Pkwy, Austin, TX",
+      buildingInfo: null,
+      roofSystemDetails: null,
       imageUrl: "https://cdn.pixabay.com/photo/2018/01/31/21/39/warehouse-3122321_960_720.jpg",
-      healthScore: 42,
-      lastScanDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      overallCondition: "poor",
+      lastInspectionDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       createdAt: new Date(),
       userId: demoUser.id,
-      scans: [],
-      reports: [],
     };
     
     this.properties.set(property1.id, property1);
@@ -223,11 +235,7 @@ export class MemStorage implements IStorage {
     this.scans.set(scan2.id, scan2);
     this.scans.set(scan3.id, scan3);
     
-    // Update properties with scans
-    property1.scans = [scan1, scan2];
-    property2.scans = [scan3];
-    property1.lastScanDate = scan1.date;
-    property2.lastScanDate = scan3.date;
+    // Store properties (extended properties will be created dynamically in getProperty)
     
     // Create demo report
     const report1: Report = {
@@ -264,18 +272,24 @@ export class MemStorage implements IStorage {
   // Property methods
   async getProperty(id: number): Promise<Property | undefined> {
     const property = this.properties.get(id);
-    if (property) {
-      // Get scans for property
-      property.scans = Array.from(this.scans.values()).filter(
-        (scan) => scan.propertyId === id
-      );
-      
-      // Get reports for property scans
-      property.reports = Array.from(this.reports.values()).filter(
-        (report) => property.scans?.some((scan) => scan.id === report.scanId)
-      );
-    }
-    return property;
+    if (!property) return undefined;
+    
+    // Get scans for this property
+    const propertyScans = Array.from(this.scans.values()).filter(scan => scan.propertyId === id);
+    
+    // Get reports for property scans
+    const propertyReports = Array.from(this.reports.values()).filter(
+      report => propertyScans.some(scan => scan.id === report.scanId)
+    );
+    
+    // Return extended property object for the API
+    return {
+      ...property,
+      scans: propertyScans,
+      reports: propertyReports,
+      healthScore: propertyScans.length > 0 ? propertyScans[0].healthScore || 50 : 50,
+      lastScanDate: propertyScans.length > 0 ? propertyScans[0].date : null
+    } as any;
   }
 
   async getPropertiesByUser(userId: number): Promise<Property[]> {
@@ -283,18 +297,21 @@ export class MemStorage implements IStorage {
       (property) => property.userId === userId
     );
     
-    // Populate scans and reports for each property
-    for (const property of properties) {
-      property.scans = Array.from(this.scans.values()).filter(
-        (scan) => scan.propertyId === property.id
+    // Return extended properties with scans and reports
+    return properties.map(property => {
+      const propertyScans = Array.from(this.scans.values()).filter(scan => scan.propertyId === property.id);
+      const propertyReports = Array.from(this.reports.values()).filter(
+        report => propertyScans.some(scan => scan.id === report.scanId)
       );
       
-      property.reports = Array.from(this.reports.values()).filter(
-        (report) => property.scans?.some((scan) => scan.id === report.scanId)
-      );
-    }
-    
-    return properties;
+      return {
+        ...property,
+        scans: propertyScans,
+        reports: propertyReports,
+        healthScore: propertyScans.length > 0 ? propertyScans[0].healthScore || 50 : 50,
+        lastScanDate: propertyScans.length > 0 ? propertyScans[0].date : null
+      } as any;
+    });
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
@@ -302,13 +319,16 @@ export class MemStorage implements IStorage {
     const newProperty: Property = { 
       ...property, 
       id, 
-      healthScore: 0,
-      createdAt: new Date(),
-      scans: [],
-      reports: []
+      createdAt: new Date()
     };
     this.properties.set(id, newProperty);
-    return newProperty;
+    return {
+      ...newProperty,
+      scans: [],
+      reports: [],
+      healthScore: 50,
+      lastScanDate: null
+    } as any;
   }
 
   async updateProperty(id: number, updates: Partial<Property>): Promise<Property | undefined> {

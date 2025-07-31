@@ -116,7 +116,36 @@ export const insertPropertySchema = createInsertSchema(properties).pick({
   userId: true,
 });
 
+// Scans Schema - Thermal and inspection data
+export const scans = pgTable("scans", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  date: timestamp("date").notNull(),
+  scanType: text("scan_type").notNull(), // 'drone', 'handheld', 'terrestrial'
+  deviceType: text("device_type"),
+  standardImageUrl: text("standard_image_url"),
+  thermalImageUrl: text("thermal_image_url"),
+  healthScore: integer("health_score"),
+  metrics: jsonb("metrics").$type<Metric[]>(),
+  issues: jsonb("issues").$type<Issue[]>(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  userId: integer("user_id").references(() => users.id),
+});
 
+export const insertScanSchema = createInsertSchema(scans).pick({
+  propertyId: true,
+  date: true,
+  scanType: true,
+  deviceType: true,
+  standardImageUrl: true,
+  thermalImageUrl: true,
+  healthScore: true,
+  metrics: true,
+  issues: true,
+  notes: true,
+  userId: true,
+});
 
 // Training Courses Schema for WinnStorm™ Certification
 export const trainingCourses = pgTable("training_courses", {
@@ -258,6 +287,18 @@ export const insertReportSchema = createInsertSchema(reports).pick({
   sentTo: true,
   userId: true,
 });
+
+// Basic scan data types
+export interface Metric {
+  name: string;
+  value: number;
+}
+
+export interface Issue {
+  title: string;
+  description: string;
+  severity: 'info' | 'warning' | 'critical';
+}
 
 // WinnStorm™ Training and Assessment Types
 export interface TrainingProgress {
