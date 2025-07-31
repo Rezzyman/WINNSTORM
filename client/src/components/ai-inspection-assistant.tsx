@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Bot, User, Send, Image, MapPin, Thermometer, Camera, FileText, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { StormyAvatar } from './stormy-avatar';
 
 interface AIMessage {
   id: string;
@@ -37,7 +38,7 @@ export function AIInspectionAssistant({
     {
       id: '1',
       role: 'assistant',
-      content: "Hello! I'm your WinnStorm™ AI Assistant, trained on Eric Winn's methodology for comprehensive damage assessment. I can help guide you through inspections, analyze thermal data, identify damage patterns, and provide recommendations based on the Winn Methodology. How can I assist with your current inspection?",
+      content: "Hello! I'm Stormy, your WinnStorm™ AI Assistant, trained on Eric Winn's methodology for comprehensive damage assessment. I can help guide you through inspections, analyze thermal data, identify damage patterns, and provide recommendations based on the Winn Methodology. How can I assist with your current inspection?",
       timestamp: new Date(),
       context: 'welcome'
     }
@@ -196,8 +197,8 @@ export function AIInspectionAssistant({
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-blue-500" />
-          WinnStorm™ AI Assistant
+          <StormyAvatar size={20} />
+          Stormy - AI Assistant
           {currentStep && (
             <Badge variant="outline" className="ml-auto">
               {currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -228,9 +229,7 @@ export function AIInspectionAssistant({
                         <User className="h-4 w-4 text-white" />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
-                        <Bot className="h-4 w-4 text-white" />
-                      </div>
+                      <StormyAvatar size={32} />
                     )}
                   </div>
                   <div
@@ -252,9 +251,7 @@ export function AIInspectionAssistant({
             ))}
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
+                <StormyAvatar size={32} />
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>

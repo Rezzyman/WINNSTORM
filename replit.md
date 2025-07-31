@@ -22,6 +22,7 @@ Building a comprehensive online application that serves as the central hub for D
 - Dark theme for reduced eye strain during long inspection sessions
 - Focus on data-rich collection workflows and comprehensive reporting capabilities
 - Intuitive UI optimized for both desktop and mobile field use
+- AI assistant named "Stormy" for personalized inspection guidance
 
 ## Target Users
 - **Damage Assessment Consultants**: Junior & Senior levels for inspections and report generation
@@ -39,6 +40,8 @@ Building a comprehensive online application that serves as the central hub for D
 - **File Management**: Support for photos, thermal images, drone data, and document storage
 
 ## Recent Changes
+- **2025-01-31**: IMPLEMENTED CONTEXTUAL AI ASSISTANT "STORMY" - Integrated OpenAI GPT-4o powered AI assistant named "Stormy" with Eric Winn's methodology for real-time inspection guidance
+- **2025-01-31**: ENHANCED GOOGLE MAPS INTEGRATION - Added property address lookup with satellite view and drawing tools for roof section marking
 - **2025-01-09**: UPDATED WINNSTORM™ RESTORATION PRO LOGO - New blue gradient shield design with "Certified to Winn" badge integrated throughout application
 - **2025-01-09**: FIXED DEMO ACCOUNT BLANK SCANS - Resolved schema mismatches and storage implementation for proper thermal scan display
 - **2025-01-09**: IMPLEMENTED LIGHT/DARK MODE TOGGLE - Complete theme system with localStorage persistence and system preference detection
