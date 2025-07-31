@@ -4,9 +4,10 @@ import { useLocation, useRoute } from 'wouter';
 import { Header, Footer } from '@/components/navbar';
 import { PropertyCard } from '@/components/property-card';
 import { useAuth } from '@/hooks/use-auth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Property } from '@shared/schema';
-import { Flame, FileText, Upload, BarChart3 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Property, Project, DamageAssessment } from '@shared/schema';
+import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
@@ -21,18 +22,19 @@ const Dashboard = () => {
     }
   }, [user, navigate]);
 
-  // Fetch properties
+  // Fetch properties and projects
   const { data: properties, isLoading } = useQuery<Property[]>({
     queryKey: ['/api/properties'],
   });
 
-  // Stats calculation
+  // Stats calculation for WinnStorm™ dashboard
   const stats = {
-    scans: properties?.reduce((acc, prop) => acc + prop.scans.length, 0) || 0,
-    reports: properties?.reduce((acc, prop) => acc + (prop.reports?.length || 0), 0) || 0,
-    avgScore: properties && properties.length > 0 
-      ? Math.round(properties.reduce((acc, prop) => acc + prop.healthScore, 0) / properties.length) 
-      : 0
+    activeProjects: properties?.length || 0,
+    completedAssessments: properties?.length || 0, // Will be replaced with actual assessment data
+    avgCondition: properties && properties.length > 0 
+      ? 'Good' // Will be calculated from actual assessments
+      : 'N/A',
+    certificationLevel: user?.certificationLevel || 'Junior'
   };
 
   return (
@@ -41,16 +43,127 @@ const Dashboard = () => {
       
       <main className="flex-grow pb-20">
         <div className="p-6">
-          <div className="mb-8 flex items-center">
-            <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-12 mr-3" />
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Recent Properties</h2>
-              <p className="text-muted-foreground text-sm mt-1">View and manage your thermal scans</p>
+          {/* WinnStorm™ Dashboard Header */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <Cloud className="h-8 w-8 text-blue-500 mr-3" />
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">WinnStorm™</h1>
+                <p className="text-muted-foreground text-sm">Damage Assessment Platform</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-500/10 px-3 py-1 rounded-full">
+                <span className="text-blue-400 text-sm font-medium">{stats.certificationLevel} Consultant</span>
+              </div>
+              <div className="text-muted-foreground text-sm">
+                Welcome back, {user?.firstName || user?.email}
+              </div>
             </div>
           </div>
 
-          {/* Property Cards */}
-          {isLoading ? (
+          {/* Dashboard Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <Briefcase className="h-8 w-8 text-blue-500 mr-3" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active Projects</p>
+                    <p className="text-2xl font-bold">{stats.activeProjects}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <FileText className="h-8 w-8 text-green-500 mr-3" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Assessments</p>
+                    <p className="text-2xl font-bold">{stats.completedAssessments}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <BarChart3 className="h-8 w-8 text-orange-500 mr-3" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Avg. Condition</p>
+                    <p className="text-2xl font-bold">{stats.avgCondition}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <GraduationCap className="h-8 w-8 text-purple-500 mr-3" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Certification</p>
+                    <p className="text-lg font-bold">{stats.certificationLevel}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button 
+                onClick={() => navigate('/upload')} 
+                className="bg-blue-600 hover:bg-blue-700 text-white p-4 h-auto flex flex-col items-center"
+              >
+                <Upload className="h-6 w-6 mb-2" />
+                <span>New Assessment</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="p-4 h-auto flex flex-col items-center"
+                onClick={() => navigate('/training')}
+              >
+                <GraduationCap className="h-6 w-6 mb-2" />
+                <span>Training Portal</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="p-4 h-auto flex flex-col items-center"
+                onClick={() => navigate('/projects')}
+              >
+                <Briefcase className="h-6 w-6 mb-2" />
+                <span>Manage Projects</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="p-4 h-auto flex flex-col items-center"
+                onClick={() => navigate('/crm-integrations')}
+              >
+                <Users className="h-6 w-6 mb-2" />
+                <span>CRM Integration</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Recent Projects & Assessments */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">Recent Projects</h3>
+              <Button variant="outline" onClick={() => navigate('/projects')}>
+                View All Projects
+              </Button>
+            </div>
+
+            {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card>
                 <Skeleton className="h-48 w-full" />
@@ -94,6 +207,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           )}
+          </div>
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

@@ -2,12 +2,22 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User Schema
+// User Schema - Updated for WinnStorm™ Consultant Management
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password"),
-  role: text("role"),
+  role: text("role"), // 'junior_consultant', 'senior_consultant', 'admin', 'client'
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  phone: text("phone"),
+  certificationLevel: text("certification_level"), // 'junior', 'senior', 'none'
+  certificationDate: timestamp("certification_date"),
+  certificationExpiry: timestamp("certification_expiry"),
+  inspectionHours: integer("inspection_hours").default(0),
+  approvedDARs: integer("approved_dars").default(0),
+  trainingProgress: jsonb("training_progress").$type<TrainingProgress>(),
+  performanceMetrics: jsonb("performance_metrics").$type<PerformanceMetrics>(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -15,52 +25,219 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
   role: true,
+  firstName: true,
+  lastName: true,
+  phone: true,
+  certificationLevel: true,
 });
 
-// Property Schema
+// Client Schema for WinnStorm™ CRM
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  companyName: text("company_name").notNull(),
+  contactPerson: text("contact_person").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  createdAt: timestamp("created_at").defaultNow(),
+  userId: integer("user_id").references(() => users.id), // Consultant who added client
+});
+
+// Project Schema - Core project management for damage assessments
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  projectId: text("project_id").notNull().unique(), // Custom project identifier
+  clientId: integer("client_id").references(() => clients.id).notNull(),
+  propertyAddress: text("property_address").notNull(),
+  lossType: text("loss_type").notNull(), // 'hail', 'wind', 'hurricane', 'flood', etc.
+  dateOfLoss: timestamp("date_of_loss").notNull(),
+  inspectionDate: timestamp("inspection_date"),
+  reportDueDate: timestamp("report_due_date"),
+  submissionDate: timestamp("submission_date"),
+  approvalDate: timestamp("approval_date"),
+  status: text("status").notNull(), // 'prospecting', 'inspection_scheduled', 'report_draft', 'submitted_to_insurance', 'approved', 'denied', 'completed'
+  estimatedValue: integer("estimated_value"), // in cents
+  approvedAmount: integer("approved_amount"), // in cents
+  assignedConsultantId: integer("assigned_consultant_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Property Schema - Updated for WinnStorm™ damage assessment
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id),
   name: text("name").notNull(),
   address: text("address").notNull(),
+  buildingInfo: jsonb("building_info").$type<BuildingInformation>(),
+  roofSystemDetails: jsonb("roof_system_details").$type<RoofSystemDetails>(),
   imageUrl: text("image_url"),
-  healthScore: integer("health_score").default(0),
-  lastScanDate: timestamp("last_scan_date"),
+  overallCondition: text("overall_condition"), // 'excellent', 'good', 'fair', 'poor', 'critical'
+  lastInspectionDate: timestamp("last_inspection_date"),
   createdAt: timestamp("created_at").defaultNow(),
   userId: integer("user_id").references(() => users.id),
+});
+
+export const insertClientSchema = createInsertSchema(clients).pick({
+  companyName: true,
+  contactPerson: true,
+  phone: true,
+  email: true,
+  address: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  userId: true,
+});
+
+export const insertProjectSchema = createInsertSchema(projects).pick({
+  projectId: true,
+  clientId: true,
+  propertyAddress: true,
+  lossType: true,
+  dateOfLoss: true,
+  inspectionDate: true,
+  reportDueDate: true,
+  status: true,
+  estimatedValue: true,
+  assignedConsultantId: true,
 });
 
 export const insertPropertySchema = createInsertSchema(properties).pick({
+  projectId: true,
   name: true,
   address: true,
+  buildingInfo: true,
+  roofSystemDetails: true,
   imageUrl: true,
+  overallCondition: true,
   userId: true,
 });
 
-// Scan Schema
-export const scans = pgTable("scans", {
+
+
+// Training Courses Schema for WinnStorm™ Certification
+export const trainingCourses = pgTable("training_courses", {
   id: serial("id").primaryKey(),
-  propertyId: integer("property_id").references(() => properties.id).notNull(),
-  date: timestamp("date").defaultNow().notNull(),
-  scanType: text("scan_type").notNull(), // 'drone' or 'handheld'
-  deviceType: text("device_type"),
-  standardImageUrl: text("standard_image_url"),
-  thermalImageUrl: text("thermal_image_url").notNull(),
-  healthScore: integer("health_score").notNull(),
-  metrics: jsonb("metrics").notNull(),
-  issues: jsonb("issues").notNull(),
-  notes: text("notes"),
+  title: text("title").notNull(),
+  description: text("description"),
+  day: text("day"), // 'orientation', 'day1', 'day2', etc.
+  subject: text("subject"), // 'technology', 'inspections', 'sales', 'insurance', etc.
+  contentType: text("content_type"), // 'video', 'text', 'document', 'external_link'
+  contentUrl: text("content_url"),
+  duration: integer("duration"), // in minutes
+  requiredForCertification: boolean("required_for_certification").default(false),
+  certificationLevel: text("certification_level"), // 'junior', 'senior', 'both'
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow(),
-  userId: integer("user_id").references(() => users.id),
 });
 
-export const insertScanSchema = createInsertSchema(scans).pick({
-  propertyId: true,
-  scanType: true,
-  deviceType: true,
-  standardImageUrl: true,
-  thermalImageUrl: true,
-  notes: true,
+// Training Quizzes Schema
+export const trainingQuizzes = pgTable("training_quizzes", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => trainingCourses.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  passingScore: integer("passing_score").default(85), // percentage
+  questions: jsonb("questions").$type<QuizQuestion[]>().notNull(),
+  timeLimit: integer("time_limit"), // in minutes
+  maxAttempts: integer("max_attempts").default(3),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Training Progress Schema
+export const userTrainingProgress = pgTable("user_training_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  courseId: integer("course_id").references(() => trainingCourses.id).notNull(),
+  quizId: integer("quiz_id").references(() => trainingQuizzes.id),
+  status: text("status").notNull(), // 'not_started', 'in_progress', 'completed', 'failed'
+  score: integer("score"), // percentage for quizzes
+  attempts: integer("attempts").default(0),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Damage Assessment Reports Schema - Core WinnStorm™ functionality
+export const damageAssessments = pgTable("damage_assessments", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  inspectionDate: timestamp("inspection_date").notNull(),
+  inspectorId: integer("inspector_id").references(() => users.id).notNull(),
+  reportType: text("report_type").notNull(), // 'initial_dar', 'v2_comprehensive_dar', 'proof_of_loss', 'winn_report'
+  weatherData: jsonb("weather_data").$type<WeatherVerificationData>(),
+  thermalData: jsonb("thermal_data").$type<ThermalInspectionData>(),
+  terrestrialWalk: jsonb("terrestrial_walk").$type<TerrestrialWalkData>(),
+  testSquares: jsonb("test_squares").$type<TestSquareData[]>(),
+  softMetals: jsonb("soft_metals").$type<SoftMetalData[]>(),
+  moistureTests: jsonb("moisture_tests").$type<MoistureTestData[]>(),
+  coreSamples: jsonb("core_samples").$type<CoreSampleData[]>(),
+  damageFindings: jsonb("damage_findings").$type<DamageFindings>(),
+  repairAnalysis: jsonb("repair_analysis").$type<RepairAnalysis>(),
+  codeCompliance: jsonb("code_compliance").$type<CodeComplianceData>(),
+  photos: jsonb("photos").$type<AssessmentPhotos>(),
+  status: text("status").notNull(), // 'in_progress', 'review', 'completed', 'submitted'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for the new tables
+export const insertTrainingCourseSchema = createInsertSchema(trainingCourses).pick({
+  title: true,
+  description: true,
+  day: true,
+  subject: true,
+  contentType: true,
+  contentUrl: true,
+  duration: true,
+  requiredForCertification: true,
+  certificationLevel: true,
+  orderIndex: true,
+});
+
+export const insertTrainingQuizSchema = createInsertSchema(trainingQuizzes).pick({
+  courseId: true,
+  title: true,
+  description: true,
+  passingScore: true,
+  questions: true,
+  timeLimit: true,
+  maxAttempts: true,
+});
+
+export const insertUserTrainingProgressSchema = createInsertSchema(userTrainingProgress).pick({
   userId: true,
+  courseId: true,
+  quizId: true,
+  status: true,
+  score: true,
+  attempts: true,
+  startedAt: true,
+  completedAt: true,
+});
+
+export const insertDamageAssessmentSchema = createInsertSchema(damageAssessments).pick({
+  projectId: true,
+  propertyId: true,
+  inspectionDate: true,
+  inspectorId: true,
+  reportType: true,
+  weatherData: true,
+  thermalData: true,
+  terrestrialWalk: true,
+  testSquares: true,
+  softMetals: true,
+  moistureTests: true,
+  coreSamples: true,
+  damageFindings: true,
+  repairAnalysis: true,
+  codeCompliance: true,
+  photos: true,
+  status: true,
 });
 
 // Report Schema
@@ -82,15 +259,419 @@ export const insertReportSchema = createInsertSchema(reports).pick({
   userId: true,
 });
 
+// WinnStorm™ Training and Assessment Types
+export interface TrainingProgress {
+  coursesCompleted: number;
+  totalCourses: number;
+  quizzesPassed: number;
+  totalQuizzes: number;
+  currentLevel: 'junior' | 'senior';
+  certificationEligible: boolean;
+}
+
+export interface PerformanceMetrics {
+  inspectionHours: number;
+  approvedDARs: number;
+  averageReportQuality: number;
+  clientSatisfaction: number;
+  revenueGenerated: number;
+  conversionRate: number;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  type: 'multiple_choice' | 'true_false' | 'short_answer';
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+  points: number;
+}
+
+// Weather Verification Data - Core WinnStorm™ requirement
+export interface WeatherVerificationData {
+  hailTraceData: HailTraceData;
+  noaaData: NOAAData;
+  newsReports: NewsReport[];
+  socialMediaReports: SocialMediaReport[];
+  ownerPhotos: string[];
+  hailReconData: HailReconData;
+  verificationTier: 'tier1_verified_spotter' | 'meteorologist_verified' | 'impact_report_ai';
+  verificationSources: string[];
+}
+
+export interface HailTraceData {
+  stormDate: string;
+  stormPath: string;
+  maxHailSize: number;
+  windSpeed: number;
+  verifiedSpotter: boolean;
+  reportId: string;
+}
+
+export interface NOAAData {
+  stormReportId: string;
+  location: string;
+  hailSize: number;
+  windSpeed: number;
+  reportTime: string;
+  verification: string;
+}
+
+export interface NewsReport {
+  source: string;
+  headline: string;
+  date: string;
+  url: string;
+  relevantQuotes: string[];
+}
+
+export interface SocialMediaReport {
+  platform: string;
+  postUrl: string;
+  content: string;
+  images: string[];
+  timestamp: string;
+  verification: string;
+}
+
+export interface HailReconData {
+  reportId: string;
+  location: string;
+  hailSize: number;
+  confidence: number;
+  radarData: string;
+}
+
+// Thermal Inspection Data
+export interface ThermalInspectionData {
+  thermalLoadObservations: string[];
+  dryRoofStatus: boolean;
+  moistureMapMosaic: string; // URL to thermal image
+  irxMap: string; // URL to IRX map
+  emissivitySettings: number;
+  thermalOrthoMaps: string[];
+  flightPlans: string[];
+  temperatureReadings: ThermalReading[];
+}
+
+// Terrestrial Walk Data
+export interface TerrestrialWalkData {
+  buildingLabels: BuildingLabel[];
+  moistureAreas: MoistureArea[];
+  featureMarkers: FeatureMarker[];
+  damageMarkers: DamageMarker[];
+  walkPath: string; // GPS coordinates or route description
+}
+
+export interface BuildingLabel {
+  id: string;
+  label: string; // e.g., "#1", "#2", "R17", "R18"
+  coordinates: { x: number; y: number };
+  sectionType: string;
+}
+
+export interface MoistureArea {
+  id: string;
+  coordinates: { x: number; y: number };
+  size: string; // e.g., "2'x2'"
+  severity: 'low' | 'medium' | 'high';
+  arrowDirection: string;
+  paintColor: 'blue';
+}
+
+export interface FeatureMarker {
+  id: string;
+  coordinates: { x: number; y: number };
+  label: string; // e.g., "1 HV 1", "1 D1"
+  featureType: 'hvac' | 'drain' | 'vent' | 'electrical' | 'satellite' | 'other';
+  paintColor: 'orange';
+}
+
+export interface DamageMarker {
+  id: string;
+  coordinates: { x: number; y: number };
+  damageType: 'moisture_entry' | 'hole' | 'damaged_seam' | 'lifted_membrane' | 'flashing_damage' | 'blister' | 'debris_strike';
+  severity: 'minor' | 'moderate' | 'severe';
+  paintColor: 'pink';
+}
+
+// Test Square Data
+export interface TestSquareData {
+  id: string;
+  location: string;
+  sectionId: string;
+  size: '10x10'; // standard size
+  totalImpacts: number;
+  individualImpacts: ImpactMarker[];
+  photos: string[];
+}
+
+export interface ImpactMarker {
+  id: string;
+  coordinates: { x: number; y: number };
+  diameter: number; // in inches
+  depth: number; // in inches
+  label: string; // pink L marking
+}
+
+// Soft Metal Data
+export interface SoftMetalData {
+  id: string;
+  type: 'parapet_cap' | 'coping' | 'flashing' | 'gutter';
+  location: string;
+  squareFootage: number;
+  impactCount: number;
+  impactSizes: number[]; // array of impact diameters
+  copingSize?: string;
+  labelConvention: string;
+  photos: string[];
+}
+
+// Moisture Test Data
+export interface MoistureTestData {
+  id: string;
+  location: string;
+  sectionId: string;
+  testNumber: number;
+  moisturePercentage: number;
+  testArea: '2x2'; // 2'x2' square
+  labelHeight: '2ft'; // 2ft tall letters
+  tramexReading: number;
+  photos: string[];
+}
+
+// Core Sample Data
+export interface CoreSampleData {
+  id: string;
+  location: string;
+  sampleArea: '2x2'; // 2'x2' location
+  cutSize: '1x1'; // 1'x1' cut on 3 sides
+  insulationDepth: number;
+  insulationLayers: InsulationLayer[];
+  deckingType: string;
+  prickTest: string;
+  layerPhotos: string[];
+  centerCutPhoto: string;
+  hailImpactPhoto: string;
+  insulationFracturePhoto: string;
+  membraneDamageTop: string;
+  membraneDamageBottom: string;
+  pullTestResults: string;
+  taperDrainage: string;
+}
+
+export interface InsulationLayer {
+  layerNumber: number;
+  material: string;
+  thickness: number;
+  condition: string;
+  rValue: number;
+}
+
+// Damage Findings
+export interface DamageFindings {
+  damageType: 'hail' | 'wind' | 'hurricane' | 'flood';
+  roofSystemType: 'metal' | 'mod_bit' | 'epdm' | 'shingle' | 'tpo' | 'pvc';
+  overallCondition: 'no_damage' | 'minor' | 'moderate' | 'severe' | 'total_loss';
+  damageAreas: DamageArea[];
+  impactDensity: number; // impacts per square foot
+  totalDamageSquareFootage: number;
+}
+
+export interface DamageArea {
+  id: string;
+  location: string;
+  damageType: string;
+  severity: 'minor' | 'moderate' | 'severe';
+  squareFootage: number;
+  description: string;
+  photos: string[];
+}
+
+// Repair Analysis
+export interface RepairAnalysis {
+  repairFeasibility: 'repair' | 'replace';
+  reasoning: string;
+  waterSaturation: boolean;
+  discontinuedMaterials: boolean;
+  emsRequirements: string[];
+  preLossConditionRestoration: boolean;
+  estimatedRepairCost: number;
+  estimatedReplacementCost: number;
+  recommendation: string;
+}
+
+// Code Compliance Data
+export interface CodeComplianceData {
+  buildingCodes: BuildingCodeReference[];
+  laws: LegalReference[];
+  statutesOfLimitations: string;
+  manufacturerSpecs: ManufacturerSpec[];
+  technicalBulletins: TechnicalBulletin[];
+  permitHistory: PermitRecord[];
+  foiaRequests: FOIARequest[];
+}
+
+export interface BuildingCodeReference {
+  code: string;
+  section: string;
+  description: string;
+  relevance: string;
+}
+
+export interface LegalReference {
+  statute: string;
+  description: string;
+  applicability: string;
+}
+
+export interface ManufacturerSpec {
+  manufacturer: string;
+  product: string;
+  specification: string;
+  requirement: string;
+}
+
+export interface TechnicalBulletin {
+  bulletinNumber: string;
+  title: string;
+  relevantSection: string;
+}
+
+export interface PermitRecord {
+  permitNumber: string;
+  issueDate: string;
+  type: string;
+  description: string;
+  status: string;
+}
+
+export interface FOIARequest {
+  requestId: string;
+  agency: string;
+  requestDate: string;
+  response: string;
+  documents: string[];
+}
+
+// Assessment Photos
+export interface AssessmentPhotos {
+  overview: OverviewPhotos;
+  midRange: MidRangePhotos;
+  closeUp: CloseUpPhotos;
+  microscope: MicroscopePhotos;
+  drone: DronePhotos;
+  videos: VideoFiles[];
+}
+
+export interface OverviewPhotos {
+  fromCenter: string[];
+  fromCorners: string[];
+  testSquareOverview: string[];
+  frontRearBackLeft: string[];
+}
+
+export interface MidRangePhotos {
+  approaching: string[];
+  closer: string[];
+}
+
+export interface CloseUpPhotos {
+  individualImpacts: ImpactPhoto[];
+  precisionSquare: string[];
+  zoomed5x: string[];
+  zoomed10x: string[];
+  zoomed15x: string[];
+}
+
+export interface ImpactPhoto {
+  url: string;
+  impactId: string;
+  measurements: string;
+  annotations: PhotoAnnotation[];
+}
+
+export interface MicroscopePhotos {
+  impacts: string[];
+  materialDetail: string[];
+}
+
+export interface DronePhotos {
+  orthoReports: string[];
+  naderTopographical: string[];
+  oblique3DModel: string[];
+  orbitalPerSection: string[];
+}
+
+export interface VideoFiles {
+  url: string;
+  type: 'inspection' | 'overview' | 'damage_detail';
+  duration: number;
+  description: string;
+}
+
+export interface PhotoAnnotation {
+  type: 'circle' | 'arrow' | 'label' | 'measurement';
+  color: 'yellow' | 'pink' | 'blue' | 'orange';
+  coordinates: { x: number; y: number };
+  text?: string;
+  measurements?: string;
+}
+
 // Types
-export type User = typeof users.$inferSelect;
+export type User = typeof users.$inferSelect & {
+  trainingProgress?: TrainingProgress;
+  performanceMetrics?: PerformanceMetrics;
+};
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+
+export type Project = typeof projects.$inferSelect & {
+  client?: Client;
+  property?: Property;
+  assessments?: DamageAssessment[];
+};
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+
 export type Property = typeof properties.$inferSelect & {
-  scans?: Scan[];
-  reports?: Report[];
+  project?: Project;
+  buildingInfo?: BuildingInformation;
+  roofSystemDetails?: RoofSystemDetails;
+  assessments?: DamageAssessment[];
 };
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
+
+export type TrainingCourse = typeof trainingCourses.$inferSelect;
+export type InsertTrainingCourse = z.infer<typeof insertTrainingCourseSchema>;
+
+export type TrainingQuiz = typeof trainingQuizzes.$inferSelect & {
+  questions: QuizQuestion[];
+};
+export type InsertTrainingQuiz = z.infer<typeof insertTrainingQuizSchema>;
+
+export type UserTrainingProgress = typeof userTrainingProgress.$inferSelect;
+export type InsertUserTrainingProgress = z.infer<typeof insertUserTrainingProgressSchema>;
+
+export type DamageAssessment = typeof damageAssessments.$inferSelect & {
+  project?: Project;
+  property?: Property;
+  inspector?: User;
+  weatherData?: WeatherVerificationData;
+  thermalData?: ThermalInspectionData;
+  terrestrialWalk?: TerrestrialWalkData;
+  testSquares?: TestSquareData[];
+  softMetals?: SoftMetalData[];
+  moistureTests?: MoistureTestData[];
+  coreSamples?: CoreSampleData[];
+  damageFindings?: DamageFindings;
+  repairAnalysis?: RepairAnalysis;
+  codeCompliance?: CodeComplianceData;
+  photos?: AssessmentPhotos;
+};
+export type InsertDamageAssessment = z.infer<typeof insertDamageAssessmentSchema>;
 
 // Comprehensive data structures for Winn reports
 export interface RoofComponent {

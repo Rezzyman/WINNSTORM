@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { Flame, Home, CloudUpload, ChartScatter, PersonStanding, Database } from "lucide-react";
+import { Cloud, Home, CloudUpload, ChartScatter, PersonStanding, Database } from "lucide-react";
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -19,8 +19,8 @@ export const Header = () => {
     <header className="bg-background shadow-md border-b border-border">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-10 mr-3" />
-          <h1 className="text-xl font-bold text-primary">WHITE HOT</h1>
+          <Cloud className="h-8 w-8 text-blue-500 mr-3" />
+          <h1 className="text-xl font-bold text-foreground">WinnStorm™</h1>
         </div>
         <div className="flex items-center">
           <span className="text-sm text-muted-foreground mr-3 hidden sm:inline-block">
@@ -45,8 +45,8 @@ export const Footer = () => {
     <footer className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 z-10">
       <div className="flex flex-col">
         <div className="mb-2 flex justify-center items-center">
-          <img src="/images/white-hot-logo.png" alt="WHITE HOT" className="h-6" />
-          <span className="text-xs text-muted-foreground ml-2">© 2025 WHITE HOT</span>
+          <Cloud className="h-4 w-4 text-blue-500 mr-2" />
+          <span className="text-xs text-muted-foreground">© 2025 WinnStorm™</span>
         </div>
         <div className="flex justify-around items-center">
           <button 

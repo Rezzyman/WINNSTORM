@@ -1,0 +1,245 @@
+Project Name: WinnStorm™
+
+Project Goal: Develop a comprehensive online application in Replit that serves as the central hub for Damage Assessment Consultants, enabling them to efficiently conduct inspections, generate highly data-rich reports based on the "Winn Methodology," manage client projects, and facilitate their professional certification process. The application aims to "crystallize and effectively create a clone of Eric Winn's expertise."
+
+Target Users:
+
+Damage Assessment Consultants (Junior & Senior): Primary users for inspections, data entry, and report generation.
+
+Clients/Property Owners: View reports, track project status, potentially interact with consultants.
+
+Administrators/Management: Oversee operations, manage users, review reports, track certifications, analyze performance.
+
+Insurance Adjusters/Engineers: Receive and review comprehensive reports.
+
+Core Application Modules & Functionality:
+
+1. User Management & Certification Portal
+User Roles: Implement distinct roles for Consultants (Junior, Senior), Admins, and potentially Clients.
+
+Consultant Profiles:
+
+Basic Info: Name, Contact, ID.
+
+Certification Status: Track progress through training, current certification level (Junior, Senior), completion dates, expiration dates, and scores.
+
+Training History: A record of all completed courses and quizzes, including passing grades (85% required for Senior Certification).
+
+Performance Metrics: Logged inspection hours (500 for Senior Cert) and approved DARs (50 for Senior Cert).
+
+Assigned Projects & Clients.
+
+Training & Certification Content Delivery:
+
+
+Course Structure: Organize courses by Day (Orientation, Day 1-12, Field Training) and subject matter (Technology, Inspections, Sales, Insurance, Products, Engineering Reports, Routine, Life Wisdom, Closing, Pipeline Management).
+
+
+Content Hosting: Support various media types (text, video links, external document links) for each lesson and module.
+
+
+Quizzes: Integrate quizzes for each class/module with automated grading and score tracking.
+
+Example quiz topics: Roofing Systems, Flat Roof Systems, Roof Coatings, Tools for Damage Assessment, Damage Assessment Reports, Insurance 101, Proof of Loss, Roof Inspection Tools, Winn Report.
+
+Question types: Multiple choice, potentially others.
+
+Required passing grade (e.g., 85% for Senior Certification).
+
+Progress Tracking: Allow consultants to track their progress through courses and certification requirements.
+
+
+Resource Library: A central repository for training manuals, scripts, call recordings , live/real-life recordings, definitions, photos of components, and other resources.
+
+2. Client & Project Management (CRM Functionality)
+Client Database:
+
+Company Name, Contact Person, Phone, Email, Property Address.
+
+Historical Projects linked to the client.
+
+Project Creation & Management:
+
+Project ID, unique identifier.
+
+Link to Client, assigned Consultant(s).
+
+
+Job Stages/Workflow Tracking: Implement clear project stages (e.g., Prospecting, Inspection Scheduled, Report Draft, Submitted to Insurance, Approved, Denied, Completed).
+
+Important Dates: Inspection Date, Report Due Date, Submission Date, Approval Date.
+
+Loss Information: Type of Loss (Hail, Wind, Hurricane, Flood, etc.), Date of Loss (DOL).
+
+Associated Reports and Documents.
+
+Financial Tracking: Estimated project value, approved amount.
+
+
+Pipeline Management: Tools to visualize and manage active and prospective jobs.
+
+3. Comprehensive Damage Assessment & Report Generation Engine
+This is the core of the "WinnStorm™" application, aiming to "clone" Eric Winn's methodology. The system must guide consultants through a data-rich collection process and generate professional, defensible reports.
+
+Report Types: Support creation of various report types:
+
+
+Initial DAR (Damage Assessment Report): Basic overview.
+
+
+V2 Damage Assessment Report (Comprehensive DAR): Detailed findings for different roof types (Flat, Metal, Tile, Shingle, TPO, PVC, EPDM, Mod Bit, BUR).
+
+
+Proof of Loss (POL) Report: Formal documentation for insurance claims.
+
+Winn Report: The most comprehensive and data-rich report, designed for high success rates with insurance companies.
+
+Data Collection & Input Forms (Guided Workflow):
+
+
+Weather Verification (Crucial): Integrate tools/fields for collecting and presenting meteorological data, algorithm data, and verified spotted hail data.
+
+Sources: Hail Trace (desktop version for storm reports) , NOAA , News Reports , Social Media , Owner Photos , Hail Recon.
+
+Tier 1 verification (Verified Spotter, Impact Report - AI/Meteorologist verified).
+
+Inspection Details:
+
+Property Overview: Address, Project Details (linking to client/project).
+
+Site Context: Elevation photos, photos from corners, overview from center.
+
+Roof System & Components: Type of roofing system (TPO, PVC, Mod Bit, BUR, Metal, Shingle, Tile, Coatings) , identification of features like HVAC, Drains, Skylights, Vents, Electrical Boxes, Gaslines, Satellites, Drain Heaters, Curbs.
+
+Detailed Damage Assessment Data Input (Core of Winn Methodology):
+
+Thermal Data: Fields for Thermal Load observations, dry roof status, moisture map mosaic, IRX Map. Input for emissivity settings. Ability to upload thermal ortho maps and flight plans.
+
+Terrestrial Walk Data:
+
+Labeling of buildings/roof sections (e.g., #1, #2, R17, R18, R19).
+
+Marking moisture areas (blue paint) with arrows.
+
+Marking features (orange paint) with labels (e.g., 1 HV 1, 1 D1).
+
+Damage Marking (pink paint) for moisture entry points (holes, damaged seams, lifted membrane, flashings), blisters, debris strikes.
+
+
+Test Squares: Input for 10x10 test square locations on each section, total number of impacts (CI=). Ability to mark individual impacts (pink L).
+
+
+Soft Metals: Fields for parapet caps, measured square footage, number/size of impacts, coping size, labeling conventions.
+
+
+Tramex Moisture Test: Input for moisture levels, marking locations (2'x2' square, label with Section, MT#, %, 2ft tall letters).
+
+
+Core Samples: Input for 2'x2' core sample locations (1'x1' cut on 3 sides). Documentation of insulation depth and layers, decking, prick test, pictures of each layer, center cut of hail impact, insulation fracture, membrane damage (top/bottom), pull testing, taper/drainage.
+
+Photos & Media (Crucial):
+
+
+Company Cam Integration: Direct integration for uploading photos from Company Cam and checking off items on a checklist.
+
+Support for various photo types: Overview (from center, corners, F/R/B/L of test square) , Mid-Range (approaching, closer) , Close-up (individual impacts with precision square, zoomed in 5x, 10x, 15x) , Microscope photos of impacts.
+
+Annotation Tools: Ability to add circles (yellow for hail impacts on granular surfaces) , marks (pink for damage/moisture) , labels, arrows (blue for moisture flow) , and measure using digital rulers/squares on images.
+
+Drone Photos: Upload and integrate Ortho Reports, Nader (topographical) , Oblique (3D model) , and Orbital photos (per section).
+
+Video integration (e.g., inspection videos).
+
+
+Damage Details: "What is Damage" based on specific types (Hail, Wind, Hurricane, Flood, Metal, Mod Bit, EPDM, Shingle, TPO, PVC, No Damage).
+
+
+Repair vs. Replace Analysis: Fields and logic to determine if repair is feasible or if replacement is necessary to restore to pre-loss condition, considering factors like water saturation , discontinued materials , EMS requirements , and ability to restore to pre-loss condition.
+
+
+Code & Compliance: Fields for noting relevant building codes , laws , statutes of limitations , manufacturer specifications and technical bulletins , and permit history (FOIA requests).
+
+
+Expert Reports: Fields to reference or integrate engineer reports and rebuttals.
+
+
+Emergency Mitigation Services (EMS): Documenting mitigation efforts and incurred damage.
+
+Automated Report Generation:
+
+Dynamic Document Assembly: Generate professional PDF reports using collected data, images, and standardized narrative sections.
+
+Customizable Templates: Allow selection of report type (DAR, POL, Winn Report).
+
+
+Data Visualization: Automatically generate maps with marked sections and damage areas , tables summarizing data (e.g., hail sizes, impact counts), and potentially charts (e.g., wind speed charts).
+
+
+Integrated Evidence: Seamlessly embed all collected photos, thermal images, drone maps, and weather data into the report.
+
+Logical Text Generation: Based on inputs, auto-populate descriptive text for damage findings, repairability assessments, and recommendations, reflecting the "Winn Methodology" narrative.
+
+
+Branding: Include company logos and professional formatting.
+
+Download & Sharing: Export reports in PDF format for easy sharing with clients, adjusters, and engineers.
+
+4. Integration Points (as mentioned implicitly/explicitly)
+
+Company Cam: For photo/video upload and checklist completion.
+
+
+Hail Trace: For weather data integration.
+
+
+CRM (Job Progress/LEAP): For linking projects and documents.
+
+
+LightspeedVT: For linking to training courses.
+
+
+Dialpad: For call recordings.
+
+
+Zoom Info: For prospecting lists.
+
+
+Google My Maps: For route planning and mapping.
+
+
+Raptor, Pix4D, Drone Deploy: For processing drone data into ortho maps.
+
+
+NOAA/Hail Recon: As sources for weather verification.
+
+5. Key Business Logic & Data Flow Requirements
+
+"Good Client - Good Damage - Good Coverage": The system should help identify these key criteria during assessment and reporting.
+
+
+"Proof of Loss / Burden of Proof": The application must inherently support the gathering and presentation of evidence to satisfy the burden of proof for insurance claims.
+
+
+"Hooked, Cooked, and Cleaned": Integrate workflows and data points that support this entire customer journey, from initial contact to successful project completion and payment.
+
+
+Commission Tracking: Potentially track consultant commission based on sales production and payment collection stages (deposit, materials arrival, final payment).
+
+Data Security & Integrity: Ensure that sensitive client and project data is securely stored and managed.
+
+Replit Application Development Considerations:
+Scalability: Design for future growth in users and data volume.
+
+User Interface (UI): Intuitive and efficient UI for consultants, especially for on-site data entry and photo annotation.
+
+Backend Logic: Robust data models and business logic to handle complex calculations and report generation.
+
+Database: A flexible database structure to store all the detailed project, client, training, and report data.
+
+External API Integrations: Ability to connect with external services like Company Cam, Hail Trace, etc.
+
+File Management: Efficient storage and retrieval of large volumes of image and PDF data.
+
+Offline Capability (Consideration): While Replit is cloud-based, consider if any parts of the inspection data collection could be cached for areas with poor connectivity.
+
+Authentication & Authorization: Secure login and role-based access control.

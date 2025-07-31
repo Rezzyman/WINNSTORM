@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertPropertySchema, insertScanSchema, insertReportSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
+import { insertPropertySchema, insertReportSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 
