@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { Cloud, Home, CloudUpload, ChartScatter, PersonStanding, Database } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -22,7 +23,8 @@ export const Header = () => {
           <Cloud className="h-8 w-8 text-blue-500 mr-3" />
           <h1 className="text-xl font-bold text-foreground">WinnStorm™</h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           <span className="text-sm text-muted-foreground mr-3 hidden sm:inline-block">
             {user?.email ? user.email.split('@')[0] : 'User'}
           </span>
