@@ -18,10 +18,12 @@ import {
   BuildingInformation,
   RoofSystemDetails,
   InspectionSection,
-  CostEstimate
+  CostEstimate,
+  RoofSection
 } from '@shared/schema';
 import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database } from 'lucide-react';
 import { ThermalAnalysis } from './thermal-analysis';
+import { GoogleMapsDrawing } from './google-maps-drawing';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -65,11 +67,34 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
     propertyId,
     inspectionDate: new Date(),
     inspector: '',
+    buildingInfo: {
+      address: '',
+      propertyType: 'commercial',
+      yearBuilt: new Date().getFullYear(),
+      squareFootage: 0,
+      stories: 1,
+      occupancy: '',
+      ownerName: '',
+      ownerContact: '',
+      roofSections: []
+    },
+    roofSystemDetails: {
+      roofType: 'flat',
+      primaryMaterial: 'membrane',
+      age: 0,
+      condition: 'good',
+      previousRepairs: [],
+      warrantyInfo: ''
+    },
     weatherConditions: [],
+    inspectionSections: [],
     roofComponents: [],
     thermalReadings: [],
     metrics: [],
     issues: [],
+    costEstimates: [],
+    executiveSummary: '',
+    recommendations: '',
     notes: '',
     images: [],
     thermalImages: [],
@@ -156,42 +181,152 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: // Property Information
+      case 0: // Building Information  
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="inspector" className="text-foreground">Inspector Name</Label>
-                <Input
-                  id="inspector"
-                  value={reportData.inspector}
-                  onChange={(e) => setReportData(prev => ({ ...prev, inspector: e.target.value }))}
-                  className="bg-card text-foreground border-border"
-                  placeholder="Enter inspector name"
+            {/* Basic Property Information */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Basic Property Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="inspector" className="text-foreground">Inspector Name</Label>
+                    <Input
+                      id="inspector"
+                      value={reportData.inspector}
+                      onChange={(e) => setReportData(prev => ({ ...prev, inspector: e.target.value }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="Enter inspector name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="inspection-date" className="text-foreground">Inspection Date</Label>
+                    <Input
+                      id="inspection-date"
+                      type="date"
+                      value={reportData.inspectionDate.toISOString().split('T')[0]}
+                      onChange={(e) => setReportData(prev => ({ ...prev, inspectionDate: new Date(e.target.value) }))}
+                      className="bg-background text-foreground border-border"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="owner-name" className="text-foreground">Property Owner</Label>
+                    <Input
+                      id="owner-name"
+                      value={reportData.buildingInfo.ownerName}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        buildingInfo: { ...prev.buildingInfo, ownerName: e.target.value }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="Enter property owner name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="owner-contact" className="text-foreground">Owner Contact</Label>
+                    <Input
+                      id="owner-contact"
+                      value={reportData.buildingInfo.ownerContact}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        buildingInfo: { ...prev.buildingInfo, ownerContact: e.target.value }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="Phone or email"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="property-type" className="text-foreground">Property Type</Label>
+                    <Select
+                      value={reportData.buildingInfo.propertyType}
+                      onValueChange={(value) => setReportData(prev => ({ 
+                        ...prev, 
+                        buildingInfo: { ...prev.buildingInfo, propertyType: value as any }
+                      }))}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="commercial">Commercial</SelectItem>
+                        <SelectItem value="residential">Residential</SelectItem>
+                        <SelectItem value="industrial">Industrial</SelectItem>
+                        <SelectItem value="institutional">Institutional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="year-built" className="text-foreground">Year Built</Label>
+                    <Input
+                      id="year-built"
+                      type="number"
+                      value={reportData.buildingInfo.yearBuilt}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        buildingInfo: { ...prev.buildingInfo, yearBuilt: parseInt(e.target.value) }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="2020"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="square-footage" className="text-foreground">Square Footage</Label>
+                    <Input
+                      id="square-footage"
+                      type="number"
+                      value={reportData.buildingInfo.squareFootage}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        buildingInfo: { ...prev.buildingInfo, squareFootage: parseInt(e.target.value) }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="10000"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Google Maps Property Location & Roof Section Drawing */}
+            <GoogleMapsDrawing
+              address={reportData.buildingInfo.address}
+              onAddressChange={(address) => setReportData(prev => ({ 
+                ...prev, 
+                buildingInfo: { ...prev.buildingInfo, address }
+              }))}
+              roofSections={reportData.buildingInfo.roofSections}
+              onSectionsChange={(roofSections) => setReportData(prev => ({ 
+                ...prev, 
+                buildingInfo: { ...prev.buildingInfo, roofSections }
+              }))}
+            />
+
+            {/* Initial Notes */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground">Initial Inspection Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={reportData.notes}
+                  onChange={(e) => setReportData(prev => ({ ...prev, notes: e.target.value }))}
+                  className="bg-background text-foreground border-border"
+                  placeholder="Enter initial inspection observations, weather conditions, access notes, etc."
+                  rows={4}
                 />
-              </div>
-              <div>
-                <Label htmlFor="inspection-date" className="text-foreground">Inspection Date</Label>
-                <Input
-                  id="inspection-date"
-                  type="date"
-                  value={reportData.inspectionDate.toISOString().split('T')[0]}
-                  onChange={(e) => setReportData(prev => ({ ...prev, inspectionDate: new Date(e.target.value) }))}
-                  className="bg-card text-foreground border-border"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="initial-notes" className="text-foreground">Initial Notes</Label>
-              <Textarea
-                id="initial-notes"
-                value={reportData.notes}
-                onChange={(e) => setReportData(prev => ({ ...prev, notes: e.target.value }))}
-                className="bg-card text-foreground border-border"
-                placeholder="Enter initial inspection notes..."
-                rows={4}
-              />
-            </div>
+              </CardContent>
+            </Card>
           </div>
         );
 

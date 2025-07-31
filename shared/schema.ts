@@ -775,35 +775,37 @@ export interface DetailedIssue {
   reportedBy: string;
 }
 
+// Roof Section Interface for Google Maps Drawing
+export interface RoofSection {
+  id: string;
+  number: number;
+  type: 'polygon' | 'rectangle' | 'circle';
+  coordinates: any[];
+  area?: number;
+  label: string;
+  notes: string;
+}
+
 // Additional comprehensive data structures for Winn reports
 export interface BuildingInformation {
-  buildingName: string;
   address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  buildingType: string;
-  constructionYear: number;
-  roofArea: number; // in square feet
-  numberOfStories: number;
-  occupancyType: string;
+  propertyType: 'commercial' | 'residential' | 'industrial' | 'institutional';
+  yearBuilt: number;
+  squareFootage: number;
+  stories: number;
+  occupancy: string;
   ownerName: string;
   ownerContact: string;
-  propertyManager?: string;
-  propertyManagerContact?: string;
+  roofSections: RoofSection[];
 }
 
 export interface RoofSystemDetails {
   roofType: 'flat' | 'sloped' | 'mixed';
-  primaryMembrane: string;
-  membraneAge: number;
-  insulationType: string;
-  insulationThickness: number;
-  deckType: string;
-  drainageType: string;
-  gutterSystem: string;
-  warranties: RoofWarranty[];
-  previousRepairs: RepairHistory[];
+  primaryMaterial: 'membrane' | 'shingle' | 'metal' | 'tile' | 'other';
+  age: number;
+  condition: 'excellent' | 'good' | 'fair' | 'poor';
+  previousRepairs: string[];
+  warrantyInfo: string;
 }
 
 export interface RoofWarranty {
