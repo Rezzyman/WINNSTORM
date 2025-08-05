@@ -34,7 +34,7 @@ const Dashboard = () => {
     avgCondition: properties && properties.length > 0 
       ? 'Good' // Will be calculated from actual assessments
       : 'N/A',
-    certificationLevel: user?.certificationLevel || 'Junior'
+    certificationLevel: 'Junior'
   };
 
   return (
@@ -60,7 +60,7 @@ const Dashboard = () => {
                 <span className="text-primary text-sm font-medium">{stats.certificationLevel} Consultant</span>
               </div>
               <div className="text-muted-foreground text-sm">
-                Welcome back, {user?.firstName || user?.email}
+                Welcome back, {user?.displayName || user?.email}
               </div>
             </div>
           </div>
