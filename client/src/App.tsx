@@ -10,6 +10,7 @@ import PropertyDetail from "@/pages/property-detail";
 import Report from "@/pages/report";
 import WinnReport from "@/pages/winn-report";
 import CrmIntegrations from "@/pages/crm-integrations";
+import Training from "@/pages/training";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/report/:id" component={Report} />
       <Route path="/winn-report/:propertyId" component={WinnReport} />
       <Route path="/crm-integrations" component={CrmIntegrations} />
+      <Route path="/training" component={Training} />
       <Route component={NotFound} />
     </Switch>
   );
