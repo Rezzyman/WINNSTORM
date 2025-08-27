@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,12 +38,18 @@ const Landing = () => {
   const [, navigate] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
+  const featuresRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 50);
+      setScrollY(currentScrollY);
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -227,65 +233,102 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-cyan-500/10"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Parallax Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-cyan-500/8"></div>
+        <div 
+          className="absolute inset-0"
+          style={{
+            transform: `translateY(${scrollY * 0.5}px)`,
+          }}
+        >
+          <div className="absolute top-32 left-[10%] w-80 h-80 bg-gradient-to-r from-primary/15 to-cyan-500/15 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute bottom-32 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/12 to-blue-500/12 rounded-full blur-3xl opacity-70"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl opacity-50"></div>
+        </div>
+        
+        {/* Floating Elements */}
+        <div 
+          className="absolute top-1/4 right-1/4 opacity-20"
+          style={{
+            transform: `translateY(${scrollY * -0.3}px) rotate(${scrollY * 0.1}deg)`,
+          }}
+        >
+          <Thermometer className="w-12 h-12 text-primary" />
+        </div>
+        <div 
+          className="absolute bottom-1/4 left-1/4 opacity-20"
+          style={{
+            transform: `translateY(${scrollY * -0.2}px) rotate(${scrollY * -0.1}deg)`,
+          }}
+        >
+          <FileText className="w-10 h-10 text-cyan-500" />
+        </div>
+        <div 
+          className="absolute top-1/3 left-1/6 opacity-15"
+          style={{
+            transform: `translateY(${scrollY * -0.4}px)`,
+          }}
+        >
+          <Camera className="w-8 h-8 text-blue-500" />
         </div>
 
-        <div className="container mx-auto px-6 text-center relative z-10 pt-20">
+        <div 
+          className="container mx-auto px-6 text-center relative z-10 pt-20"
+          style={{
+            transform: `translateY(${scrollY * -0.1}px)`,
+          }}
+        >
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-gradient-to-r from-primary/20 to-cyan-500/20 text-primary border-primary/30">
-              The Future of Damage Assessment
+            <Badge className="mb-8 bg-gradient-to-r from-primary/15 to-cyan-500/15 text-primary border-primary/25 backdrop-blur-sm">
+              Revolutionizing Property Damage Assessment
             </Badge>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight">
-              Transform Damage Assessment with the Winn Methodology
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight">
+              Master Damage Assessment with Proven Expertise
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
-              The only platform that crystallizes Eric Winn's expertise into AI-powered thermal analysis, 
-              comprehensive reporting, and certification training for damage assessment consultants.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light">
+              Harness decades of industry-leading expertise through AI-powered thermal analysis, 
+              comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-lg px-8 py-6"
+                className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-lg px-10 py-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 onClick={() => navigate('/auth')}
               >
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Begin Your Assessment Journey
+                <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-lg px-8 py-6 border-primary/30 hover:bg-primary/10"
+                className="text-lg px-10 py-7 border-primary/40 hover:bg-primary/5 backdrop-blur-sm hover:border-primary/60 transition-all duration-300"
               >
-                <Play className="mr-2 h-5 w-5" />
-                Watch Demo
+                <Play className="mr-3 h-5 w-5" />
+                See It In Action
               </Button>
             </div>
 
-            {/* Key Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-                <div className="text-sm text-muted-foreground">Assessments Completed</div>
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+              <div className="text-center group">
+                <div className="text-4xl font-bold bg-gradient-to-br from-primary to-cyan-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">10,000+</div>
+                <div className="text-sm text-muted-foreground font-medium">Properties Assessed</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-cyan-500 mb-2">98%</div>
-                <div className="text-sm text-muted-foreground">Accuracy Rate</div>
+              <div className="text-center group">
+                <div className="text-4xl font-bold bg-gradient-to-br from-cyan-500 to-blue-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">98.7%</div>
+                <div className="text-sm text-muted-foreground font-medium">Precision Rate</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-500 mb-2">500+</div>
-                <div className="text-sm text-muted-foreground">Certified Consultants</div>
+              <div className="text-center group">
+                <div className="text-4xl font-bold bg-gradient-to-br from-blue-500 to-purple-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">750+</div>
+                <div className="text-sm text-muted-foreground font-medium">Certified Professionals</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-                <div className="text-sm text-muted-foreground">AI Support</div>
+              <div className="text-center group">
+                <div className="text-4xl font-bold bg-gradient-to-br from-primary to-blue-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">24/7</div>
+                <div className="text-sm text-muted-foreground font-medium">Expert AI Guidance</div>
               </div>
             </div>
           </div>
@@ -298,30 +341,54 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-gradient-to-b from-background to-muted/30">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/30">Platform Features</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
-              Everything You Need for Professional Damage Assessment
+      <section 
+        ref={featuresRef} 
+        id="features" 
+        className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden"
+      >
+        {/* Parallax Background */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            transform: `translateY(${scrollY * 0.2}px)`,
+          }}
+        >
+          <div className="absolute top-1/4 right-1/6 w-64 h-64 bg-gradient-to-r from-primary/10 to-cyan-500/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-1/4 left-1/6 w-80 h-80 bg-gradient-to-r from-cyan-500/8 to-blue-500/8 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 backdrop-blur-sm">Core Capabilities</Badge>
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent leading-tight">
+              Professional-Grade Assessment Tools
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Built by experts, for experts. WinnStorm combines cutting-edge AI technology with proven methodologies 
-              to deliver the most comprehensive damage assessment platform available.
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
+              Experience the intersection of decades of field expertise and modern technology. Our platform transforms 
+              complex damage assessment into streamlined, accurate, and defensible reports that stand up to scrutiny.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-card/50 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-6">
-                    <div className="bg-gradient-to-br from-primary/20 to-cyan-500/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Icon className="h-6 w-6 text-primary" />
+                <Card 
+                  key={index} 
+                  className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 bg-card/60 backdrop-blur-md border-border/40 hover:border-primary/30 relative overflow-hidden"
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                  }}
+                >
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <CardContent className="p-8 relative z-10">
+                    <div className="bg-gradient-to-br from-primary/15 to-cyan-500/15 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <Icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -329,56 +396,83 @@ const Landing = () => {
           </div>
 
           {/* Stormy AI Showcase */}
-          <Card className="bg-gradient-to-r from-primary/5 to-cyan-500/5 border-primary/20 overflow-hidden">
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <Card className="bg-gradient-to-r from-primary/8 to-cyan-500/8 border-primary/25 overflow-hidden backdrop-blur-sm relative">
+            {/* Animated background elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-full blur-xl opacity-60"></div>
+            
+            <CardContent className="p-10 relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                  <div className="flex items-center mb-4">
-                    <StormyAvatar size={48} className="mr-4" />
-                    <div>
-                      <h3 className="text-2xl font-bold">Meet Stormy</h3>
-                      <p className="text-muted-foreground">Your AI Damage Assessment Expert</p>
+                  <div className="flex items-center mb-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-full blur-lg"></div>
+                      <StormyAvatar size={56} className="relative z-10" />
+                    </div>
+                    <div className="ml-6">
+                      <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Meet Stormy</h3>
+                      <p className="text-muted-foreground text-lg">Your Expert AI Assessment Partner</p>
                     </div>
                   </div>
-                  <p className="text-lg mb-6 text-muted-foreground">
-                    Stormy is trained on Eric Winn's decades of expertise and provides real-time guidance during inspections, 
-                    thermal analysis insights, and methodology recommendations—like having the industry's leading expert with you on every job.
+                  <p className="text-lg mb-8 text-muted-foreground leading-relaxed">
+                    Powered by decades of field expertise, Stormy provides intelligent guidance throughout your inspection process. 
+                    From thermal analysis to methodology recommendations, it's like having Eric Winn's expertise available 24/7 
+                    for every assessment.
                   </p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm">Real-time guidance</span>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="flex items-center group">
+                      <div className="bg-green-500/20 p-2 rounded-full mr-3 group-hover:bg-green-500/30 transition-colors">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      <span className="font-medium">Contextual Guidance</span>
                     </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm">Thermal analysis</span>
+                    <div className="flex items-center group">
+                      <div className="bg-blue-500/20 p-2 rounded-full mr-3 group-hover:bg-blue-500/30 transition-colors">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <span className="font-medium">Thermal Insights</span>
                     </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm">Methodology training</span>
+                    <div className="flex items-center group">
+                      <div className="bg-purple-500/20 p-2 rounded-full mr-3 group-hover:bg-purple-500/30 transition-colors">
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
+                      </div>
+                      <span className="font-medium">Methodology Training</span>
                     </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm">24/7 availability</span>
+                    <div className="flex items-center group">
+                      <div className="bg-primary/20 p-2 rounded-full mr-3 group-hover:bg-primary/30 transition-colors">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium">Always Available</span>
                     </div>
                   </div>
                 </div>
-                <div className="bg-background/50 backdrop-blur-sm rounded-lg p-6 border border-border/50">
-                  <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                    <div className="flex items-start space-x-3">
-                      <StormyAvatar size={32} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium mb-2">Stormy AI Assistant</p>
-                        <p className="text-sm text-muted-foreground">
-                          "Based on the thermal imaging data, I've identified moisture intrusion in the northwest section. 
-                          The temperature differential suggests compromised insulation. I recommend core sampling at coordinates 
-                          N-3, W-2 to confirm water damage extent per Winn Methodology protocols."
+                <div className="bg-background/70 backdrop-blur-md rounded-xl p-8 border border-border/40 shadow-lg relative overflow-hidden">
+                  {/* Chat simulation */}
+                  <div className="bg-gradient-to-br from-muted/60 to-muted/40 rounded-xl p-6 mb-6 relative">
+                    <div className="flex items-start space-x-4">
+                      <StormyAvatar size={40} className="flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center mb-3">
+                          <p className="font-semibold text-foreground">Stormy</p>
+                          <div className="w-2 h-2 bg-green-500 rounded-full ml-3 animate-pulse"></div>
+                          <span className="text-xs text-muted-foreground ml-2">Active</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          "Thermal signature analysis complete. Northwest section shows 8°F differential indicating moisture intrusion. 
+                          Core sample recommended at grid N-3, W-2 following Winn protocols. Shall I generate the preliminary damage assessment?"
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground text-center">
-                    ⚡ Powered by OpenAI GPT-4o with Eric Winn's methodology training
+                  
+                  {/* Typing indicator */}
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <div className="flex space-x-1 mr-3">
+                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                    <span>Powered by advanced AI trained on expert methodology</span>
                   </div>
                 </div>
               </div>
@@ -388,7 +482,20 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-background">
+      <section 
+        id="pricing" 
+        className="py-24 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden"
+      >
+        {/* Parallax elements */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            transform: `translateY(${scrollY * 0.15}px)`,
+          }}
+        >
+          <div className="absolute top-1/3 left-1/12 w-48 h-48 bg-gradient-to-r from-primary/15 to-cyan-500/15 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-1/3 right-1/12 w-64 h-64 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
+        </div>
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Simple Pricing</Badge>
