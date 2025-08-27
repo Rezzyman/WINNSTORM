@@ -7,7 +7,17 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
+export async function apiRequest(url: string, options?: RequestInit): Promise<any> {
+  const res = await fetch(url, {
+    credentials: "include",
+    ...options,
+  });
+
+  await throwIfResNotOk(res);
+  return await res.json();
+}
+
+export async function apiRequestRaw(
   method: string,
   url: string,
   data?: unknown | undefined,
