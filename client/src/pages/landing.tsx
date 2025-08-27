@@ -230,23 +230,23 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* WinnStorm Video Background */}
-        <div className="absolute inset-0 w-full h-full">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src={winnstormVideo} type="video/mp4" />
-            {/* Fallback gradient background */}
-          </video>
-          {/* Overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
+      {/* Video Hero Section */}
+      <section className="relative w-full h-screen overflow-hidden">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={winnstormVideo} type="video/mp4" />
+        </video>
+        {/* Optional subtle overlay */}
+        <div className="absolute inset-0 bg-black/10"></div>
+      </section>
+
+      {/* Main Content Hero Section */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-muted/10 to-background">
         
 
 
@@ -260,11 +260,11 @@ const Landing = () => {
             
             
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both' }}>
               Master Damage Assessment with Proven Expertise
             </h1>
             
-            <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both' }}>
               Harness decades of industry-leading expertise through AI-powered thermal analysis, 
               comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
             </p>
