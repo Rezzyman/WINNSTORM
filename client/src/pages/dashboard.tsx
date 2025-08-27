@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Property, Project, DamageAssessment } from '@shared/schema';
 import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 
 const Dashboard = () => {
   const { user, role } = useAuth();
@@ -48,7 +49,7 @@ const Dashboard = () => {
             <div className="flex items-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
-                <img src="/winnstorm-logo.png" alt="WinnStorm" className="h-12 relative z-10" />
+                <img src={winnstormLogo} alt="WinnStorm" className="h-12 relative z-10" />
               </div>
               <div className="ml-4">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">WinnStorm™</h1>

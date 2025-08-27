@@ -32,6 +32,7 @@ import {
   X
 } from 'lucide-react';
 import { StormyAvatar } from '@/components/stormy-avatar';
+import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 
 const Landing = () => {
   const [, navigate] = useLocation();
@@ -172,12 +173,11 @@ const Landing = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
-                <div className="relative z-10 bg-gradient-to-br from-primary to-cyan-500 p-2 rounded-lg">
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
-              </div>
+              <img 
+                src={winnstormLogo} 
+                alt="WinnStorm Logo" 
+                className="h-10 w-auto"
+              />
               <span className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
                 WinnStorm™
               </span>
@@ -541,9 +541,11 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-gradient-to-br from-primary to-cyan-500 p-2 rounded-lg">
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
+                <img 
+                  src={winnstormLogo} 
+                  alt="WinnStorm Logo" 
+                  className="h-10 w-auto"
+                />
                 <span className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
                   WinnStorm™
                 </span>
