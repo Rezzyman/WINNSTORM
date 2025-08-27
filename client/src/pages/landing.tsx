@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { StormyAvatar } from '@/components/stormy-avatar';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
+import winnstormVideo from '@assets/WINNSTORM™ (1)_1756326492392.mp4';
 
 const Landing = () => {
   const [, navigate] = useLocation();
@@ -238,15 +239,15 @@ const Landing = () => {
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-            style={{ filter: 'brightness(0.7) contrast(1.3)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-70"
+            style={{ filter: 'brightness(0.8) contrast(1.2)' }}
           >
-            <source src="attached_assets/WINNSTORM™ (1)_1756326492392.mp4" type="video/mp4" />
+            <source src={winnstormVideo} type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
             {/* Fallback gradient background */}
           </video>
           {/* Overlay to ensure readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/30"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/10 to-black/20"></div>
         </div>
         
         {/* Parallax Background Elements */}
