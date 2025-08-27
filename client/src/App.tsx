@@ -12,13 +12,15 @@ import WinnReport from "@/pages/winn-report";
 import CrmIntegrations from "@/pages/crm-integrations";
 import Training from "@/pages/training";
 import Projects from "@/pages/projects";
+import Landing from "@/pages/landing";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Auth} />
+      <Route path="/auth" component={Auth} />
+      <Route path="/" component={Landing} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/upload" component={Upload} />
       <Route path="/analysis/:id" component={Analysis} />
