@@ -241,12 +241,12 @@ const Landing = () => {
             className="absolute inset-0 w-full h-full object-cover opacity-50"
             style={{ filter: 'brightness(0.7) contrast(1.3)' }}
           >
-            <source src="/attached_assets/WINNSTORM™ (1)_1756326492392.mp4" type="video/mp4" />
+            <source src="attached_assets/WINNSTORM™ (1)_1756326492392.mp4" type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
             {/* Fallback gradient background */}
           </video>
           {/* Overlay to ensure readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/30"></div>
         </div>
         
         {/* Parallax Background Elements */}
@@ -289,8 +289,8 @@ const Landing = () => {
             </div>
             
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both' }}>
-              Master Damage Assessment with Proven Expertise
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              Master Roof Damage Assessment with Proven Expertise
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both' }}>
