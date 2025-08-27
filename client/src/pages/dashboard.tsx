@@ -44,27 +44,7 @@ const Dashboard = () => {
       
       <main className="flex-grow pb-20">
         <div className="p-6">
-          {/* WinnStorm™ Dashboard Header */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
-                <img src={winnstormLogo} alt="WinnStorm" className="h-12 relative z-10" />
-              </div>
-              <div className="ml-4">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">WinnStorm™</h1>
-                <p className="text-muted-foreground text-sm">Damage Assessment Platform</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-r from-primary/20 to-cyan-500/20 px-4 py-2 rounded-full border border-primary/30">
-                <span className="text-primary text-sm font-medium">{stats.certificationLevel} Consultant</span>
-              </div>
-              <div className="text-muted-foreground text-sm">
-                Welcome back, {user?.displayName || user?.email}
-              </div>
-            </div>
-          </div>
+          
 
           {/* Dashboard Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
