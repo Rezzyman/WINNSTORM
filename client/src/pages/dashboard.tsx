@@ -240,13 +240,16 @@ const Dashboard = () => {
             </Card>
 
             {/* View Reports Card */}
-            <Card className="bg-card border border-border hover:border-accent transition-colors cursor-pointer shadow-md">
+            <Card 
+              className="bg-card border border-border hover:border-accent transition-colors cursor-pointer shadow-md"
+              onClick={() => navigate('/reports')}
+            >
               <CardContent className="p-6 text-center">
                 <div className="bg-accent/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-8 w-8 text-accent" />
                 </div>
-                <h3 className="font-bold text-foreground mb-2">Analytics</h3>
-                <p className="text-muted-foreground text-sm">View insights and trends</p>
+                <h3 className="font-bold text-foreground mb-2">View Reports</h3>
+                <p className="text-muted-foreground text-sm">Access all damage assessment reports</p>
               </CardContent>
             </Card>
           </div>

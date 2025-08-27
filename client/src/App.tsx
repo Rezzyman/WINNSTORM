@@ -8,6 +8,7 @@ import Upload from "@/pages/upload";
 import Analysis from "@/pages/analysis";
 import PropertyDetail from "@/pages/property-detail";
 import Report from "@/pages/report";
+import Reports from "@/pages/reports";
 import WinnReport from "@/pages/winn-report";
 import CrmIntegrations from "@/pages/crm-integrations";
 import Training from "@/pages/training";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/analysis/:id" component={Analysis} />
       <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/report/:id" component={Report} />
+      <Route path="/reports" component={Reports} />
       <Route path="/winn-report/:propertyId" component={WinnReport} />
       <Route path="/crm-integrations" component={CrmIntegrations} />
       <Route path="/training" component={Training} />
