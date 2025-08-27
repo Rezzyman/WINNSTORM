@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { StormyAvatar } from '@/components/stormy-avatar';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
+import winnstormVideo from '@assets/WINNSTORM™_1756325796891.mp4';
 
 const Landing = () => {
   const [, navigate] = useLocation();
@@ -269,23 +270,23 @@ const Landing = () => {
             transform: `translateY(${scrollY * -0.1}px)`,
           }}
         >
-          <div className="max-w-4xl mx-auto">
-            {/* Animated Logo with Lightning Effects */}
-            <div className="mb-16 relative">
-              <div className="absolute inset-0 opacity-30">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/40 via-cyan-400/50 to-blue-600/40 rounded-full blur-3xl animate-pulse"></div>
-              </div>
-              
-
-              
-              {/* Main Logo */}
-              <div className="relative z-10" style={{ animation: 'fadeInScale 3s ease-out both' }}>
-                <img 
-                  src={winnstormLogo} 
-                  alt="WinnStorm Logo" 
-                  className="h-56 md:h-72 lg:h-80 xl:h-96 w-auto mx-auto filter drop-shadow-2xl"
-                />
-              </div>
+          <div className="max-w-6xl mx-auto">
+            {/* WinnStorm Video */}
+            <div className="mb-16 relative rounded-2xl overflow-hidden shadow-2xl">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="w-full h-auto max-h-[80vh] object-cover"
+                style={{ animation: 'fadeInScale 2s ease-out both' }}
+              >
+                <source src={winnstormVideo} type="video/mp4" />
+                {/* Fallback message */}
+                <div className="flex items-center justify-center h-96 bg-gradient-to-br from-primary/20 to-cyan-500/20">
+                  <p className="text-2xl text-muted-foreground">Video loading...</p>
+                </div>
+              </video>
             </div>
             
             
