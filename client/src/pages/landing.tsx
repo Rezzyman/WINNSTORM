@@ -238,11 +238,11 @@ const Landing = () => {
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
-            style={{ filter: 'brightness(0.6) contrast(1.5) saturate(1.2)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+            style={{ filter: 'brightness(0.7) contrast(1.3)' }}
           >
+            <source src="/attached_assets/WINNSTORM™ (1)_1756326492392.mp4" type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
-            <source src="https://cdn.pixabay.com/vimeo/280550265/lightning-18208.mp4?width=1280&hash=7f1c2f7c3e8b3d9a5b4c6e8f9a1b2c3d" type="video/mp4" />
             {/* Fallback gradient background */}
           </video>
           {/* Overlay to ensure readability */}
@@ -289,8 +289,7 @@ const Landing = () => {
             </div>
             
             
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both' }}>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both' }}>
               Master Damage Assessment with Proven Expertise
             </h1>
             
