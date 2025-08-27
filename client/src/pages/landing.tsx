@@ -178,15 +178,12 @@ const Landing = () => {
       }`}>
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               <img 
                 src={winnstormLogo} 
                 alt="WinnStorm Logo" 
                 className="h-10 w-auto"
               />
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
-                WinnStorm™
-              </span>
             </div>
 
             {/* Desktop Navigation */}
@@ -256,20 +253,55 @@ const Landing = () => {
           }}
         >
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-8 bg-gradient-to-r from-primary/15 to-cyan-500/15 text-primary border-primary/25 backdrop-blur-sm">
+            {/* Animated Logo with Lightning Effects */}
+            <div className="mb-12 relative">
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/30 via-cyan-400/40 to-blue-600/30 rounded-full blur-3xl animate-pulse"></div>
+              </div>
+              
+              {/* Lightning Bolts */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute -top-8 -left-8 w-16 h-16 opacity-60">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-400 animate-ping" style={{ animationDuration: '2s' }}>
+                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
+                </div>
+                <div className="absolute -top-6 -right-10 w-12 h-12 opacity-50">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-blue-400 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}>
+                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
+                </div>
+                <div className="absolute -bottom-6 -left-6 w-10 h-10 opacity-40">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-400 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }}>
+                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Main Logo */}
+              <div className="relative z-10 animate-fade-in" style={{ animation: 'fadeInScale 2s ease-out' }}>
+                <img 
+                  src={winnstormLogo} 
+                  alt="WinnStorm Logo" 
+                  className="h-32 md:h-40 w-auto mx-auto filter drop-shadow-2xl"
+                />
+              </div>
+            </div>
+            
+            <Badge className="mb-8 bg-gradient-to-r from-primary/15 to-cyan-500/15 text-primary border-primary/25 backdrop-blur-sm animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both' }}>
               Revolutionizing Property Damage Assessment
             </Badge>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both' }}>
               Master Damage Assessment with Proven Expertise
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both' }}>
               Harness decades of industry-leading expertise through AI-powered thermal analysis, 
               comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 2s both' }}>
               <Button 
                 size="lg"
                 className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-lg px-10 py-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
@@ -289,7 +321,7 @@ const Landing = () => {
             </div>
 
             {/* Trust Indicators */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 2.5s both' }}>
               <div className="text-center group">
                 <div className="text-4xl font-bold bg-gradient-to-br from-primary to-cyan-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">10,000+</div>
                 <div className="text-sm text-muted-foreground font-medium">Properties Assessed</div>
@@ -597,15 +629,12 @@ const Landing = () => {
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
+              <div className="flex items-center mb-4">
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
-                  className="h-10 w-auto"
+                  className="h-12 w-auto"
                 />
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
-                  WinnStorm™
-                </span>
               </div>
               <p className="text-muted-foreground mb-4">
                 The professional damage assessment platform powered by Eric Winn's proven methodology.
