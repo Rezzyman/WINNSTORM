@@ -110,7 +110,7 @@ export class MemStorage implements IStorage {
         manufacturer: "GAF",
         warrantyStatus: "Expired"
       },
-      imageUrl: "/attached_assets/generated_images/Hail_damaged_office_building_6d3912a4.png",
+      imageUrl: "/Hail_damaged_office_building_6d3912a4.png",
       overallCondition: "poor",
       lastInspectionDate: new Date("2025-01-15"),
       createdAt: new Date(),
@@ -136,7 +136,7 @@ export class MemStorage implements IStorage {
         manufacturer: "Firestone",
         warrantyStatus: "Active"
       },
-      imageUrl: "/attached_assets/generated_images/Wind_damaged_retail_center_196a2ea4.png",
+      imageUrl: "/Wind_damaged_retail_center_196a2ea4.png",
       overallCondition: "fair",
       lastInspectionDate: new Date("2025-01-08"),
       createdAt: new Date(),
@@ -162,7 +162,7 @@ export class MemStorage implements IStorage {
         manufacturer: "Berridge",
         warrantyStatus: "Expired"
       },
-      imageUrl: "/attached_assets/generated_images/Tornado_damaged_warehouse_1b53c65b.png",
+      imageUrl: "/Tornado_damaged_warehouse_1b53c65b.png",
       overallCondition: "critical",
       lastInspectionDate: new Date("2025-01-20"),
       createdAt: new Date(),
@@ -188,7 +188,7 @@ export class MemStorage implements IStorage {
         manufacturer: "CertainTeed",
         warrantyStatus: "Expired"
       },
-      imageUrl: "/attached_assets/generated_images/Flood_damaged_apartment_complex_fc1f3c43.png",
+      imageUrl: "/Flood_damaged_apartment_complex_fc1f3c43.png",
       overallCondition: "poor",
       lastInspectionDate: new Date("2025-01-12"),
       createdAt: new Date(),
@@ -238,7 +238,7 @@ export class MemStorage implements IStorage {
       date: new Date("2025-01-15"),
       scanType: "terrestrial",
       deviceType: "FLIR T1020 Thermal Camera",
-      standardImageUrl: "/attached_assets/generated_images/Hail_damaged_office_building_6d3912a4.png",
+      standardImageUrl: "attached_assets/generated_images/Hail_damaged_office_building_6d3912a4.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
       healthScore: 25,
       metrics: scan1Metrics,
@@ -286,7 +286,7 @@ export class MemStorage implements IStorage {
       date: new Date("2025-01-08"),
       scanType: "drone",
       deviceType: "DJI Mavic 3 Enterprise Thermal",
-      standardImageUrl: "/attached_assets/generated_images/Wind_damaged_retail_center_196a2ea4.png",
+      standardImageUrl: "attached_assets/generated_images/Wind_damaged_retail_center_196a2ea4.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
       healthScore: 55,
       metrics: [
@@ -325,7 +325,7 @@ export class MemStorage implements IStorage {
       date: new Date("2025-01-20"),
       scanType: "terrestrial",
       deviceType: "FLIR T1050sc Research Camera",
-      standardImageUrl: "/attached_assets/generated_images/Tornado_damaged_warehouse_1b53c65b.png",
+      standardImageUrl: "attached_assets/generated_images/Tornado_damaged_warehouse_1b53c65b.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
       healthScore: 15,
       metrics: [
@@ -369,7 +369,7 @@ export class MemStorage implements IStorage {
       date: new Date("2025-01-12"),
       scanType: "handheld",
       deviceType: "FLIR E95 Advanced Thermal Camera",
-      standardImageUrl: "/attached_assets/generated_images/Flood_damaged_apartment_complex_fc1f3c43.png",
+      standardImageUrl: "attached_assets/generated_images/Flood_damaged_apartment_complex_fc1f3c43.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
       healthScore: 35,
       metrics: [

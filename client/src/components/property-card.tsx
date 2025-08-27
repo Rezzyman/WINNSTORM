@@ -39,13 +39,13 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-foreground">{property.name}</h3>
-          <Badge variant="outline" className={getScoreColor(property.healthScore)}>
-            Score: {property.healthScore}
+          <Badge variant="outline" className={getScoreColor(75)}>
+            {property.overallCondition}
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm mb-3">{property.address}</p>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Last scan: {formatDate(new Date(property.lastScanDate))}</span>
+          <span className="text-muted-foreground">Last scan: {formatDate(new Date(property.lastInspectionDate))}</span>
           <span className="text-primary font-medium">View Details →</span>
         </div>
       </CardContent>
