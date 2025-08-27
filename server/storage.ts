@@ -90,17 +90,29 @@ export class MemStorage implements IStorage {
     };
     this.users.set(demoUser.id, demoUser);
 
-    // Create demo properties
+    // Create realistic properties with actual locations and damage imagery
     const property1: Property = {
       id: this.propertyId++,
       projectId: null,
-      name: "Office Complex",
-      address: "123 Business Ave, Austin, TX",
-      buildingInfo: null,
-      roofSystemDetails: null,
-      imageUrl: "https://cdn.pixabay.com/photo/2012/05/07/18/57/skyscrapers-49592_960_720.jpg",
-      overallCondition: "good",
-      lastInspectionDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      name: "Meridian Business Center",
+      address: "2500 Technology Drive, Plano, TX 75074",
+      buildingInfo: {
+        type: "Commercial Office",
+        yearBuilt: 2008,
+        squareFootage: 85000,
+        stories: 3,
+        occupancy: "Class A Office Space"
+      },
+      roofSystemDetails: {
+        type: "Modified Bitumen",
+        age: 15,
+        lastReplacement: "2009",
+        manufacturer: "GAF",
+        warrantyStatus: "Expired"
+      },
+      imageUrl: "/attached_assets/generated_images/Hail_damaged_office_building_6d3912a4.png",
+      overallCondition: "poor",
+      lastInspectionDate: new Date("2025-01-15"),
       createdAt: new Date(),
       userId: demoUser.id,
     };
@@ -108,57 +120,130 @@ export class MemStorage implements IStorage {
     const property2: Property = {
       id: this.propertyId++,
       projectId: null,
-      name: "Distribution Center",
-      address: "456 Industrial Pkwy, Austin, TX",
-      buildingInfo: null,
-      roofSystemDetails: null,
-      imageUrl: "https://cdn.pixabay.com/photo/2018/01/31/21/39/warehouse-3122321_960_720.jpg",
+      name: "Legacy Village Shopping Center",
+      address: "7200 Bishop Road, Plano, TX 75024",
+      buildingInfo: {
+        type: "Retail Complex",
+        yearBuilt: 2012,
+        squareFootage: 124000,
+        stories: 1,
+        occupancy: "Multi-Tenant Retail"
+      },
+      roofSystemDetails: {
+        type: "TPO Single Ply",
+        age: 12,
+        lastReplacement: "2012",
+        manufacturer: "Firestone",
+        warrantyStatus: "Active"
+      },
+      imageUrl: "/attached_assets/generated_images/Wind_damaged_retail_center_196a2ea4.png",
+      overallCondition: "fair",
+      lastInspectionDate: new Date("2025-01-08"),
+      createdAt: new Date(),
+      userId: demoUser.id,
+    };
+    
+    const property3: Property = {
+      id: this.propertyId++,
+      projectId: null,
+      name: "Industrial Distribution Facility",
+      address: "1850 Central Expressway, Richardson, TX 75080",
+      buildingInfo: {
+        type: "Industrial Warehouse",
+        yearBuilt: 2005,
+        squareFootage: 245000,
+        stories: 1,
+        occupancy: "Distribution Center"
+      },
+      roofSystemDetails: {
+        type: "Metal Standing Seam",
+        age: 19,
+        lastReplacement: "2005",
+        manufacturer: "Berridge",
+        warrantyStatus: "Expired"
+      },
+      imageUrl: "/attached_assets/generated_images/Tornado_damaged_warehouse_1b53c65b.png",
+      overallCondition: "critical",
+      lastInspectionDate: new Date("2025-01-20"),
+      createdAt: new Date(),
+      userId: demoUser.id,
+    };
+    
+    const property4: Property = {
+      id: this.propertyId++,
+      projectId: null,
+      name: "Oakwood Apartments",
+      address: "5420 LBJ Freeway, Dallas, TX 75240",
+      buildingInfo: {
+        type: "Multi-Family Residential",
+        yearBuilt: 1998,
+        squareFootage: 180000,
+        stories: 3,
+        occupancy: "Apartment Complex - 156 Units"
+      },
+      roofSystemDetails: {
+        type: "Asphalt Shingle",
+        age: 26,
+        lastReplacement: "1998",
+        manufacturer: "CertainTeed",
+        warrantyStatus: "Expired"
+      },
+      imageUrl: "/attached_assets/generated_images/Flood_damaged_apartment_complex_fc1f3c43.png",
       overallCondition: "poor",
-      lastInspectionDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      lastInspectionDate: new Date("2025-01-12"),
       createdAt: new Date(),
       userId: demoUser.id,
     };
     
     this.properties.set(property1.id, property1);
     this.properties.set(property2.id, property2);
+    this.properties.set(property3.id, property3);
+    this.properties.set(property4.id, property4);
 
-    // Create demo scans for property 1
+    // Create realistic assessment data for Meridian Business Center (hail damage)
     const scan1Metrics: Metric[] = [
-      { name: "Membrane Integrity", value: 82 },
-      { name: "Insulation Performance", value: 58 },
-      { name: "Moisture Detection", value: 45 },
+      { name: "Roof Surface Integrity", value: 25 },
+      { name: "Membrane Condition", value: 35 },
+      { name: "Hail Impact Density", value: 85 },
+      { name: "Water Infiltration Risk", value: 90 },
+      { name: "Structural Integrity", value: 70 }
     ];
     
     const scan1Issues: Issue[] = [
       { 
-        title: "Moisture Infiltration", 
-        description: "Detected in NE corner, approximately 120 sq ft affected.", 
+        title: "Severe Hail Damage", 
+        description: "Multiple impact points across 75% of roof surface. Granule loss and membrane punctures documented. Immediate repair required.", 
         severity: "critical" 
       },
       { 
-        title: "Insulation Degradation", 
-        description: "Central section shows heat loss, indicating poor insulation performance.", 
-        severity: "warning" 
+        title: "Compromised Flashing", 
+        description: "Perimeter flashing displaced at multiple penetrations. Active leaks detected in building interior.", 
+        severity: "critical" 
       },
       { 
-        title: "HVAC Efficiency", 
-        description: "Rooftop units showing normal thermal signatures.", 
-        severity: "info" 
+        title: "HVAC Unit Damage", 
+        description: "All 4 rooftop units show impact damage to housings and ductwork connections.", 
+        severity: "warning" 
+      },
+      {
+        title: "Gutter System Failure",
+        description: "Gutters and downspouts severely damaged. Improper drainage causing ponding water.",
+        severity: "warning"
       }
     ];
     
     const scan1: Scan = {
       id: this.scanId++,
       propertyId: property1.id,
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      scanType: "drone",
-      deviceType: "DJI Mavic 2 Enterprise",
-      standardImageUrl: "https://cdn.pixabay.com/photo/2016/11/18/17/46/drone-1836350_1280.jpg",
+      date: new Date("2025-01-15"),
+      scanType: "terrestrial",
+      deviceType: "FLIR T1020 Thermal Camera",
+      standardImageUrl: "/attached_assets/generated_images/Hail_damaged_office_building_6d3912a4.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
-      healthScore: 68,
+      healthScore: 25,
       metrics: scan1Metrics,
       issues: scan1Issues,
-      notes: "Regular annual inspection. Weather was clear, 72°F.",
+      notes: "Post-storm damage assessment following January 12, 2025 severe hailstorm. Hail stones measured up to 2.5 inches diameter. Property requires immediate emergency repairs. Insurance claim #HC-2025-0115-TX pending.",
       createdAt: new Date(),
       userId: demoUser.id,
     };
@@ -194,39 +279,129 @@ export class MemStorage implements IStorage {
       userId: demoUser.id,
     };
     
-    // Create demo scan for property 2
+    // Legacy Village Shopping Center - Wind damage assessment
     const scan3: Scan = {
       id: this.scanId++,
       propertyId: property2.id,
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      scanType: "handheld",
-      deviceType: "FLIR E6-XT",
-      standardImageUrl: "https://cdn.pixabay.com/photo/2018/01/31/21/39/warehouse-3122321_960_720.jpg",
+      date: new Date("2025-01-08"),
+      scanType: "drone",
+      deviceType: "DJI Mavic 3 Enterprise Thermal",
+      standardImageUrl: "/attached_assets/generated_images/Wind_damaged_retail_center_196a2ea4.png",
       thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
-      healthScore: 42,
+      healthScore: 55,
       metrics: [
-        { name: "Membrane Integrity", value: 35 },
-        { name: "Insulation Performance", value: 42 },
-        { name: "Moisture Detection", value: 28 },
+        { name: "TPO Membrane Integrity", value: 60 },
+        { name: "Seam Adhesion", value: 40 },
+        { name: "Wind Uplift Resistance", value: 25 },
+        { name: "Drainage System", value: 70 },
+        { name: "Penetration Sealing", value: 65 }
       ],
       issues: [
         { 
-          title: "Severe Moisture Infiltration", 
-          description: "Multiple areas showing significant moisture penetration.", 
+          title: "TPO Membrane Uplift", 
+          description: "Significant membrane lifting along eastern perimeter. Wind speeds reached 85 mph during January 5th storm event.", 
           severity: "critical" 
         },
         { 
-          title: "Membrane Failure", 
-          description: "Western section shows complete failure with water pooling.", 
-          severity: "critical" 
+          title: "Seam Separation", 
+          description: "Multiple seam failures noted across approximately 2,400 sq ft of roof area.", 
+          severity: "warning" 
         },
         { 
-          title: "Insulation Saturation", 
-          description: "Approximately 30% of roof insulation appears saturated.", 
-          severity: "critical" 
+          title: "Fastener Pull-Through", 
+          description: "Mechanical fasteners showing signs of pull-through at membrane attachment points.", 
+          severity: "warning" 
         }
       ],
-      notes: "Emergency scan following heavy rainfall.",
+      notes: "Post-windstorm assessment following derecho event January 5-6, 2025. Sustained winds 70-85 mph with gusts to 95 mph. Insurance claim #WD-2025-0108-TX filed.",
+      createdAt: new Date(),
+      userId: demoUser.id,
+    };
+
+    // Industrial Distribution Facility - Tornado damage assessment  
+    const scan4: Scan = {
+      id: this.scanId++,
+      propertyId: property3.id,
+      date: new Date("2025-01-20"),
+      scanType: "terrestrial",
+      deviceType: "FLIR T1050sc Research Camera",
+      standardImageUrl: "/attached_assets/generated_images/Tornado_damaged_warehouse_1b53c65b.png",
+      thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
+      healthScore: 15,
+      metrics: [
+        { name: "Structural Integrity", value: 20 },
+        { name: "Metal Panel Condition", value: 10 },
+        { name: "Standing Seam Integrity", value: 5 },
+        { name: "Insulation System", value: 15 },
+        { name: "Drainage Infrastructure", value: 30 }
+      ],
+      issues: [
+        { 
+          title: "Catastrophic Roof Failure", 
+          description: "EF-2 tornado caused complete roof system failure across 80% of building footprint. Metal panels twisted and torn from structural supports.", 
+          severity: "critical" 
+        },
+        { 
+          title: "Structural Beam Damage", 
+          description: "Multiple steel roof beams bent and displaced. Structural engineer assessment required before occupancy.", 
+          severity: "critical" 
+        },
+        { 
+          title: "Total Insulation Loss", 
+          description: "All roof insulation blown away or severely damaged. Interior equipment exposed to elements.", 
+          severity: "critical" 
+        },
+        {
+          title: "Electrical System Compromise",
+          description: "Rooftop electrical systems and lighting damaged. Power shut off for safety.",
+          severity: "critical"
+        }
+      ],
+      notes: "Emergency damage assessment following EF-2 tornado touchdown January 18, 2025 at 11:47 PM. Peak winds estimated 135 mph. Property declared total constructive loss. FEMA disaster declaration requested.",
+      createdAt: new Date(),
+      userId: demoUser.id,
+    };
+
+    // Oakwood Apartments - Flood damage assessment
+    const scan5: Scan = {
+      id: this.scanId++,
+      propertyId: property4.id,
+      date: new Date("2025-01-12"),
+      scanType: "handheld",
+      deviceType: "FLIR E95 Advanced Thermal Camera",
+      standardImageUrl: "/attached_assets/generated_images/Flood_damaged_apartment_complex_fc1f3c43.png",
+      thermalImageUrl: "https://cdn.pixabay.com/photo/2019/09/14/09/48/thermal-imaging-4475776_1280.jpg",
+      healthScore: 35,
+      metrics: [
+        { name: "Shingle Condition", value: 45 },
+        { name: "Underlayment Integrity", value: 30 },
+        { name: "Moisture Infiltration", value: 80 },
+        { name: "Guttering System", value: 20 },
+        { name: "Ventilation Adequacy", value: 60 }
+      ],
+      issues: [
+        { 
+          title: "Widespread Water Damage", 
+          description: "Heavy rainfall (8.5 inches in 4 hours) caused extensive water infiltration through aging roof system. Multiple units affected.", 
+          severity: "critical" 
+        },
+        { 
+          title: "Shingle Granule Loss", 
+          description: "25-year-old asphalt shingles showing severe granule loss and curling. Multiple shingles missing or displaced.", 
+          severity: "warning" 
+        },
+        { 
+          title: "Gutter Overflow", 
+          description: "Inadequate gutter capacity led to overflow and water damage to building exterior and foundation areas.", 
+          severity: "warning" 
+        },
+        {
+          title: "Interior Ceiling Damage",
+          description: "Water stains and active leaks in 12 residential units. Tenant displacement required.",
+          severity: "critical"
+        }
+      ],
+      notes: "Flash flood assessment following January 10, 2025 extreme rainfall event. Property received 8.5 inches of rain in 4-hour period, exceeding 100-year flood plain projections. Emergency tarping completed.",
       createdAt: new Date(),
       userId: demoUser.id,
     };
@@ -234,6 +409,8 @@ export class MemStorage implements IStorage {
     this.scans.set(scan1.id, scan1);
     this.scans.set(scan2.id, scan2);
     this.scans.set(scan3.id, scan3);
+    this.scans.set(scan4.id, scan4);
+    this.scans.set(scan5.id, scan5);
     
     // Store properties (extended properties will be created dynamically in getProperty)
     
