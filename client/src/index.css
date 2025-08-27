@@ -167,7 +167,7 @@
 }
 
 .animate-fade-in {
-  opacity: 0;
+  animation-fill-mode: both;
 }
 
 .lightning-flash {

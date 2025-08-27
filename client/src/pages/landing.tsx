@@ -279,7 +279,7 @@ const Landing = () => {
 
               
               {/* Main Logo */}
-              <div className="relative z-10 animate-fade-in" style={{ animation: 'fadeInScale 3s ease-out' }}>
+              <div className="relative z-10" style={{ animation: 'fadeInScale 3s ease-out both' }}>
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
