@@ -247,31 +247,7 @@ const Landing = () => {
           <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl opacity-50"></div>
         </div>
         
-        {/* Floating Elements */}
-        <div 
-          className="absolute top-1/4 right-1/4 opacity-20"
-          style={{
-            transform: `translateY(${scrollY * -0.3}px) rotate(${scrollY * 0.1}deg)`,
-          }}
-        >
-          <Thermometer className="w-12 h-12 text-primary" />
-        </div>
-        <div 
-          className="absolute bottom-1/4 left-1/4 opacity-20"
-          style={{
-            transform: `translateY(${scrollY * -0.2}px) rotate(${scrollY * -0.1}deg)`,
-          }}
-        >
-          <FileText className="w-10 h-10 text-cyan-500" />
-        </div>
-        <div 
-          className="absolute top-1/3 left-1/6 opacity-15"
-          style={{
-            transform: `translateY(${scrollY * -0.4}px)`,
-          }}
-        >
-          <Camera className="w-8 h-8 text-blue-500" />
-        </div>
+
 
         <div 
           className="container mx-auto px-6 text-center relative z-10 pt-20"
@@ -346,16 +322,7 @@ const Landing = () => {
         id="features" 
         className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden"
       >
-        {/* Parallax Background */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            transform: `translateY(${scrollY * 0.2}px)`,
-          }}
-        >
-          <div className="absolute top-1/4 right-1/6 w-64 h-64 bg-gradient-to-r from-primary/10 to-cyan-500/10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-1/4 left-1/6 w-80 h-80 bg-gradient-to-r from-cyan-500/8 to-blue-500/8 rounded-full blur-3xl"></div>
-        </div>
+
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
@@ -396,10 +363,7 @@ const Landing = () => {
           </div>
 
           {/* Stormy AI Showcase */}
-          <Card className="bg-gradient-to-r from-primary/8 to-cyan-500/8 border-primary/25 overflow-hidden backdrop-blur-sm relative">
-            {/* Animated background elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-full blur-xl opacity-60"></div>
+          <Card className="bg-gradient-to-r from-primary/8 to-cyan-500/8 border-primary/25 overflow-hidden backdrop-blur-sm">
             
             <CardContent className="p-10 relative z-10">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -465,13 +429,8 @@ const Landing = () => {
                     </div>
                   </div>
                   
-                  {/* Typing indicator */}
+                  {/* Status indicator */}
                   <div className="flex items-center text-xs text-muted-foreground">
-                    <div className="flex space-x-1 mr-3">
-                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
-                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
                     <span>Powered by advanced AI trained on expert methodology</span>
                   </div>
                 </div>
@@ -486,16 +445,7 @@ const Landing = () => {
         id="pricing" 
         className="py-24 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden"
       >
-        {/* Parallax elements */}
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            transform: `translateY(${scrollY * 0.15}px)`,
-          }}
-        >
-          <div className="absolute top-1/3 left-1/12 w-48 h-48 bg-gradient-to-r from-primary/15 to-cyan-500/15 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-1/3 right-1/12 w-64 h-64 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
-        </div>
+
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Simple Pricing</Badge>
@@ -554,7 +504,7 @@ const Landing = () => {
 
           <div className="text-center mt-12">
             <p className="text-muted-foreground mb-4">
-              All plans include 14-day free trial • No setup fees • Cancel anytime
+              All plans include 14-day free trial - No setup fees - Cancel anytime
             </p>
             <div className="flex justify-center space-x-8 text-sm text-muted-foreground">
               <div className="flex items-center">
