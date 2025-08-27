@@ -288,9 +288,7 @@ const Landing = () => {
               </div>
             </div>
             
-            <Badge className="mb-8 bg-gradient-to-r from-primary/15 to-cyan-500/15 text-primary border-primary/25 backdrop-blur-sm animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both' }}>
-              Revolutionizing Property Damage Assessment
-            </Badge>
+            
             
             <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both' }}>
               Master Damage Assessment with Proven Expertise
