@@ -231,59 +231,81 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Lightning Video Background */}
+        <div className="absolute inset-0 w-full h-full">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            style={{ filter: 'brightness(0.6) contrast(1.5) saturate(1.2)' }}
+          >
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
+            <source src="https://cdn.pixabay.com/vimeo/280550265/lightning-18208.mp4?width=1280&hash=7f1c2f7c3e8b3d9a5b4c6e8f9a1b2c3d" type="video/mp4" />
+            {/* Fallback gradient background */}
+          </video>
+          {/* Overlay to ensure readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80"></div>
+        </div>
+        
         {/* Parallax Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-cyan-500/8"></div>
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 z-10"
           style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
+            transform: `translateY(${scrollY * 0.3}px)`,
           }}
         >
-          <div className="absolute top-32 left-[10%] w-80 h-80 bg-gradient-to-r from-primary/15 to-cyan-500/15 rounded-full blur-3xl opacity-60"></div>
-          <div className="absolute bottom-32 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/12 to-blue-500/12 rounded-full blur-3xl opacity-70"></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl opacity-50"></div>
+          <div className="absolute top-32 left-[10%] w-80 h-80 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-3xl opacity-40"></div>
+          <div className="absolute bottom-32 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full blur-2xl opacity-30"></div>
         </div>
         
 
 
         <div 
-          className="container mx-auto px-6 text-center relative z-10 pt-20"
+          className="container mx-auto px-6 text-center relative z-20 pt-20"
           style={{
             transform: `translateY(${scrollY * -0.1}px)`,
           }}
         >
           <div className="max-w-4xl mx-auto">
             {/* Animated Logo with Lightning Effects */}
-            <div className="mb-12 relative">
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/30 via-cyan-400/40 to-blue-600/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="mb-16 relative">
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/40 via-cyan-400/50 to-blue-600/40 rounded-full blur-3xl animate-pulse"></div>
               </div>
               
-              {/* Lightning Bolts */}
+              {/* Enhanced Lightning Bolts */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="absolute -top-8 -left-8 w-16 h-16 opacity-60">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-400 animate-ping" style={{ animationDuration: '2s' }}>
+                <div className="absolute -top-16 -left-16 w-20 h-20 opacity-70">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-300 animate-ping" style={{ animationDuration: '1.8s' }}>
                     <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
                   </svg>
                 </div>
-                <div className="absolute -top-6 -right-10 w-12 h-12 opacity-50">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-blue-400 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}>
+                <div className="absolute -top-12 -right-20 w-16 h-16 opacity-60">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-blue-300 animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.3s' }}>
                     <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
                   </svg>
                 </div>
-                <div className="absolute -bottom-6 -left-6 w-10 h-10 opacity-40">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-400 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }}>
+                <div className="absolute -bottom-14 -left-12 w-14 h-14 opacity-50">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-300 animate-ping" style={{ animationDuration: '2.8s', animationDelay: '0.8s' }}>
+                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
+                </div>
+                <div className="absolute -bottom-10 -right-14 w-12 h-12 opacity-45">
+                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-400 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '1.2s' }}>
                     <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
                   </svg>
                 </div>
               </div>
               
               {/* Main Logo */}
-              <div className="relative z-10 animate-fade-in" style={{ animation: 'fadeInScale 2s ease-out' }}>
+              <div className="relative z-10 animate-fade-in" style={{ animation: 'fadeInScale 3s ease-out' }}>
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
-                  className="h-32 md:h-40 w-auto mx-auto filter drop-shadow-2xl"
+                  className="h-56 md:h-72 lg:h-80 xl:h-96 w-auto mx-auto filter drop-shadow-2xl"
                 />
               </div>
             </div>
