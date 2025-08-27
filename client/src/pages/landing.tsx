@@ -276,29 +276,7 @@ const Landing = () => {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/40 via-cyan-400/50 to-blue-600/40 rounded-full blur-3xl animate-pulse"></div>
               </div>
               
-              {/* Enhanced Lightning Bolts */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="absolute -top-16 -left-16 w-20 h-20 opacity-70">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-300 animate-ping" style={{ animationDuration: '1.8s' }}>
-                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                </div>
-                <div className="absolute -top-12 -right-20 w-16 h-16 opacity-60">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-blue-300 animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.3s' }}>
-                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                </div>
-                <div className="absolute -bottom-14 -left-12 w-14 h-14 opacity-50">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-300 animate-ping" style={{ animationDuration: '2.8s', animationDelay: '0.8s' }}>
-                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                </div>
-                <div className="absolute -bottom-10 -right-14 w-12 h-12 opacity-45">
-                  <svg viewBox="0 0 24 24" className="w-full h-full text-yellow-400 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '1.2s' }}>
-                    <path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                </div>
-              </div>
+
               
               {/* Main Logo */}
               <div className="relative z-10 animate-fade-in" style={{ animation: 'fadeInScale 3s ease-out' }}>
