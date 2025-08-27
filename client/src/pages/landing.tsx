@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { StormyAvatar } from '@/components/stormy-avatar';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
-import winnstormVideo from '@assets/WINNSTORM™_1756325796891.mp4';
+import winnstormVideo from '@assets/WINNSTORM™_1756326077205.mp4';
 
 const Landing = () => {
   const [, navigate] = useLocation();
@@ -232,34 +232,20 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Lightning Video Background */}
+        {/* WinnStorm Video Background */}
         <div className="absolute inset-0 w-full h-full">
           <video 
             autoPlay 
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
-            style={{ filter: 'brightness(0.6) contrast(1.5) saturate(1.2)' }}
+            className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
-            <source src="https://cdn.pixabay.com/vimeo/280550265/lightning-18208.mp4?width=1280&hash=7f1c2f7c3e8b3d9a5b4c6e8f9a1b2c3d" type="video/mp4" />
+            <source src={winnstormVideo} type="video/mp4" />
             {/* Fallback gradient background */}
           </video>
-          {/* Overlay to ensure readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80"></div>
-        </div>
-        
-        {/* Parallax Background Elements */}
-        <div 
-          className="absolute inset-0 z-10"
-          style={{
-            transform: `translateY(${scrollY * 0.3}px)`,
-          }}
-        >
-          <div className="absolute top-32 left-[10%] w-80 h-80 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-3xl opacity-40"></div>
-          <div className="absolute bottom-32 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full blur-2xl opacity-30"></div>
+          {/* Overlay for text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
         
 
@@ -270,32 +256,15 @@ const Landing = () => {
             transform: `translateY(${scrollY * -0.1}px)`,
           }}
         >
-          <div className="max-w-6xl mx-auto">
-            {/* WinnStorm Video */}
-            <div className="mb-16 relative rounded-2xl overflow-hidden shadow-2xl">
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline
-                className="w-full h-auto max-h-[80vh] object-cover"
-                style={{ animation: 'fadeInScale 2s ease-out both' }}
-              >
-                <source src={winnstormVideo} type="video/mp4" />
-                {/* Fallback message */}
-                <div className="flex items-center justify-center h-96 bg-gradient-to-br from-primary/20 to-cyan-500/20">
-                  <p className="text-2xl text-muted-foreground">Video loading...</p>
-                </div>
-              </video>
-            </div>
+          <div className="max-w-4xl mx-auto">
             
             
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both' }}>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1s both', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
               Master Damage Assessment with Proven Expertise
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both' }}>
+            <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
               Harness decades of industry-leading expertise through AI-powered thermal analysis, 
               comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
             </p>
