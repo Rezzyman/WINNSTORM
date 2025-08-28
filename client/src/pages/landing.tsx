@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +43,14 @@ const Landing = () => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
+  const testimonialsRef = useRef<HTMLElement>(null);
+  const ctaRef = useRef<HTMLElement>(null);
+
+  // Framer Motion scroll tracking
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -352,42 +361,99 @@ const Landing = () => {
         id="features" 
         className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden"
       >
+        {/* Floating Background Elements */}
+        <motion.div 
+          style={{ y: backgroundY }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute top-20 left-[5%] w-72 h-72 bg-gradient-to-r from-primary/10 to-cyan-500/10 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute bottom-20 right-[8%] w-96 h-96 bg-gradient-to-r from-cyan-500/8 to-blue-500/8 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-500/6 to-purple-500/6 rounded-full blur-2xl opacity-40"></div>
+        </motion.div>
 
+        {/* Geometric patterns */}
+        <motion.div 
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '30%']) }}
+          className="absolute inset-0 z-0 opacity-20"
+        >
+          <div className="absolute top-40 right-[15%] w-32 h-32 border border-primary/20 rotate-45 animate-pulse"></div>
+          <div className="absolute bottom-40 left-[10%] w-24 h-24 border border-cyan-500/30 rotate-12"></div>
+        </motion.div>
         
         <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 backdrop-blur-sm">Core Capabilities</Badge>
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent leading-tight">
+          <motion.div 
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 backdrop-blur-sm">Core Capabilities</Badge>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent leading-tight"
+            >
               Professional-Grade Assessment Tools
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light"
+            >
               Experience the intersection of decades of field expertise and modern technology. Our platform transforms 
               complex damage assessment into streamlined, accurate, and defensible reports that stand up to scrutiny.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card 
-                  key={index} 
-                  className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 bg-card/60 backdrop-blur-md border-border/40 hover:border-primary/30 relative overflow-hidden"
-                  style={{
-                    animationDelay: `${index * 100}ms`,
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 60, rotateX: -10 }}
+                  whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: index * 0.1,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                  viewport={{ once: true }}
+                  whileHover={{ 
+                    y: -8, 
+                    scale: 1.02,
+                    transition: { duration: 0.3 }
                   }}
                 >
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  <CardContent className="p-8 relative z-10">
-                    <div className="bg-gradient-to-br from-primary/15 to-cyan-500/15 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <Icon className="h-7 w-7 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors">{feature.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                  <Card className="group hover:shadow-2xl transition-all duration-500 bg-card/60 backdrop-blur-md border-border/40 hover:border-primary/30 relative overflow-hidden h-full">
+                    {/* Subtle gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <CardContent className="p-8 relative z-10">
+                      <motion.div 
+                        whileHover={{ scale: 1.1, rotate: 3 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-gradient-to-br from-primary/15 to-cyan-500/15 w-14 h-14 rounded-xl flex items-center justify-center mb-6"
+                      >
+                        <Icon className="h-7 w-7 text-primary" />
+                      </motion.div>
+                      <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors">{feature.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
@@ -472,28 +538,91 @@ const Landing = () => {
 
       {/* Pricing Section */}
       <section 
+        ref={pricingRef}
         id="pricing" 
         className="py-24 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden"
       >
+        {/* Floating Background Elements */}
+        <motion.div 
+          style={{ y: useTransform(scrollYProgress, [0.3, 1], ['0%', '60%']) }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute top-32 right-[10%] w-80 h-80 bg-gradient-to-r from-green-500/8 to-emerald-500/8 rounded-full blur-3xl opacity-70"></div>
+          <div className="absolute bottom-32 left-[15%] w-72 h-72 bg-gradient-to-r from-primary/8 to-cyan-500/8 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute top-1/3 left-[8%] w-48 h-48 bg-gradient-to-r from-blue-500/6 to-indigo-500/6 rounded-full blur-2xl opacity-50"></div>
+        </motion.div>
 
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Simple Pricing</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        {/* Geometric accents */}
+        <motion.div 
+          style={{ 
+            y: useTransform(scrollYProgress, [0.3, 1], ['0%', '40%']),
+            rotate: useTransform(scrollYProgress, [0.3, 1], [0, 10])
+          }}
+          className="absolute inset-0 z-0 opacity-15"
+        >
+          <div className="absolute top-1/4 left-[5%] w-16 h-16 border-2 border-green-500/40 rounded-lg rotate-45"></div>
+          <div className="absolute bottom-1/3 right-[12%] w-20 h-20 border border-primary/30 rounded-full"></div>
+        </motion.div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Simple Pricing</Badge>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold mb-6"
+            >
               Choose Your Plan
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+            >
               Transparent pricing that scales with your business. All plans include core features with no hidden fees.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <Card key={index} className={`relative overflow-hidden ${
-                plan.badge === "Most Popular" 
-                  ? "border-primary shadow-xl scale-105 bg-gradient-to-b from-primary/5 to-cyan-500/5" 
-                  : "border-border hover:shadow-lg transition-shadow"
-              }`}>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 80, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                viewport={{ once: true }}
+                whileHover={{ 
+                  y: -10, 
+                  scale: 1.03,
+                  transition: { duration: 0.3 }
+                }}
+              >
+                <Card className={`relative overflow-hidden h-full ${
+                  plan.badge === "Most Popular" 
+                    ? "border-primary shadow-xl bg-gradient-to-b from-primary/5 to-cyan-500/5" 
+                    : "border-border hover:shadow-lg transition-shadow"
+                }`}>
                 {plan.badge && (
                   <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-cyan-500 text-white px-3 py-1 text-sm font-medium">
                     {plan.badge}
@@ -528,7 +657,8 @@ const Landing = () => {
                     {plan.buttonText}
                   </Button>
                 </CardContent>
-              </Card>
+                </Card>
+              </motion.div>
             ))}
           </div>
 
@@ -555,22 +685,89 @@ const Landing = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 bg-gradient-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">Testimonials</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <section 
+        ref={testimonialsRef}
+        id="testimonials" 
+        className="py-20 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden"
+      >
+        {/* Floating Background Elements */}
+        <motion.div 
+          style={{ y: useTransform(scrollYProgress, [0.5, 1], ['0%', '80%']) }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute top-24 left-[8%] w-64 h-64 bg-gradient-to-r from-yellow-500/8 to-orange-500/8 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute bottom-24 right-[12%] w-80 h-80 bg-gradient-to-r from-primary/6 to-purple-500/6 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-full blur-2xl opacity-40"></div>
+        </motion.div>
+
+        {/* Subtle geometric patterns */}
+        <motion.div 
+          style={{ 
+            y: useTransform(scrollYProgress, [0.5, 1], ['0%', '50%']),
+            rotate: useTransform(scrollYProgress, [0.5, 1], [0, -8])
+          }}
+          className="absolute inset-0 z-0 opacity-10"
+        >
+          <div className="absolute top-1/3 right-[8%] w-24 h-24 border border-yellow-500/30 rounded-full"></div>
+          <div className="absolute bottom-1/4 left-[15%] w-20 h-20 border-2 border-primary/20 rotate-45"></div>
+        </motion.div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Badge className="mb-4 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">Testimonials</Badge>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold mb-6"
+            >
               Trusted by Industry Leaders
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+            >
               See how WinnStorm is transforming damage assessment for consultants, adjusters, and insurance professionals worldwide.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-card/50 backdrop-blur-sm border-border/50 hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 60, rotateY: -15 }}
+                whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.2,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                viewport={{ once: true }}
+                whileHover={{ 
+                  y: -8, 
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+              >
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:shadow-lg transition-shadow h-full">
+                  <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -583,42 +780,105 @@ const Landing = () => {
                     <div className="text-sm text-muted-foreground">{testimonial.role}</div>
                     <div className="text-sm text-primary">{testimonial.company}</div>
                   </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <section 
+        ref={ctaRef}
+        className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white relative overflow-hidden"
+      >
+        {/* Dynamic Background Effects */}
+        <motion.div 
+          style={{ 
+            y: useTransform(scrollYProgress, [0.7, 1], ['0%', '40%']),
+            scale: useTransform(scrollYProgress, [0.7, 1], [1, 1.1])
+          }}
+          className="absolute inset-0 bg-black/10"
+        ></motion.div>
+
+        {/* Floating particles */}
+        <motion.div 
+          style={{ y: useTransform(scrollYProgress, [0.7, 1], ['0%', '60%']) }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute top-20 left-[10%] w-32 h-32 bg-white/10 rounded-full blur-xl opacity-60"></div>
+          <div className="absolute bottom-20 right-[15%] w-48 h-48 bg-white/8 rounded-full blur-2xl opacity-50"></div>
+          <div className="absolute top-1/3 right-[25%] w-24 h-24 bg-white/12 rounded-full blur-lg opacity-40"></div>
+          <div className="absolute bottom-1/3 left-[20%] w-40 h-40 bg-white/6 rounded-full blur-xl opacity-30"></div>
+        </motion.div>
+
+        {/* Geometric accents */}
+        <motion.div 
+          style={{ 
+            y: useTransform(scrollYProgress, [0.7, 1], ['0%', '30%']),
+            rotate: useTransform(scrollYProgress, [0.7, 1], [0, 15])
+          }}
+          className="absolute inset-0 z-0 opacity-20"
+        >
+          <div className="absolute top-1/4 left-[8%] w-16 h-16 border-2 border-white/30 rotate-45"></div>
+          <div className="absolute bottom-1/4 right-[12%] w-20 h-20 border border-white/40 rounded-lg rotate-12"></div>
+        </motion.div>
+
         <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl font-bold mb-6"
+          >
             Ready to Transform Your Damage Assessments?
-          </h2>
-          <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="text-xl mb-8 opacity-90 max-w-3xl mx-auto"
+          >
             Join hundreds of certified consultants who trust WinnStorm for accurate, comprehensive damage assessment. 
             Start your free trial today and experience the future of professional inspections.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary"
-              className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6"
-              onClick={() => navigate('/auth')}
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Start Free Trial
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6"
+                onClick={() => navigate('/auth')}
+              >
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Schedule Demo
-            </Button>
-          </div>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
+              >
+                Schedule Demo
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
