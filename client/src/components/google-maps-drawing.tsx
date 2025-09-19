@@ -39,6 +39,8 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
   roofSections,
   onSectionsChange
 }) => {
+  console.log('🚀 GoogleMapsDrawing component mounting...', { address, roofSections });
+  
   const mapRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const initializingRef = useRef(false);
@@ -49,6 +51,9 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
   const [selectedTool, setSelectedTool] = useState<string>('');
   const [sectionCounter, setSectionCounter] = useState(1);
   const [drawnOverlays, setDrawnOverlays] = useState<any[]>([]);
+  
+  console.log('🧪 Component state:', { isLoading, map: !!map, initializingRef: initializingRef.current });
+  console.log('🔑 API Key available:', !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
 
   useEffect(() => {
     const initMap = async () => {
@@ -357,16 +362,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading Google Maps...</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Always render the DOM structure - show loading state within the map container
 
   return (
     <div ref={rootRef} className="space-y-6">
@@ -451,9 +447,18 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
           <div 
             ref={mapRef}
             data-map-container="true"
-            className="w-full h-96 rounded-lg border border-border"
+            className="w-full h-96 rounded-lg border border-border relative"
             style={{ minHeight: '400px' }}
-          />
+          >
+            {isLoading && (
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading Google Maps...</p>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
