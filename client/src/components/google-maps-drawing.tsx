@@ -40,6 +40,8 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
   onSectionsChange
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const initializingRef = useRef(false);
   const [map, setMap] = useState<any>(null);
   const [drawingManager, setDrawingManager] = useState<any>(null);
   const [geocoder, setGeocoder] = useState<any>(null);
@@ -50,6 +52,15 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
 
   useEffect(() => {
     const initMap = async () => {
+      // Guard against double initialization
+      if (map || initializingRef.current) {
+        console.log('🚫 Skipping initialization - already initialized or initializing');
+        return;
+      }
+      
+      initializingRef.current = true;
+      console.log('🗺️ Starting Google Maps initialization...');
+      
       const loader = new Loader({
         apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
         version: 'weekly',
@@ -57,11 +68,67 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
       });
 
       try {
+        console.log('🔄 Loading Google Maps API...');
         await loader.load();
         
-        if (!mapRef.current) return;
+        console.log('✅ Google Maps API loaded successfully');
+        
+        // Use a more robust container check with multiple strategies
+        const getContainer = () => {
+          // Strategy 1: React ref
+          if (mapRef.current) {
+            console.log('✅ Found container via React ref');
+            return mapRef.current;
+          }
+          
+          // Strategy 2: Scoped DOM query as fallback
+          if (rootRef.current) {
+            const container = rootRef.current.querySelector('[data-map-container="true"]');
+            if (container) {
+              console.log('🔍 Found container via scoped DOM query');
+              return container as HTMLDivElement;
+            }
+          }
+          
+          // Strategy 3: Global fallback (only if no root ref)
+          const globalContainer = document.querySelector('[data-map-container="true"]');
+          if (globalContainer) {
+            console.log('🌐 Found container via global DOM query');
+            return globalContainer as HTMLDivElement;
+          }
+          
+          return null;
+        };
+        
+        // Wait for container with improved retry logic
+        let container = null;
+        let retries = 0;
+        const maxRetries = 30; // 3 seconds total
+        
+        while (!container && retries < maxRetries) {
+          container = getContainer();
+          if (container) break;
+          
+          console.log(`⏳ Waiting for map container... (attempt ${retries + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retries++;
+        }
+        
+        if (!container) {
+          console.error('❌ Map container not found after retries');
+          console.log('🔍 Debug info:');
+          console.log('- mapRef.current:', mapRef.current);
+          console.log('- rootRef.current:', rootRef.current);
+          console.log('- data-map-container elements:', document.querySelectorAll('[data-map-container="true"]'));
+          setIsLoading(false);
+          initializingRef.current = false;
+          return;
+        }
+        
+        console.log('🎯 Map container found:', container);
 
-        const mapInstance = new (window as any).google.maps.Map(mapRef.current, {
+        console.log('🏗️ Creating map instance...');
+        const mapInstance = new (window as any).google.maps.Map(container, {
           center: { lat: 39.8283, lng: -98.5795 }, // Center of US
           zoom: 4,
           mapTypeId: 'satellite',
@@ -74,6 +141,9 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
           }
         });
 
+        console.log('Map instance created:', mapInstance);
+
+        console.log('Creating drawing manager...');
         const drawingManagerInstance = new (window as any).google.maps.drawing.DrawingManager({
           drawingMode: null,
           drawingControl: false,
@@ -191,19 +261,41 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
           setSelectedTool('');
         });
 
+        console.log('Creating geocoder...');
         const geocoderInstance = new (window as any).google.maps.Geocoder();
         
+        console.log('Setting state...');
         setMap(mapInstance);
         setDrawingManager(drawingManagerInstance);
         setGeocoder(geocoderInstance);
         setIsLoading(false);
+        console.log('🎉 Google Maps initialization complete!');
       } catch (error) {
-        console.error('Error loading Google Maps:', error);
+        console.error('❌ Error loading Google Maps:', error);
         setIsLoading(false);
+        initializingRef.current = false;
       }
     };
 
     initMap();
+    
+    // Cleanup function
+    return () => {
+      if (drawingManager) {
+        drawingManager.setMap(null);
+      }
+      if (drawnOverlays.length > 0) {
+        drawnOverlays.forEach(overlay => {
+          if (overlay && typeof overlay.setMap === 'function') {
+            overlay.setMap(null);
+          }
+        });
+      }
+      if (map) {
+        map.unbindAll?.();
+      }
+      initializingRef.current = false;
+    };
   }, []);
 
   const handleAddressSearch = () => {
@@ -277,7 +369,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div ref={rootRef} className="space-y-6">
       {/* Address Search */}
       <Card>
         <CardHeader>
@@ -357,7 +449,8 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
           
           {/* Map Container */}
           <div 
-            ref={mapRef} 
+            ref={mapRef}
+            data-map-container="true"
             className="w-full h-96 rounded-lg border border-border"
             style={{ minHeight: '400px' }}
           />
