@@ -13,15 +13,16 @@ interface EducationalTooltipProps {
 export function EducationalTooltip({ content, learnMore }: EducationalTooltipProps) {
   return (
     <Tooltip delayDuration={200}>
-      <TooltipTrigger>
-        <button
-          type="button"
-          className="inline-flex items-center justify-center touch-target ml-1"
+      <TooltipTrigger asChild>
+        <span
+          role="button"
+          tabIndex={0}
+          className="inline-flex items-center justify-center touch-target ml-1 cursor-pointer"
           aria-label="Learn more"
           data-testid="tooltip-help"
         >
           <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
-        </button>
+        </span>
       </TooltipTrigger>
       <TooltipContent
         side="top"

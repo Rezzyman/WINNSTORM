@@ -201,12 +201,10 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
                   <div>
                     <Label htmlFor="inspector" className="text-foreground flex items-center">
                       Inspector Name
-                      {/* Temporarily disabled for debugging
                       <EducationalTooltip 
                         content="Document who conducted this inspection for accountability and certification tracking."
                         learnMore="This information appears on the final Winn Report and is linked to your consultant certification."
                       />
-                      */}
                     </Label>
                     <Input
                       id="inspector"
@@ -233,12 +231,10 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
                   <div>
                     <Label htmlFor="owner-name" className="text-foreground flex items-center">
                       Property Owner
-                      {/* Temporarily disabled for debugging
                       <EducationalTooltip 
                         content="Record the property owner's name for report authorization and insurance claim documentation."
                         learnMore="Accurate owner information is critical for legal compliance and insurance processing."
                       />
-                      */}
                     </Label>
                     <Input
                       id="owner-name"
