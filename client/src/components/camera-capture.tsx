@@ -1,8 +1,11 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Camera, X, Check, RotateCw } from 'lucide-react';
+import { Camera as CameraIcon, X, Check, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Camera } from '@capacitor/camera';
+import { CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 interface CameraCaptureProps {
   onCapture: (imageData: string, filename: string) => void;
@@ -21,9 +24,46 @@ export function CameraCapture({
   const [isReviewing, setIsReviewing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const isNative = Capacitor.isNativePlatform();
+
+  const handleNativeCameraClick = async () => {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+        saveToGallery: true,
+        presentationStyle: 'fullscreen'
+      });
+
+      if (image.base64String) {
+        const imageData = `data:image/${image.format};base64,${image.base64String}`;
+        setCapturedImage(imageData);
+        setIsReviewing(true);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message !== 'User cancelled photos app') {
+        console.error('Native camera error:', error);
+        toast({
+          title: "Camera Error",
+          description: "Failed to access camera. Please check permissions.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleWebCameraClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleCameraClick = () => {
-    fileInputRef.current?.click();
+    if (isNative) {
+      handleNativeCameraClick();
+    } else {
+      handleWebCameraClick();
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +115,8 @@ export function CameraCapture({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    handleCameraClick();
+    // Immediately open camera again
+    setTimeout(() => handleCameraClick(), 100);
   };
 
   const handleCancel = () => {
@@ -135,15 +176,18 @@ export function CameraCapture({
 
   return (
     <>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileChange}
-        className="hidden"
-        aria-label="Camera input"
-      />
+      {/* Web fallback file input */}
+      {!isNative && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+          className="hidden"
+          aria-label="Camera input"
+        />
+      )}
       
       <Button
         data-testid={`button-camera-${captureType}`}
@@ -151,7 +195,7 @@ export function CameraCapture({
         variant="outline"
         className={`touch-target ${className}`}
       >
-        <Camera className="h-4 w-4 mr-2" />
+        <CameraIcon className="h-4 w-4 mr-2" />
         {buttonLabel}
       </Button>
     </>

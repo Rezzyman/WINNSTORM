@@ -50,6 +50,15 @@ Building a comprehensive online application that serves as the central hub for D
 5. **Adaptive Learning**: Stormy reduces guidance as user demonstrates competency
 
 ## Recent Changes
+- **2025-11-17**: NATIVE iOS & ANDROID APPLICATIONS - Transformed WinnStorm into native mobile apps using Capacitor:
+  - Configured Capacitor 7.x with iOS and Android platforms
+  - Enhanced camera-capture component with native Capacitor Camera API (falls back to web on browsers)
+  - App ID: com.winnstorm.inspector, App Name: WinnStorm
+  - Native camera with saveToGallery, 90% quality, fullscreen presentation
+  - Created comprehensive DEPLOYMENT.md with App Store and Google Play submission guides
+  - iOS and Android projects synced with latest web build
+  - 3 native plugins integrated: Camera, Filesystem, Preferences
+  - Platform detection with Capacitor.isNativePlatform() for seamless web/native compatibility
 - **2025-11-17**: MOBILE-FIRST FIELD READINESS TRANSFORMATION - Complete mobile-first redesign for field inspectors working on rooftops:
   - Added 44px touch-target buttons, h-12 field-input forms, h-14 mobile navigation for outdoor usability
   - Implemented fixed bottom navigation bar (MobileWorkflowNav) with large Previous/Next buttons and progress indicator

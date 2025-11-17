@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WinnStorm</string>
+    <string name="title_activity_main">WinnStorm</string>
+    <string name="package_name">com.winnstorm.inspector</string>
+    <string name="custom_url_scheme">com.winnstorm.inspector</string>
+</resources>
