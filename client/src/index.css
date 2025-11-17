@@ -17,6 +17,23 @@
   .shadow-glow {
     box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
   }
+  
+  /* Mobile-First Field App Optimizations */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px]; /* Apple Human Interface Guidelines minimum */
+  }
+  
+  .field-input {
+    @apply text-base h-12 px-4; /* Larger for outdoor use, prevents iOS zoom */
+  }
+  
+  .outdoor-readable {
+    @apply text-lg font-medium; /* Enhanced outdoor visibility */
+  }
+  
+  .mobile-nav-btn {
+    @apply h-14 text-base font-semibold; /* Larger nav buttons for field use */
+  }
 }
 
 :root {

@@ -25,6 +25,8 @@ import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database } from 
 import { ThermalAnalysis } from './thermal-analysis';
 import { GoogleMapsDrawing } from './google-maps-drawing';
 import { AIInspectionAssistant } from './ai-inspection-assistant';
+import { MobileWorkflowNav } from './mobile-workflow-nav';
+import { EducationalTooltip } from './educational-tooltip';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -196,12 +198,19 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="inspector" className="text-foreground">Inspector Name</Label>
+                    <Label htmlFor="inspector" className="text-foreground flex items-center">
+                      Inspector Name
+                      <EducationalTooltip 
+                        content="Document who conducted this inspection for accountability and certification tracking."
+                        learnMore="This information appears on the final Winn Report and is linked to your consultant certification."
+                      />
+                    </Label>
                     <Input
                       id="inspector"
+                      data-testid="input-inspector-name"
                       value={reportData.inspector}
                       onChange={(e) => setReportData(prev => ({ ...prev, inspector: e.target.value }))}
-                      className="bg-background text-foreground border-border"
+                      className="bg-background text-foreground border-border field-input"
                       placeholder="Enter inspector name"
                     />
                   </div>
@@ -219,15 +228,22 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="owner-name" className="text-foreground">Property Owner</Label>
+                    <Label htmlFor="owner-name" className="text-foreground flex items-center">
+                      Property Owner
+                      <EducationalTooltip 
+                        content="Record the property owner's name for report authorization and insurance claim documentation."
+                        learnMore="Accurate owner information is critical for legal compliance and insurance processing."
+                      />
+                    </Label>
                     <Input
                       id="owner-name"
+                      data-testid="input-property-owner"
                       value={reportData.buildingInfo.ownerName}
                       onChange={(e) => setReportData(prev => ({ 
                         ...prev, 
                         buildingInfo: { ...prev.buildingInfo, ownerName: e.target.value }
                       }))}
-                      className="bg-background text-foreground border-border"
+                      className="bg-background text-foreground border-border field-input"
                       placeholder="Enter property owner name"
                     />
                   </div>
@@ -282,16 +298,24 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
                     />
                   </div>
                   <div>
-                    <Label htmlFor="square-footage" className="text-foreground">Square Footage</Label>
+                    <Label htmlFor="square-footage" className="text-foreground flex items-center">
+                      Square Footage
+                      <EducationalTooltip 
+                        content="Total roof square footage is essential for material estimates, cost calculations, and damage assessment scope."
+                        learnMore="Winn Methodology requires precise measurements verified through on-site inspection and satellite imagery."
+                      />
+                    </Label>
                     <Input
                       id="square-footage"
+                      data-testid="input-square-footage"
                       type="number"
+                      inputMode="numeric"
                       value={reportData.buildingInfo.squareFootage}
                       onChange={(e) => setReportData(prev => ({ 
                         ...prev, 
                         buildingInfo: { ...prev.buildingInfo, squareFootage: parseInt(e.target.value) }
                       }))}
-                      className="bg-background text-foreground border-border"
+                      className="bg-background text-foreground border-border field-input"
                       placeholder="10000"
                     />
                   </div>
@@ -336,7 +360,11 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-foreground font-semibold">Weather Conditions</h3>
-              <Button onClick={addWeatherCondition} className="bg-primary text-primary-foreground">
+              <Button 
+                data-testid="button-add-weather"
+                onClick={addWeatherCondition} 
+                className="bg-primary text-primary-foreground touch-target"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Reading
               </Button>
@@ -417,7 +445,11 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-foreground font-semibold">Roof Components</h3>
-              <Button onClick={addRoofComponent} className="bg-primary text-primary-foreground">
+              <Button 
+                data-testid="button-add-component"
+                onClick={addRoofComponent} 
+                className="bg-primary text-primary-foreground touch-target"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Component
               </Button>
@@ -527,7 +559,11 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-foreground font-semibold">Issues & Findings</h3>
-              <Button onClick={addIssue} className="bg-primary text-primary-foreground">
+              <Button 
+                data-testid="button-add-issue"
+                onClick={addIssue} 
+                className="bg-primary text-primary-foreground touch-target"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Issue
               </Button>
@@ -716,16 +752,16 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 pb-32 md:pb-6">
+      <div className="mb-6 md:mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-foreground">Winn Report Generation</h1>
-          <Badge variant="outline" className="text-primary border-primary">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Winn Report Generation</h1>
+          <Badge variant="outline" className="text-primary border-primary hidden md:inline-flex">
             Step {currentStep + 1} of {WORKFLOW_STEPS.length}
           </Badge>
         </div>
         <Progress value={progressPercentage} className="mb-4" />
-        <div className="flex justify-between text-sm text-muted-foreground">
+        <div className="hidden md:flex justify-between text-sm text-muted-foreground">
           {WORKFLOW_STEPS.map((step, index) => (
             <div key={step.id} className={`flex items-center ${index <= currentStep ? 'text-primary' : ''}`}>
               <step.icon className="h-4 w-4 mr-1" />
@@ -751,26 +787,30 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
             </CardContent>
           </Card>
 
-          <div className="flex justify-between mt-6">
+          {/* Desktop Navigation - Hidden on mobile */}
+          <div className="hidden md:flex justify-between mt-6">
             <Button 
+              data-testid="button-previous-step"
               onClick={prevStep} 
               disabled={currentStep === 0}
               variant="outline"
-              className="border-border text-foreground"
+              className="border-border text-foreground touch-target"
             >
               Previous
             </Button>
             {currentStep === WORKFLOW_STEPS.length - 1 ? (
               <Button 
+                data-testid="button-generate-report"
                 onClick={() => onComplete(reportData)}
-                className="bg-primary text-primary-foreground"
+                className="bg-primary text-primary-foreground touch-target"
               >
                 Generate Winn Report
               </Button>
             ) : (
               <Button 
+                data-testid="button-next-step"
                 onClick={nextStep}
-                className="bg-primary text-primary-foreground"
+                className="bg-primary text-primary-foreground touch-target"
               >
                 Next
               </Button>
@@ -786,14 +826,28 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
               propertyData={reportData.buildingInfo}
               thermalData={reportData.thermalReadings}
               roofSections={reportData.buildingInfo.roofSections}
+              weatherData={reportData.weatherConditions}
+              issues={reportData.issues}
+              components={reportData.roofComponents}
               onGuidanceReceived={(guidance) => {
-                // Optional: Update notes or recommendations based on AI guidance
                 console.log('AI Guidance received:', guidance);
               }}
             />
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation - Fixed bottom bar */}
+      <MobileWorkflowNav
+        currentStep={currentStep}
+        totalSteps={WORKFLOW_STEPS.length}
+        onPrevious={prevStep}
+        onNext={nextStep}
+        onComplete={() => onComplete(reportData)}
+        isFirstStep={currentStep === 0}
+        isLastStep={currentStep === WORKFLOW_STEPS.length - 1}
+        stepTitle={WORKFLOW_STEPS[currentStep].title}
+      />
     </div>
   );
 };

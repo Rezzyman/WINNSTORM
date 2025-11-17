@@ -6,9 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Bot, User, Send, Image, MapPin, Thermometer, Camera, FileText, AlertTriangle } from 'lucide-react';
+import { Bot, User, Send, Image, MapPin, Thermometer, Camera, FileText, AlertTriangle, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StormyAvatar } from './stormy-avatar';
+import { getStormySystemPrompt, getQuickActionsForStep, getStepWelcomeMessage, UserExperienceLevel } from '@/lib/stormy-guidance';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AIMessage {
   id: string;
@@ -24,6 +26,9 @@ interface AIInspectionAssistantProps {
   propertyData?: any;
   thermalData?: any;
   roofSections?: any[];
+  weatherData?: any[];
+  issues?: any[];
+  components?: any[];
   onGuidanceReceived?: (guidance: string) => void;
 }
 
@@ -32,19 +37,24 @@ export function AIInspectionAssistant({
   propertyData,
   thermalData,
   roofSections,
+  weatherData,
+  issues,
+  components,
   onGuidanceReceived
 }: AIInspectionAssistantProps) {
+  const [userLevel, setUserLevel] = useState<UserExperienceLevel>('beginner');
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       id: '1',
       role: 'assistant',
-      content: "Hello! I'm Stormy, your WinnStorm™ AI Assistant, trained on Eric Winn's methodology for comprehensive damage assessment. I can help guide you through inspections, analyze thermal data, identify damage patterns, and provide recommendations based on the Winn Methodology. How can I assist with your current inspection?",
+      content: "Hello! I'm Stormy, your WinnStorm™ AI Inspection Coach, trained on Eric Winn's proven methodology. I'll adapt my guidance to your experience level and the current workflow step. How can I help make this inspection successful?",
       timestamp: new Date(),
       context: 'welcome'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [previousStep, setPreviousStep] = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -56,38 +66,39 @@ export function AIInspectionAssistant({
     scrollToBottom();
   }, [messages]);
 
+  // Send welcome message when step changes
+  useEffect(() => {
+    if (currentStep && currentStep !== previousStep) {
+      setPreviousStep(currentStep);
+      
+      // Add step welcome message for beginners and intermediates
+      if (userLevel !== 'expert') {
+        const welcomeMsg = getStepWelcomeMessage(currentStep, userLevel);
+        if (welcomeMsg) {
+          const stepMessage: AIMessage = {
+            id: `step-${Date.now()}`,
+            role: 'assistant',
+            content: welcomeMsg,
+            timestamp: new Date(),
+            context: currentStep
+          };
+          setMessages(prev => [...prev, stepMessage]);
+        }
+      }
+    }
+  }, [currentStep, userLevel, previousStep]);
+
   const getContextualPrompt = () => {
-    let context = "You are an expert damage assessment consultant AI trained on Eric Winn's methodology. ";
-    
-    if (currentStep) {
-      context += `The user is currently working on: ${currentStep}. `;
-    }
-    
-    if (propertyData) {
-      context += `Property details: ${JSON.stringify(propertyData)}. `;
-    }
-    
-    if (thermalData) {
-      context += `Thermal inspection data available. `;
-    }
-    
-    if (roofSections && roofSections.length > 0) {
-      context += `Roof sections marked: ${roofSections.length} sections. `;
-    }
-
-    context += `
-    Core principles of the Winn Methodology:
-    1. Comprehensive data collection through thermal imaging, terrestrial walks, test squares
-    2. Systematic documentation with precise measurements and photographic evidence
-    3. Weather verification and meteorological correlation
-    4. Structured analysis of core samples and moisture testing
-    5. Detailed damage assessment with impact density calculations
-    6. Professional reporting with supporting evidence and compliance documentation
-
-    Provide specific, actionable guidance based on these principles. Reference relevant inspection procedures, measurement techniques, and documentation requirements when appropriate.
-    `;
-    
-    return context;
+    return getStormySystemPrompt({
+      currentStep: currentStep || 'building-info',
+      userLevel,
+      propertyData,
+      thermalData,
+      roofSections,
+      weatherData,
+      issues,
+      components
+    });
   };
 
   const sendMessage = async () => {
@@ -157,35 +168,11 @@ export function AIInspectionAssistant({
   };
 
   const getQuickActions = () => {
-    const actions = [
-      { 
-        label: "Thermal Analysis Guide", 
-        icon: Thermometer, 
-        message: "How should I analyze thermal readings for this property?" 
-      },
-      { 
-        label: "Damage Assessment", 
-        icon: AlertTriangle, 
-        message: "What are the key indicators of hail damage I should look for?" 
-      },
-      { 
-        label: "Documentation Standards", 
-        icon: FileText, 
-        message: "What documentation is required for this inspection step?" 
-      },
-      { 
-        label: "Test Square Protocol", 
-        icon: MapPin, 
-        message: "Walk me through the proper test square methodology." 
-      },
-      { 
-        label: "Photo Requirements", 
-        icon: Camera, 
-        message: "What photos do I need to take for comprehensive documentation?" 
-      }
-    ];
-
-    return actions;
+    const stepActions = getQuickActionsForStep(currentStep || 'building-info', userLevel);
+    return stepActions.map(action => ({
+      ...action,
+      icon: Camera // Default icon, can be made more specific later
+    }));
   };
 
   const sendQuickAction = (message: string) => {
@@ -196,15 +183,30 @@ export function AIInspectionAssistant({
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <StormyAvatar size={20} />
-          Stormy - AI Assistant
-          {currentStep && (
-            <Badge variant="outline" className="ml-auto">
-              {currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </Badge>
-          )}
+        <CardTitle className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <StormyAvatar size={20} />
+            Stormy - AI Coach
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <Select value={userLevel} onValueChange={(value) => setUserLevel(value as UserExperienceLevel)}>
+              <SelectTrigger className="h-7 w-[120px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="expert">Expert</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardTitle>
+        {currentStep && (
+          <Badge variant="outline" className="text-primary border-primary mt-2 w-fit">
+            {currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          </Badge>
+        )}
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col gap-4 p-4">
