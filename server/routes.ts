@@ -56,8 +56,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/properties", async (req, res) => {
     try {
-      // Get demo user for MVP
-      const demoUser = await storage.getUserByEmail("demo@example.com");
+      // Get demo user for MVP - try both demo and test user emails
+      let demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        demoUser = await storage.getUserByEmail("test@example.com");
+      }
       if (!demoUser) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -79,6 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a scan for this property with mock analysis
       const scanData = insertScanSchema.parse({
         propertyId: property.id,
+        date: captureDate ? new Date(captureDate) : new Date(),
         scanType: scanType || "drone",
         deviceType: scanType === "drone" ? "DJI Mavic 2 Enterprise" : "FLIR E6-XT",
         standardImageUrl: imageUrls[0],

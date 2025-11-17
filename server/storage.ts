@@ -89,6 +89,26 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
     this.users.set(demoUser.id, demoUser);
+    
+    // Create test user for test login functionality
+    const testUser: User = {
+      id: this.userId++,
+      email: "test@example.com",
+      password: "password",
+      role: "field-rep",
+      firstName: "Test",
+      lastName: "User",
+      phone: null,
+      certificationLevel: "junior",
+      certificationDate: null,
+      certificationExpiry: null,
+      inspectionHours: 0,
+      approvedDARs: 0,
+      trainingProgress: null,
+      performanceMetrics: null,
+      createdAt: new Date(),
+    };
+    this.users.set(testUser.id, testUser);
 
     // Create realistic properties with actual locations and damage imagery
     const property1: Property = {
