@@ -293,7 +293,7 @@ const Landing = () => {
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
-                  className="h-56 md:h-72 lg:h-80 xl:h-96 w-auto mx-auto filter drop-shadow-2xl"
+                  className="h-[16.8rem] md:h-[21.6rem] lg:h-96 xl:h-[28.8rem] w-auto mx-auto filter drop-shadow-2xl"
                 />
               </div>
             </div>
