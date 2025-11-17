@@ -688,7 +688,7 @@ const Landing = () => {
       <section 
         ref={testimonialsRef}
         id="testimonials" 
-        className="py-20 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden"
+        className="py-20 bg-gradient-to-b from-muted/30 via-background to-primary/30 relative overflow-hidden"
       >
         {/* Floating Background Elements */}
         <motion.div 
