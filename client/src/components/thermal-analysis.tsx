@@ -8,10 +8,11 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Upload, Camera, Thermometer, AlertTriangle, CheckCircle, Clock, Activity } from 'lucide-react';
+import { Upload, Camera, Thermometer, AlertTriangle, CheckCircle, Clock, Activity, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ThermalReading, DetailedIssue, InspectionMetric } from '@shared/schema';
+import { CameraCapture } from './camera-capture';
 
 interface ThermalAnalysisResult {
   thermalReadings: ThermalReading[];
@@ -54,8 +55,28 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
       });
     }
     
-    setSelectedFiles(validFiles);
+    // Merge with existing files, avoiding duplicates by name
+    setSelectedFiles(prev => {
+      const existingNames = new Set(prev.map(f => f.name));
+      const newFiles = validFiles.filter(f => !existingNames.has(f.name));
+      return [...prev, ...newFiles];
+    });
   }, [toast]);
+
+  const handleCameraCapture = useCallback((imageData: string, filename: string) => {
+    // Convert base64 to File object
+    const byteString = atob(imageData.split(',')[1]);
+    const mimeString = imageData.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    const file = new File([blob], filename, { type: mimeString });
+    
+    setSelectedFiles(prev => [...prev, file]);
+  }, []);
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -73,7 +94,7 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
     try {
       const base64 = await convertToBase64(file);
       
-      const response = await apiRequest<ThermalAnalysisResult>('/api/thermal/analyze', {
+      const response = await apiRequest('/api/thermal/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +113,8 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
       return response;
     } catch (error) {
       console.error('Analysis error:', error);
-      throw new Error(`Failed to analyze ${file.name}: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to analyze ${file.name}: ${errorMessage}`);
     }
   };
 
@@ -145,9 +167,10 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
       
     } catch (error) {
       console.error('Analysis failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to analyze thermal images';
       toast({
         title: "Analysis Failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -236,10 +259,28 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
             <TabsContent value="upload" className="space-y-4">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label htmlFor="thermal-images" className="text-lg font-medium cursor-pointer">
                     Select Thermal Images
                   </Label>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <Button
+                      data-testid="button-choose-files"
+                      onClick={() => document.getElementById('thermal-images')?.click()}
+                      className="touch-target"
+                    >
+                      Choose Files
+                    </Button>
+                    
+                    <CameraCapture
+                      onCapture={handleCameraCapture}
+                      buttonLabel="Take Photo"
+                      captureType="thermal"
+                      className="w-full sm:w-auto"
+                    />
+                  </div>
+                  
                   <Input
                     id="thermal-images"
                     type="file"
@@ -249,19 +290,39 @@ export const ThermalAnalysis: React.FC<ThermalAnalysisProps> = ({
                     className="hidden"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Upload thermal images for AI analysis
+                    Upload or capture thermal images for AI analysis
                   </p>
                 </div>
               </div>
               
               {selectedFiles.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium">Selected Files:</h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Selected Files ({selectedFiles.length}):</h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedFiles([])}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
                   <div className="space-y-1">
                     {selectedFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                        <span className="text-sm">{file.name}</span>
-                        <Badge variant="secondary">{(file.size / 1024 / 1024).toFixed(1)} MB</Badge>
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded gap-2">
+                        <span className="text-sm truncate flex-1">{file.name}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{(file.size / 1024 / 1024).toFixed(1)} MB</Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>

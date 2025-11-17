@@ -27,6 +27,7 @@ import { GoogleMapsDrawing } from './google-maps-drawing';
 import { AIInspectionAssistant } from './ai-inspection-assistant';
 import { MobileWorkflowNav } from './mobile-workflow-nav';
 import { EducationalTooltip } from './educational-tooltip';
+import { CameraCapture } from './camera-capture';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
