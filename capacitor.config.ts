@@ -4,11 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.winnstorm.inspector',
   appName: 'WinnStorm',
   webDir: 'dist/public',
-  server: {
-    androidScheme: 'https',
-    iosScheme: 'https',
-    hostname: 'winnstorm.app'
-  },
   plugins: {
     Camera: {
       presentationStyle: 'fullscreen',
