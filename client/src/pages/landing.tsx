@@ -653,6 +653,16 @@ const Landing = () => {
                     }`}
                     variant={plan.buttonVariant}
                     size="lg"
+                    onClick={() => {
+                      if (plan.name === "Enterprise") {
+                        // Scroll to contact section for enterprise
+                        window.location.hash = 'contact';
+                      } else {
+                        // Navigate to subscription checkout
+                        navigate(`/subscribe/${plan.name.toLowerCase()}`);
+                      }
+                    }}
+                    data-testid={`button-subscribe-${plan.name.toLowerCase()}`}
                   >
                     {plan.buttonText}
                   </Button>

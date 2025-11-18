@@ -50,6 +50,14 @@ Building a comprehensive online application that serves as the central hub for D
 5. **Adaptive Learning**: Stormy reduces guidance as user demonstrates competency
 
 ## Recent Changes
+- **2025-11-18**: STRIPE SUBSCRIPTION PAYMENTS - Integrated subscription-based monetization with Stripe:
+  - Created /subscribe/:plan page with Stripe Elements payment form
+  - Built /subscription-success page with post-payment onboarding
+  - Connected landing page pricing buttons to subscription checkout flow
+  - Backend API route /api/create-subscription creates Stripe customers and subscriptions
+  - Payment flow: Landing → Choose Plan → Stripe Checkout → Success Page → Dashboard
+  - Supports Starter, Professional, and Enterprise pricing tiers
+  - Test mode enabled with Stripe test keys (VITE_STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY)
 - **2025-11-17**: NATIVE iOS & ANDROID APPLICATIONS - Transformed WinnStorm into native mobile apps using Capacitor:
   - Configured Capacitor 7.x with iOS and Android platforms
   - Enhanced camera-capture component with native Capacitor Camera API (falls back to web on browsers)

@@ -6,6 +6,7 @@ import { insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmCo
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest } from './ai-assistant';
+import Stripe from 'stripe';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -476,6 +477,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('AI Inspection analysis error:', error);
       res.status(500).json({ 
         message: "Failed to analyze inspection data", 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // Stripe subscription routes
+  app.post("/api/create-subscription", async (req, res) => {
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ message: "Stripe is not configured" });
+      }
+
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2025-10-29.clover',
+      });
+
+      const { plan } = req.body;
+
+      // Map plan names to Stripe price IDs
+      // You'll need to create these products in your Stripe Dashboard
+      const priceMap: Record<string, string> = {
+        'starter': process.env.STRIPE_PRICE_STARTER || '',
+        'professional': process.env.STRIPE_PRICE_PROFESSIONAL || '',
+        'enterprise': process.env.STRIPE_PRICE_ENTERPRISE || ''
+      };
+
+      const priceId = priceMap[plan.toLowerCase()];
+      
+      if (!priceId) {
+        // For development, create a subscription without a specific price
+        // In production, you should have actual price IDs from Stripe
+        console.warn(`No Stripe price ID configured for plan: ${plan}. Using demo mode.`);
+      }
+
+      // Create a customer (in production, check if customer already exists)
+      const customer = await stripe.customers.create({
+        metadata: {
+          plan: plan,
+        },
+      });
+
+      // Create a subscription with payment intent
+      const subscription = await stripe.subscriptions.create({
+        customer: customer.id,
+        items: priceId ? [{ price: priceId }] : [],
+        payment_behavior: 'default_incomplete',
+        payment_settings: { 
+          save_default_payment_method: 'on_subscription',
+        },
+        expand: ['latest_invoice.payment_intent'],
+      });
+
+      const invoice = subscription.latest_invoice as any;
+      const paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent;
+
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error) {
+      console.error('Stripe subscription creation error:', error);
+      res.status(500).json({ 
+        message: "Failed to create subscription", 
         error: (error as Error).message 
       });
     }

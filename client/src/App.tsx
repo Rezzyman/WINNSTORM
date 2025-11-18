@@ -14,6 +14,8 @@ import CrmIntegrations from "@/pages/crm-integrations";
 import Training from "@/pages/training";
 import Projects from "@/pages/projects";
 import Landing from "@/pages/landing";
+import Subscribe from "@/pages/subscribe";
+import SubscriptionSuccess from "@/pages/subscription-success";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 
@@ -22,6 +24,8 @@ function Router() {
     <Switch>
       <Route path="/auth" component={Auth} />
       <Route path="/" component={Landing} />
+      <Route path="/subscribe/:plan" component={Subscribe} />
+      <Route path="/subscription-success" component={SubscriptionSuccess} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/upload" component={Upload} />
       <Route path="/analysis/:id" component={Analysis} />
