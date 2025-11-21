@@ -362,7 +362,7 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
         <Button
           onClick={handleSync}
           disabled={!selectedCrmId || syncMutation.isPending}
-          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600"
+          className="w-full bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 disabled:opacity-50"
         >
           {syncMutation.isPending ? (
             <>

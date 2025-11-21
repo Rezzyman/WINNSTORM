@@ -219,7 +219,7 @@ export const CrmConfigManager: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -240,7 +240,7 @@ export const CrmConfigManager: React.FC = () => {
             resetForm();
             setSelectedConfig(null);
           }}
-          className="bg-red-600 hover:bg-red-700"
+          className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Integration
@@ -418,7 +418,7 @@ export const CrmConfigManager: React.FC = () => {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90"
                   disabled={createConfigMutation.isPending || updateConfigMutation.isPending}
                 >
                   {createConfigMutation.isPending || updateConfigMutation.isPending ? 'Saving...' : 'Save Integration'}

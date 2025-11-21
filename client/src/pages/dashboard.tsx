@@ -55,9 +55,9 @@ const Dashboard = () => {
       ? 'Good'
       : 'N/A',
     certificationLevel: 'Junior',
-    scans: properties?.length || 0,
-    reports: properties?.length || 0,
-    avgScore: properties && properties.length > 0 ? '8.5' : 'N/A'
+    scans: '—',
+    reports: '—',
+    avgScore: '—'
   };
 
   return (
