@@ -95,7 +95,6 @@ const Auth = () => {
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log('Test login button clicked');
                     
                     try {
                       // Use the auth context test login function
@@ -107,7 +106,6 @@ const Auth = () => {
                         description: "Redirecting to dashboard...",
                       });
                       
-                      console.log('Navigating to dashboard...');
                       
                       // Navigate to dashboard using direct URL change
                       setTimeout(() => {

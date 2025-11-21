@@ -31,15 +31,10 @@ export default function WinnReportPage() {
   const handleReportComplete = (reportData: WinnReportData) => {
     setGeneratedReport(reportData);
     setReportCompleted(true);
-    
-    // Here you would typically send the data to your backend
-    // For now, we'll just show a completion message
-    console.log('Winn Report Generated:', reportData);
   };
 
   const handleGenerateBlockchainEntry = () => {
-    // This would integrate with your blockchain system
-    console.log('Generating blockchain entry for immutable roof history...');
+    // Future: integrate with blockchain system for immutable records
   };
 
   if (reportCompleted && generatedReport) {

@@ -830,9 +830,7 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
               weatherData={reportData.weatherConditions}
               issues={reportData.issues}
               components={reportData.roofComponents}
-              onGuidanceReceived={(guidance) => {
-                console.log('AI Guidance received:', guidance);
-              }}
+              onGuidanceReceived={() => {}}
             />
           </div>
         </div>
