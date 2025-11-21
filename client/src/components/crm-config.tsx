@@ -229,8 +229,8 @@ export const CrmConfigManager: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-white">CRM Integrations</h2>
-          <p className="text-gray-400 mt-1">
+          <h2 className="text-2xl font-bold text-foreground">CRM Integrations</h2>
+          <p className="text-muted-foreground mt-1">
             Connect your roofing CRM to automatically sync property data and reports
           </p>
         </div>
@@ -250,15 +250,15 @@ export const CrmConfigManager: React.FC = () => {
       {/* Configuration List */}
       <div className="grid gap-4">
         {configs.map((config) => (
-          <Card key={config.id} className="bg-zinc-900 border-zinc-800">
+          <Card key={config.id} className="bg-card border-border">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-foreground flex items-center gap-2">
                     <Database className="w-5 h-5" />
                     {config.name}
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
+                  <CardDescription className="text-muted-foreground">
                     {CRM_TYPES.find(t => t.value === config.type)?.label || config.type}
                   </CardDescription>
                 </div>
@@ -270,7 +270,7 @@ export const CrmConfigManager: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEdit(config)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <Settings className="w-4 h-4" />
                   </Button>
@@ -288,12 +288,12 @@ export const CrmConfigManager: React.FC = () => {
             <CardContent>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-400">API Endpoint:</span>
-                  <p className="text-white font-mono text-xs truncate">{config.baseUrl}</p>
+                  <span className="text-muted-foreground">API Endpoint:</span>
+                  <p className="text-foreground font-mono text-xs truncate">{config.baseUrl}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">Created:</span>
-                  <p className="text-white">{new Date(config.createdAt).toLocaleDateString()}</p>
+                  <span className="text-muted-foreground">Created:</span>
+                  <p className="text-foreground">{new Date(config.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             </CardContent>
@@ -303,12 +303,12 @@ export const CrmConfigManager: React.FC = () => {
 
       {/* Create/Edit Form */}
       {isCreating && (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">
+            <CardTitle className="text-foreground">
               {selectedConfig ? 'Edit Integration' : 'New CRM Integration'}
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-muted-foreground">
               Configure your CRM connection settings
             </CardDescription>
           </CardHeader>
@@ -316,28 +316,28 @@ export const CrmConfigManager: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name" className="text-white">Integration Name</Label>
+                  <Label htmlFor="name" className="text-foreground">Integration Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="e.g., Main JobNimbus"
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-muted border-input text-foreground"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="type" className="text-white">CRM Type</Label>
+                  <Label htmlFor="type" className="text-foreground">CRM Type</Label>
                   <Select value={formData.type} onValueChange={handleTypeChange}>
-                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectTrigger className="bg-muted border-input text-foreground">
                       <SelectValue placeholder="Select CRM type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectContent className="bg-muted border-input">
                       {CRM_TYPES.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           <div>
                             <div className="font-medium">{type.label}</div>
-                            <div className="text-xs text-gray-400">{type.description}</div>
+                            <div className="text-xs text-muted-foreground">{type.description}</div>
                           </div>
                         </SelectItem>
                       ))}
@@ -347,49 +347,49 @@ export const CrmConfigManager: React.FC = () => {
               </div>
 
               <div>
-                <Label htmlFor="apiKey" className="text-white">API Key</Label>
+                <Label htmlFor="apiKey" className="text-foreground">API Key</Label>
                 <Input
                   id="apiKey"
                   type="password"
                   value={formData.apiKey}
                   onChange={(e) => setFormData(prev => ({ ...prev, apiKey: e.target.value }))}
                   placeholder="Enter your API key"
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-muted border-input text-foreground"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="baseUrl" className="text-white">API Base URL</Label>
+                <Label htmlFor="baseUrl" className="text-foreground">API Base URL</Label>
                 <Input
                   id="baseUrl"
                   value={formData.baseUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, baseUrl: e.target.value }))}
                   placeholder="https://api.example.com/v1"
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-muted border-input text-foreground"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="webhookUrl" className="text-white">Webhook URL (Optional)</Label>
+                <Label htmlFor="webhookUrl" className="text-foreground">Webhook URL (Optional)</Label>
                 <Input
                   id="webhookUrl"
                   value={formData.webhookUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, webhookUrl: e.target.value }))}
                   placeholder="https://your-webhook-endpoint.com"
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-muted border-input text-foreground"
                 />
               </div>
 
               <div>
-                <Label htmlFor="customFields" className="text-white">Custom Fields (JSON)</Label>
+                <Label htmlFor="customFields" className="text-foreground">Custom Fields (JSON)</Label>
                 <Textarea
                   id="customFields"
                   value={formData.customFields}
                   onChange={(e) => setFormData(prev => ({ ...prev, customFields: e.target.value }))}
                   placeholder='{"field1": "value1", "field2": "value2"}'
-                  className="bg-zinc-800 border-zinc-700 text-white font-mono"
+                  className="bg-muted border-input text-foreground font-mono"
                   rows={3}
                 />
               </div>
@@ -400,7 +400,7 @@ export const CrmConfigManager: React.FC = () => {
                   checked={formData.isActive}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
                 />
-                <Label htmlFor="isActive" className="text-white">Active</Label>
+                <Label htmlFor="isActive" className="text-foreground">Active</Label>
               </div>
 
               <div className="flex justify-end space-x-2">
@@ -412,7 +412,7 @@ export const CrmConfigManager: React.FC = () => {
                     setSelectedConfig(null);
                     resetForm();
                   }}
-                  className="border-zinc-600 text-gray-300"
+                  className="border-border text-foreground"
                 >
                   Cancel
                 </Button>
@@ -431,17 +431,17 @@ export const CrmConfigManager: React.FC = () => {
 
       {/* Sync Logs */}
       {selectedConfig && syncLogs.length > 0 && (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Sync History</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardTitle className="text-foreground">Sync History</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Recent synchronization activity for {selectedConfig.name}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {syncLogs.slice(0, 10).map((log) => (
-                <div key={log.id} className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg">
+                <div key={log.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div className="flex items-center gap-3">
                     {log.status === 'success' ? (
                       <CheckCircle className="w-5 h-5 text-green-400" />
@@ -449,8 +449,8 @@ export const CrmConfigManager: React.FC = () => {
                       <AlertCircle className="w-5 h-5 text-red-400" />
                     )}
                     <div>
-                      <p className="text-white font-medium">{log.syncType} sync</p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-foreground font-medium">{log.syncType} sync</p>
+                      <p className="text-muted-foreground text-sm">
                         {new Date(log.syncedAt).toLocaleString()}
                       </p>
                     </div>
@@ -460,7 +460,7 @@ export const CrmConfigManager: React.FC = () => {
                       {log.status}
                     </Badge>
                     {log.externalId && (
-                      <p className="text-gray-400 text-xs mt-1">ID: {log.externalId}</p>
+                      <p className="text-muted-foreground text-xs mt-1">ID: {log.externalId}</p>
                     )}
                   </div>
                 </div>

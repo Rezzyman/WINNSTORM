@@ -147,11 +147,11 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
 
   if (isLoading) {
     return (
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-            <span className="ml-2 text-gray-400">Loading CRM configurations...</span>
+            <span className="ml-2 text-muted-foreground">Loading CRM configurations...</span>
           </div>
         </CardContent>
       </Card>
@@ -160,9 +160,9 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
 
   if (activeCrmConfigs.length === 0) {
     return (
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
-          <div className="text-center text-gray-400">
+          <div className="text-center text-muted-foreground">
             <Database className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>No active CRM integrations found.</p>
             <p className="text-sm mt-1">Configure a CRM integration to sync property data.</p>
@@ -173,25 +173,25 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
   }
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800">
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground flex items-center gap-2">
           <Database className="w-5 h-5" />
           CRM Integration
         </CardTitle>
-        <CardDescription className="text-gray-400">
+        <CardDescription className="text-muted-foreground">
           Sync property data and inspection results to your CRM system
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* CRM Selection */}
         <div>
-          <Label htmlFor="crm-select" className="text-white">Select CRM</Label>
+          <Label htmlFor="crm-select" className="text-foreground">Select CRM</Label>
           <Select value={selectedCrmId?.toString()} onValueChange={(value) => setSelectedCrmId(parseInt(value))}>
-            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+            <SelectTrigger className="bg-muted border-input text-foreground">
               <SelectValue placeholder="Choose a CRM integration" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
+            <SelectContent className="bg-muted border-input">
               {activeCrmConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id.toString()}>
                   <div className="flex items-center gap-2">
@@ -208,37 +208,37 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
         </div>
 
         {/* Property Summary */}
-        <div className="bg-zinc-800 p-4 rounded-lg">
-          <h4 className="text-white font-medium mb-2 flex items-center gap-2">
+        <div className="bg-muted p-4 rounded-lg">
+          <h4 className="text-foreground font-medium mb-2 flex items-center gap-2">
             <Building className="w-4 h-4" />
             Property Summary
           </h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-400">Name:</span>
-              <p className="text-white">{property.name}</p>
+              <span className="text-muted-foreground">Name:</span>
+              <p className="text-foreground">{property.name}</p>
             </div>
             <div>
-              <span className="text-gray-400">Health Score:</span>
-              <p className="text-white">{property.healthScore}/100</p>
+              <span className="text-muted-foreground">Health Score:</span>
+              <p className="text-foreground">{property.healthScore}/100</p>
             </div>
             <div>
-              <span className="text-gray-400">Address:</span>
-              <p className="text-white">{property.address}</p>
+              <span className="text-muted-foreground">Address:</span>
+              <p className="text-foreground">{property.address}</p>
             </div>
             <div>
-              <span className="text-gray-400">Issues Found:</span>
-              <p className="text-white">{scan.issues.length} issues</p>
+              <span className="text-muted-foreground">Issues Found:</span>
+              <p className="text-foreground">{scan.issues.length} issues</p>
             </div>
           </div>
           
           {/* Issues Preview */}
           {scan.issues.length > 0 && (
             <div className="mt-3">
-              <p className="text-gray-400 text-sm mb-2">Critical Issues:</p>
+              <p className="text-muted-foreground text-sm mb-2">Critical Issues:</p>
               <div className="flex flex-wrap gap-1">
                 {scan.issues.filter(issue => issue.severity === 'critical').slice(0, 3).map((issue, index) => (
-                  <Badge key={index} className={`${getSeverityColor(issue.severity)} text-white text-xs`}>
+                  <Badge key={index} className={`${getSeverityColor(issue.severity)} text-foreground text-xs`}>
                     {issue.title}
                   </Badge>
                 ))}
@@ -257,7 +257,7 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
           <Button
             variant="outline"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full justify-between border-zinc-700 text-white hover:bg-zinc-800"
+            className="w-full justify-between border-input text-foreground hover:bg-muted"
           >
             <span className="flex items-center gap-2">
               <User className="w-4 h-4" />
@@ -267,25 +267,25 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
           </Button>
           
           {isExpanded && (
-            <div className="mt-4 space-y-3 bg-zinc-800 p-4 rounded-lg">
+            <div className="mt-4 space-y-3 bg-muted p-4 rounded-lg">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="firstName" className="text-white">First Name *</Label>
+                  <Label htmlFor="firstName" className="text-foreground">First Name *</Label>
                   <Input
                     id="firstName"
                     value={ownerInfo.firstName}
                     onChange={(e) => setOwnerInfo(prev => ({ ...prev, firstName: e.target.value }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="John"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName" className="text-white">Last Name *</Label>
+                  <Label htmlFor="lastName" className="text-foreground">Last Name *</Label>
                   <Input
                     id="lastName"
                     value={ownerInfo.lastName}
                     onChange={(e) => setOwnerInfo(prev => ({ ...prev, lastName: e.target.value }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="Doe"
                   />
                 </div>
@@ -293,42 +293,42 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="email" className="text-white">Email *</Label>
+                  <Label htmlFor="email" className="text-foreground">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={ownerInfo.email}
                     onChange={(e) => setOwnerInfo(prev => ({ ...prev, email: e.target.value }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="john@example.com"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone" className="text-white">Phone</Label>
+                  <Label htmlFor="phone" className="text-foreground">Phone</Label>
                   <Input
                     id="phone"
                     value={ownerInfo.phone}
                     onChange={(e) => setOwnerInfo(prev => ({ ...prev, phone: e.target.value }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="(555) 123-4567"
                   />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="company" className="text-white">Company</Label>
+                <Label htmlFor="company" className="text-foreground">Company</Label>
                 <Input
                   id="company"
                   value={ownerInfo.company}
                   onChange={(e) => setOwnerInfo(prev => ({ ...prev, company: e.target.value }))}
-                  className="bg-zinc-700 border-zinc-600 text-white"
+                  className="bg-input border-border text-foreground"
                   placeholder="Company Name"
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="city" className="text-white">City</Label>
+                  <Label htmlFor="city" className="text-foreground">City</Label>
                   <Input
                     id="city"
                     value={ownerInfo.address?.city || ''}
@@ -336,12 +336,12 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
                       ...prev, 
                       address: { ...prev.address!, city: e.target.value }
                     }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="City"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state" className="text-white">State</Label>
+                  <Label htmlFor="state" className="text-foreground">State</Label>
                   <Input
                     id="state"
                     value={ownerInfo.address?.state || ''}
@@ -349,7 +349,7 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
                       ...prev, 
                       address: { ...prev.address!, state: e.target.value }
                     }))}
-                    className="bg-zinc-700 border-zinc-600 text-white"
+                    className="bg-input border-border text-foreground"
                     placeholder="State"
                   />
                 </div>
