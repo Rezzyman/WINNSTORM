@@ -6,6 +6,7 @@ import { insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmCo
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest } from './ai-assistant';
+import { requireAuth } from './auth';
 import Stripe from 'stripe';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -17,14 +18,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // User routes
   app.get("/api/user", async (req, res) => {
-    // Would normally verify the user's session/token here
-    // For MVP, we're using a demo user
+    if (!requireAuth(req)) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
     const demoUser = await storage.getUserByEmail("demo@example.com");
     if (!demoUser) {
       return res.status(404).json({ message: "User not found" });
     }
     
-    // Don't send password in response
     const { password, ...userWithoutPassword } = demoUser;
     res.json(userWithoutPassword);
   });
