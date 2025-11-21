@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocation, useRoute } from 'wouter';
 import { Header, Footer } from '@/components/navbar';
 import { PropertyCard } from '@/components/property-card';
+import { UserOnboarding } from '@/components/user-onboarding';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const { user, role } = useAuth();
   const [, navigate] = useLocation();
   const [, params] = useRoute('/dashboard');
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -22,6 +24,23 @@ const Dashboard = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    if (user) {
+      const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user.uid}`);
+      if (!hasCompletedOnboarding) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [user]);
+
+  const handleOnboardingComplete = () => {
+    if (user) {
+      localStorage.setItem(`onboarding_completed_${user.uid}`, 'true');
+    }
+    setShowOnboarding(false);
+  };
 
   // Fetch properties and projects
   const { data: properties, isLoading } = useQuery<Property[]>({
@@ -280,6 +299,15 @@ const Dashboard = () => {
       </main>
       
       <Footer />
+
+      {/* Onboarding Modal */}
+      {user && (
+        <UserOnboarding
+          isOpen={showOnboarding}
+          onComplete={handleOnboardingComplete}
+          userEmail={user.email || ''}
+        />
+      )}
     </div>
   );
 };

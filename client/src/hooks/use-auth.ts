@@ -19,7 +19,6 @@ interface AuthContextType {
   register: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   setUserRole: (role: UserRole) => void;
-  testLogin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,20 +35,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for test user first
-    const testUser = localStorage.getItem('test_user');
-    const testRole = localStorage.getItem('userRole');
-    
-    console.log('Auth hook checking for test user:', { testUser, testRole });
-    
-    if (testUser && testRole) {
-      console.log('Found test user, setting auth state');
-      setUser(JSON.parse(testUser));
-      setRole(testRole as UserRole);
-      setLoading(false);
-      return;
-    }
-    
     const unsubscribe = onAuthChange((authUser) => {
       setUser(authUser);
       setLoading(false);
@@ -106,16 +91,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      
-      // Handle test user logout
-      if (localStorage.getItem('test_user')) {
-        localStorage.removeItem('test_user');
-        localStorage.removeItem('userRole');
-        setUser(null);
-        setRole(null);
-        return;
-      }
-      
       await logoutUser();
       setUser(null);
       setRole(null);
@@ -132,25 +107,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const testLogin = () => {
-    const mockUser = {
-      uid: 'test-user-123',
-      email: 'test@example.com',
-      displayName: 'Test User',
-      photoURL: null,
-      emailVerified: true
-    } as User;
-    
-    // Set localStorage
-    localStorage.setItem('test_user', JSON.stringify(mockUser));
-    localStorage.setItem('userRole', 'field-rep');
-    
-    // Update state immediately
-    setUser(mockUser);
-    setRole('field-rep');
-    setLoading(false);
-  };
-
   const value = {
     user,
     role,
@@ -160,7 +116,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     register,
     logout,
     setUserRole,
-    testLogin,
   };
 
   // Use createElement instead of JSX to avoid build issues

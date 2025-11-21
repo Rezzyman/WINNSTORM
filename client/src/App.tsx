@@ -18,8 +18,24 @@ import Subscribe from "@/pages/subscribe";
 import SubscriptionSuccess from "@/pages/subscription-success";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
+import { useEffect } from "react";
+
+// Clean up old test user data from localStorage
+function useCleanupTestData() {
+  useEffect(() => {
+    const testUser = localStorage.getItem('test_user');
+    const userRole = localStorage.getItem('userRole');
+    
+    if (testUser || userRole) {
+      localStorage.removeItem('test_user');
+      localStorage.removeItem('userRole');
+    }
+  }, []);
+}
 
 function Router() {
+  useCleanupTestData();
+  
   return (
     <Switch>
       <Route path="/auth" component={Auth} />

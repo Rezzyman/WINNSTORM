@@ -19,7 +19,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { user, login, loginWithGoogle, testLogin } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   
@@ -89,47 +89,6 @@ const Auth = () => {
         <Card className="border border-border shadow-lg bg-gradient-to-b from-card to-card/95 backdrop-blur-sm">
           <CardContent className="pt-6">
             <form onSubmit={handleLogin}>
-              {/* Test Login Button */}
-              <div className="mb-6">
-                <Button 
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    
-                    try {
-                      // Use the auth context test login function
-                      testLogin();
-                      
-                      // Show success toast
-                      toast({
-                        title: "Test Login Successful",
-                        description: "Redirecting to dashboard...",
-                      });
-                      
-                      
-                      // Navigate to dashboard using direct URL change
-                      setTimeout(() => {
-                        navigate('/dashboard');
-                      }, 100);
-                    } catch (error) {
-                      console.error('Test login error:', error);
-                      toast({
-                        title: "Test Login Failed",
-                        description: "Please try again",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
-                >
-                  🧪 Test Login (No Registration Required)
-                </Button>
-              </div>
-
-              <div className="text-center mb-4">
-                <span className="text-muted-foreground text-sm">OR</span>
-              </div>
-
               <div className="mb-6">
                 <Label htmlFor="email" className="block text-foreground text-sm font-medium mb-2">
                   Email

@@ -48,13 +48,6 @@ const UploadPage = () => {
   const [scanType, setScanType] = useState<'drone' | 'handheld'>('drone');
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<FileUploadItem[]>([]);
-  
-  // Mock recent uploads
-  const [recentUploads] = useState([
-    { id: '1', name: 'thermal_scan_001.jpg', size: '3.2 MB', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-    { id: '2', name: 'thermal_scan_002.jpg', size: '2.8 MB', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) }
-  ]);
-  const [selectedRecentFiles, setSelectedRecentFiles] = useState<Set<string>>(new Set());
 
   const uploadMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -130,7 +123,7 @@ const UploadPage = () => {
       return;
     }
 
-    if (files.length === 0 && selectedRecentFiles.size === 0) {
+    if (files.length === 0) {
       toast({
         title: 'No files selected',
         description: 'Please upload at least one thermal image',
@@ -145,27 +138,19 @@ const UploadPage = () => {
     try {
       let imageUrls: string[] = [];
       
-      // Upload new files to Firebase Storage (if any)
-      if (files.length > 0) {
-        try {
-          const uploadPromises = files.map(async (file) => {
-            const path = `scans/${Date.now()}_${file.file.name}`;
-            const { downloadURL } = await uploadFile(file.file, path);
-            return downloadURL;
-          });
-          imageUrls = await Promise.all(uploadPromises);
-        } catch (uploadError) {
-          console.error('Firebase upload error:', uploadError);
-          // If Firebase is not configured, use mock URLs for demo
-          imageUrls = files.map(f => `https://storage.demo.com/scans/${f.file.name}`);
-        }
+      // Upload files to Firebase Storage
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const path = `scans/${Date.now()}_${file.file.name}`;
+          const { downloadURL } = await uploadFile(file.file, path);
+          return downloadURL;
+        });
+        imageUrls = await Promise.all(uploadPromises);
+      } catch (uploadError) {
+        console.error('Firebase upload error:', uploadError);
+        // If Firebase is not configured, use mock URLs for demo
+        imageUrls = files.map(f => `https://storage.demo.com/scans/${f.file.name}`);
       }
-      
-      // Add URLs for selected recent files (already uploaded)
-      const recentFileUrls = Array.from(selectedRecentFiles).map(id => {
-        const file = recentUploads.find(f => f.id === id);
-        return `https://storage.example.com/scans/${file?.name}`;
-      });
       
       // Submit property data with image URLs
       const propertyData = {
@@ -173,7 +158,7 @@ const UploadPage = () => {
         address,
         scanType,
         notes,
-        imageUrls: [...imageUrls, ...recentFileUrls],
+        imageUrls,
         captureDate: new Date().toISOString()
       };
 
@@ -363,50 +348,6 @@ const UploadPage = () => {
               </Button>
             </CardContent>
           </Card>
-
-          {/* Recently Uploaded */}
-          {recentUploads.length > 0 && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-neutral-darker mb-3">Recently Uploaded</h3>
-                <div className="space-y-3">
-                  {recentUploads.map((item) => {
-                    const isSelected = selectedRecentFiles.has(item.id);
-                    return (
-                      <div 
-                        key={item.id} 
-                        className={`flex items-center p-2 border rounded-lg cursor-pointer transition ${
-                          isSelected 
-                            ? 'border-primary bg-blue-50 dark:bg-blue-950/20' 
-                            : 'border-neutral-medium hover:bg-neutral-light'
-                        }`}
-                        onClick={() => {
-                          const newSelected = new Set(selectedRecentFiles);
-                          if (isSelected) {
-                            newSelected.delete(item.id);
-                          } else {
-                            newSelected.add(item.id);
-                          }
-                          setSelectedRecentFiles(newSelected);
-                        }}
-                        data-testid={`recent-file-${item.id}`}
-                      >
-                        <Image className="text-neutral-dark mr-3" />
-                        <div className="flex-grow">
-                          <p className="text-sm font-medium text-neutral-darker">{item.name}</p>
-                          <p className="text-xs text-neutral-dark">{item.size} - Uploaded {formatDate(item.date)}</p>
-                        </div>
-                        <Check 
-                          className={`${isSelected ? 'text-primary' : 'text-neutral-medium'}`}
-                          data-testid={`check-${item.id}`}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
       

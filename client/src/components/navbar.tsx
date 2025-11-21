@@ -76,7 +76,9 @@ export const Footer = () => {
             <span className="text-xs mt-1">CRM</span>
           </button>
           <button 
-            className="flex flex-col items-center text-muted-foreground hover:text-foreground"
+            className={`flex flex-col items-center ${location === '/reports' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => navigate('/reports')}
+            data-testid="button-reports"
           >
             <ChartScatter className="h-6 w-6" />
             <span className="text-xs mt-1">Reports</span>
