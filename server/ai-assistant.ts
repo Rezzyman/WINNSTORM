@@ -1,7 +1,11 @@
 import OpenAI from 'openai';
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// This is using Replit's AI Integrations service, which provides OpenAI-compatible API access without requiring your own OpenAI API key.
+// the newest OpenAI model is "gpt-5.1" which was released August 7, 2025. do not change this unless explicitly requested by the user
+const openai = new OpenAI({
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
+});
 
 export interface AIAssistantRequest {
   message: string;
@@ -82,10 +86,10 @@ Keep responses concise but comprehensive, focusing on practical application of t
     messages.push({ role: 'user', content: request.message });
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.1', // the newest OpenAI model is "gpt-5.1" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages,
-      max_tokens: 1000,
-      temperature: 0.3, // Lower temperature for more consistent, professional responses
+      max_completion_tokens: 1000, // GPT-5.1 uses max_completion_tokens instead of max_tokens
+      // temperature is not specifiable for GPT-5.1 (always defaults to 1)
     });
 
     const content = response.choices[0].message.content;
@@ -140,7 +144,7 @@ Format the response as JSON with the following structure:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.1', // the newest OpenAI model is "gpt-5.1" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages: [
         {
           role: 'system',
@@ -148,8 +152,8 @@ Format the response as JSON with the following structure:
         },
         { role: 'user', content: prompt }
       ],
-      max_tokens: 1500,
-      temperature: 0.2,
+      max_completion_tokens: 1500, // GPT-5.1 uses max_completion_tokens instead of max_tokens
+      // temperature is not specifiable for GPT-5.1 (always defaults to 1)
       response_format: { type: "json_object" },
     });
 
