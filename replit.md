@@ -12,9 +12,10 @@ Building a comprehensive online application that serves as the central hub for D
 
 ## Technical Architecture
 - **Frontend**: React + TypeScript + Tailwind CSS (professional dark theme with WinnStorm branding)
-- **Backend**: Express.js with in-memory storage (scalable for future growth)
-- **Database**: Currently MemStorage with flexible structure for complex data relationships
-- **Theme**: Professional dark interface with blue/gray accents for enterprise consulting environment
+- **Backend**: Express.js with PostgreSQL database via Drizzle ORM
+- **Database**: PostgreSQL (production-ready persistence with full data integrity)
+- **AI Integration**: Replit AI Integrations with GPT-5.1 for Stormy AI assistant (no API key management required)
+- **Theme**: Professional dark interface with WinnStorm cyan gradient brand colors
 
 ## User Preferences
 - Professional enterprise-grade interface design suitable for damage assessment consultants
@@ -50,6 +51,22 @@ Building a comprehensive online application that serves as the central hub for D
 5. **Adaptive Learning**: Stormy reduces guidance as user demonstrates competency
 
 ## Recent Changes
+- **2025-11-24**: STORMY AI UPGRADED TO GPT-5.1 - Enhanced AI assistant with latest OpenAI model:
+  - Installed Replit AI Integrations for seamless GPT-5.1 access (no API key needed, charges to Replit credits)
+  - Upgraded all AI endpoints from GPT-4o to GPT-5.1 for improved reasoning and contextual awareness
+  - Enhanced system prompts with Eric Winn methodology focus for damage assessment expertise
+  - Updated thermal image analysis with hail damage pattern recognition and moisture detection
+  - Improved conversational AI for better beginner-to-expert adaptive coaching
+  - Ready for Thursday's Blitzy assessment meeting with superior AI guidance capabilities
+- **2025-11-24**: VISUAL CONSISTENCY & DATABASE MIGRATION - Production readiness improvements:
+  - Migrated from MemStorage to PostgreSQL with Drizzle ORM for persistent data
+  - Replaced all hardcoded zinc/gray colors with WinnStorm theme variables (cyan brand consistency)
+  - Updated CRM buttons from red to WinnStorm gradient (primary → cyan-500)
+  - Dashboard stats show neutral placeholders instead of misleading mock data
+  - Firebase authentication fully implemented with Google sign-in and email/password
+  - User onboarding flow with first-time modal guide
+  - Fixed navigation - all footer buttons functional
+  - Zero LSP errors - codebase production-ready
 - **2025-11-18**: STRIPE SUBSCRIPTION PAYMENTS - Integrated subscription-based monetization with Stripe:
   - Created /subscribe/:plan page with Stripe Elements payment form
   - Built /subscription-success page with post-payment onboarding
@@ -85,7 +102,7 @@ Building a comprehensive online application that serves as the central hub for D
   - Mobile-optimized with touch-friendly review controls
 - **2025-02-05**: CREATED KILLER LANDING PAGE - Built comprehensive marketing website with parallax effects, detailed pricing tiers, testimonials, and complete feature showcase for WinnStorm.com
 - **2025-02-05**: ACTIVATED TRAINING PORTAL - Created comprehensive WinnStorm™ certification training portal with course management, progress tracking, and multi-level certification system
-- **2025-01-31**: IMPLEMENTED CONTEXTUAL AI ASSISTANT "STORMY" - Integrated OpenAI GPT-4o powered AI assistant named "Stormy" with Eric Winn's methodology for real-time inspection guidance
+- **2025-01-31**: IMPLEMENTED CONTEXTUAL AI ASSISTANT "STORMY" - Integrated OpenAI powered AI assistant named "Stormy" with Eric Winn's methodology for real-time inspection guidance (upgraded to GPT-5.1 on 2025-11-24)
 - **2025-01-31**: ENHANCED GOOGLE MAPS INTEGRATION - Added property address lookup with satellite view and drawing tools for roof section marking
 - **2025-01-31**: UPDATED STORMY AVATAR - Implemented custom cowboy hat avatar image (ChatGPT Image Jul 31, 2025, 03_42_36 PM_1753998186905.png) for AI assistant branding
 - **2025-01-09**: UPDATED WINNSTORM™ RESTORATION PRO LOGO - New blue gradient shield design with "Certified to Winn" badge integrated throughout application
@@ -99,16 +116,26 @@ Building a comprehensive online application that serves as the central hub for D
 - **2025-01-09**: Built project-based workflow system supporting client management, property assessment, and comprehensive reporting
 - **2025-01-09**: Integrated Winn Methodology data collection including core samples, moisture tests, soft metals, and compliance tracking
 
-## Test Login
-- **Test Login Button**: Green button on auth page bypasses Firebase authentication
-- **Test User**: Automatically creates test user with field-rep role
-- **Access**: Provides full access to dashboard and Winn Report functionality
-- **Logout**: Properly clears test user data and returns to login screen
+## Authentication
+- **Firebase Integration**: Google sign-in and email/password authentication
+- **User Onboarding**: First-time user guide modal after login
+- **Role-Based Access**: Consultant, admin, and client role management
+- **Session Management**: Secure token-based authentication with PostgreSQL persistence
 
-## AI Features
-- **Thermal Analysis**: Real-time AI analysis of thermal images using OpenAI GPT-4o
-- **Issue Detection**: Automatically identifies temperature anomalies, moisture, insulation gaps
-- **Metrics Generation**: Creates detailed inspection metrics and recommendations
+## AI Features (Powered by GPT-5.1)
+- **Stormy AI Assistant**: Context-aware conversational guidance using GPT-5.1 via Replit AI Integrations
+  - Adapts to user experience level (Beginner/Intermediate/Expert)
+  - Real-time inspection coaching based on Eric Winn methodology
+  - Step-specific educational tips and "Why This Matters" explanations
+  - No API key management required (charges to Replit credits)
+- **Thermal Image Analysis**: Advanced AI analysis of thermal imagery using GPT-5.1 vision capabilities
+  - Temperature anomaly detection and pattern recognition
+  - Moisture intrusion and water infiltration identification
+  - Hail damage signature analysis
+  - Insulation gap and thermal bridging detection
+  - Structural integrity assessment
+- **Automated Metrics Generation**: AI-powered inspection metrics and recommendations
+- **Report Generation**: Professional executive summaries for insurance claims and restoration planning
 - **Report Integration**: AI analysis results flow directly into Winn Report workflow
 
 ## Next Steps (Post-KC Field Test)
