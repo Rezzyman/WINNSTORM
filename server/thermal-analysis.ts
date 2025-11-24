@@ -114,7 +114,11 @@ Provide response in this exact JSON format:
       max_completion_tokens: 4000 // GPT-5.1 uses max_completion_tokens instead of max_tokens
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content from OpenAI');
+    }
+    const result = JSON.parse(content);
     
     // Process and validate the response
     const thermalReadings: ThermalReading[] = result.thermalReadings.map((reading: any) => ({
@@ -166,7 +170,7 @@ Provide response in this exact JSON format:
 
   } catch (error) {
     console.error('Error analyzing thermal image:', error);
-    throw new Error('Failed to analyze thermal image: ' + error.message);
+    throw new Error('Failed to analyze thermal image: ' + (error as Error).message);
   }
 }
 
@@ -201,9 +205,13 @@ export async function generateThermalReport(
       max_completion_tokens: 2000 // GPT-5.1 uses max_completion_tokens instead of max_tokens
     });
 
-    return response.choices[0].message.content;
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content from OpenAI');
+    }
+    return content;
   } catch (error) {
     console.error('Error generating thermal report:', error);
-    throw new Error('Failed to generate thermal report: ' + error.message);
+    throw new Error('Failed to generate thermal report: ' + (error as Error).message);
   }
 }
