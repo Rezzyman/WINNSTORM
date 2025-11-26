@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { uploadFile } from '@/lib/firebase';
 import { queryClient } from '@/lib/queryClient';
+import { SEO } from '@/components/seo';
 
 interface FileUploadItem {
   id: string;
@@ -191,6 +192,12 @@ const UploadPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      <SEO
+        title="Upload Thermal Scan"
+        description="Upload thermal imagery for AI-powered damage assessment analysis. Supports FLIR and compatible thermal cameras."
+        canonical="/upload"
+        noindex={true}
+      />
       <Header />
       
       <main className="flex-grow pb-20">
