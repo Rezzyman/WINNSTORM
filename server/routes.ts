@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema } from "@shared/schema";
+import { insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema, insertKnowledgeBaseSchema } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest } from './ai-assistant';
@@ -544,6 +544,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to create subscription", 
         error: (error as Error).message 
       });
+    }
+  });
+
+  // Knowledge Base routes
+  app.get("/api/knowledge", async (req, res) => {
+    try {
+      const { search, workflowStep } = req.query;
+      
+      if (search) {
+        const entries = await storage.searchKnowledge(
+          String(search),
+          workflowStep ? String(workflowStep) : undefined
+        );
+        return res.json(entries);
+      }
+      
+      const entries = await storage.getAllKnowledgeEntries();
+      res.json(entries);
+    } catch (error) {
+      console.error('Error fetching knowledge base:', error);
+      res.status(500).json({ message: "Failed to fetch knowledge base" });
+    }
+  });
+
+  app.get("/api/knowledge/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid knowledge entry ID" });
+      }
+      
+      const entry = await storage.getKnowledgeEntry(id);
+      if (!entry) {
+        return res.status(404).json({ message: "Knowledge entry not found" });
+      }
+      
+      res.json(entry);
+    } catch (error) {
+      console.error('Error fetching knowledge entry:', error);
+      res.status(500).json({ message: "Failed to fetch knowledge entry" });
+    }
+  });
+
+  app.post("/api/knowledge", async (req, res) => {
+    try {
+      const entryData = insertKnowledgeBaseSchema.parse(req.body);
+      const entry = await storage.createKnowledgeEntry(entryData);
+      res.status(201).json(entry);
+    } catch (error) {
+      console.error('Error creating knowledge entry:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid knowledge entry data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to create knowledge entry" });
+    }
+  });
+
+  app.patch("/api/knowledge/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid knowledge entry ID" });
+      }
+      
+      const updatedEntry = await storage.updateKnowledgeEntry(id, req.body);
+      if (!updatedEntry) {
+        return res.status(404).json({ message: "Knowledge entry not found" });
+      }
+      
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error('Error updating knowledge entry:', error);
+      res.status(500).json({ message: "Failed to update knowledge entry" });
+    }
+  });
+
+  app.delete("/api/knowledge/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid knowledge entry ID" });
+      }
+      
+      const deleted = await storage.deleteKnowledgeEntry(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Knowledge entry not found" });
+      }
+      
+      res.json({ message: "Knowledge entry deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting knowledge entry:', error);
+      res.status(500).json({ message: "Failed to delete knowledge entry" });
     }
   });
 

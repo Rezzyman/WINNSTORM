@@ -1,4 +1,4 @@
-import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, users, properties, scans, reports, crmConfigs, crmSyncLogs } from "@shared/schema";
+import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase, users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase } from "@shared/schema";
 import { db } from './db';
 import { eq } from 'drizzle-orm';
 
@@ -36,6 +36,14 @@ export interface IStorage {
   getCrmSyncLog(id: number): Promise<CrmSyncLog | undefined>;
   getCrmSyncLogsByConfig(crmConfigId: number): Promise<CrmSyncLog[]>;
   createCrmSyncLog(log: InsertCrmSyncLog): Promise<CrmSyncLog>;
+  
+  // Knowledge Base methods
+  getKnowledgeEntry(id: number): Promise<KnowledgeBase | undefined>;
+  getAllKnowledgeEntries(): Promise<KnowledgeBase[]>;
+  searchKnowledge(query: string, workflowStep?: string): Promise<KnowledgeBase[]>;
+  createKnowledgeEntry(entry: InsertKnowledgeBase): Promise<KnowledgeBase>;
+  updateKnowledgeEntry(id: number, entry: Partial<KnowledgeBase>): Promise<KnowledgeBase | undefined>;
+  deleteKnowledgeEntry(id: number): Promise<boolean>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -273,6 +281,76 @@ export class DatabaseStorage implements IStorage {
   async createCrmSyncLog(log: InsertCrmSyncLog): Promise<CrmSyncLog> {
     const [newLog] = await db.insert(crmSyncLogs).values(log).returning();
     return newLog;
+  }
+
+  // Knowledge Base methods
+  async getKnowledgeEntry(id: number): Promise<KnowledgeBase | undefined> {
+    try {
+      const [entry] = await db.select().from(knowledgeBase).where(eq(knowledgeBase.id, id));
+      return entry || undefined;
+    } catch (error) {
+      console.error('Error fetching knowledge entry:', error);
+      return undefined;
+    }
+  }
+
+  async getAllKnowledgeEntries(): Promise<KnowledgeBase[]> {
+    try {
+      return await db.select().from(knowledgeBase);
+    } catch (error) {
+      console.error('Error fetching all knowledge entries:', error);
+      return [];
+    }
+  }
+
+  async searchKnowledge(query: string, workflowStep?: string): Promise<KnowledgeBase[]> {
+    try {
+      const entries = await db.select().from(knowledgeBase);
+      
+      const lowerQuery = query.toLowerCase();
+      return entries.filter(entry => {
+        const matchesQuery = 
+          entry.title.toLowerCase().includes(lowerQuery) ||
+          entry.content.toLowerCase().includes(lowerQuery) ||
+          (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(lowerQuery)));
+        
+        const matchesStep = !workflowStep || entry.workflowStep === workflowStep;
+        
+        return matchesQuery && matchesStep;
+      });
+    } catch (error) {
+      console.error('Error searching knowledge base:', error);
+      return [];
+    }
+  }
+
+  async createKnowledgeEntry(entry: InsertKnowledgeBase): Promise<KnowledgeBase> {
+    const [newEntry] = await db.insert(knowledgeBase).values(entry).returning();
+    return newEntry;
+  }
+
+  async updateKnowledgeEntry(id: number, updates: Partial<KnowledgeBase>): Promise<KnowledgeBase | undefined> {
+    try {
+      const [updatedEntry] = await db
+        .update(knowledgeBase)
+        .set(updates)
+        .where(eq(knowledgeBase.id, id))
+        .returning();
+      return updatedEntry || undefined;
+    } catch (error) {
+      console.error('Error updating knowledge entry:', error);
+      return undefined;
+    }
+  }
+
+  async deleteKnowledgeEntry(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(knowledgeBase).where(eq(knowledgeBase.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error('Error deleting knowledge entry:', error);
+      return false;
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { storage } from './storage';
 
 // This is using Replit's AI Integrations service, which provides OpenAI-compatible API access without requiring your own OpenAI API key.
 // the newest OpenAI model is "gpt-5.1" which was released August 7, 2025. do not change this unless explicitly requested by the user
@@ -22,7 +23,19 @@ export interface AIAssistantResponse {
 
 export async function getAIAssistance(request: AIAssistantRequest): Promise<AIAssistantResponse> {
   try {
-    const systemPrompt = `${request.context}
+    // Query knowledge base for relevant methodology entries
+    const knowledgeResults = await storage.searchKnowledge(request.message);
+    const relevantKnowledge = knowledgeResults.slice(0, 3); // Top 3 most relevant entries
+    
+    let knowledgeContext = '';
+    if (relevantKnowledge.length > 0) {
+      knowledgeContext = '\n\n**ERIC WINN METHODOLOGY REFERENCE:**\n\n' + 
+        relevantKnowledge.map(entry => 
+          `### ${entry.title}\n${entry.content}\n`
+        ).join('\n---\n');
+    }
+    
+    const systemPrompt = `${request.context}${knowledgeContext}
 
 You are Stormy, the WinnStorm™ AI Assistant, an expert in damage assessment consulting based on Eric Winn's proven methodology. You have deep expertise in:
 

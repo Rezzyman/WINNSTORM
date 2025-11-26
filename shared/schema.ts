@@ -912,3 +912,36 @@ export type CrmConfig = typeof crmConfigs.$inferSelect;
 export type InsertCrmConfig = z.infer<typeof insertCrmConfigSchema>;
 export type CrmSyncLog = typeof crmSyncLogs.$inferSelect;
 export type InsertCrmSyncLog = z.infer<typeof insertCrmSyncLogSchema>;
+
+// Knowledge Base Schema - Eric Winn Methodology Documentation
+export const knowledgeBase = pgTable("knowledge_base", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // 'procedure', 'decision_tree', 'terminology', 'best_practice', 'common_mistake'
+  title: text("title").notNull(),
+  content: text("content").notNull(), // Full text content
+  tags: text("tags").array(), // Searchable tags
+  workflowStep: text("workflow_step"), // Maps to inspection workflow steps (weather, thermal, terrestrial, etc.)
+  difficulty: text("difficulty"), // 'beginner', 'intermediate', 'expert'
+  relatedIds: integer("related_ids").array(), // Links to related knowledge entries
+  videoUrl: text("video_url"), // Link to Eric's video demonstrations
+  imageUrls: text("image_urls").array(), // Reference images
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertKnowledgeBaseSchema = createInsertSchema(knowledgeBase).pick({
+  category: true,
+  title: true,
+  content: true,
+  tags: true,
+  workflowStep: true,
+  difficulty: true,
+  relatedIds: true,
+  videoUrl: true,
+  imageUrls: true,
+  createdBy: true,
+});
+
+export type KnowledgeBase = typeof knowledgeBase.$inferSelect;
+export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;
