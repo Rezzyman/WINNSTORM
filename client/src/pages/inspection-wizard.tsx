@@ -21,6 +21,7 @@ import {
   ChevronLeft, ChevronRight, HelpCircle, Loader2, X, Eye, Brain, 
   MessageCircle, Sparkles, BookOpen
 } from 'lucide-react';
+import { StormySidekick } from '@/components/stormy-sidekick';
 
 const STEP_CONFIG: Record<WinnMethodologyStep, {
   title: string;
@@ -691,6 +692,16 @@ export default function InspectionWizard() {
           )}
         </DialogContent>
       </Dialog>
+
+      <StormySidekick
+        currentStep={currentStep}
+        experienceLevel={experienceLevel}
+        propertyId={propertyId}
+        sessionId={sessionData?.session.id}
+        evidenceCount={currentEvidence.length}
+        onLevelChange={setExperienceLevel}
+        isFloating={true}
+      />
     </div>
   );
 }

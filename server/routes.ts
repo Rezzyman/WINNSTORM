@@ -713,6 +713,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Get step-specific coaching content (query param version)
+  app.get("/api/inspection/coaching", async (req, res) => {
+    try {
+      const step = req.query.step as WinnMethodologyStep;
+      const experienceLevel = (req.query.level as 'beginner' | 'intermediate' | 'expert') || 'beginner';
+      
+      if (!step || !WINN_METHODOLOGY_STEPS.includes(step)) {
+        return res.status(400).json({ 
+          message: "Invalid or missing methodology step",
+          validSteps: WINN_METHODOLOGY_STEPS 
+        });
+      }
+
+      const coaching = await getStepCoaching(step, experienceLevel);
+      res.json(coaching);
+
+    } catch (error) {
+      console.error('Error getting coaching content:', error);
+      res.status(500).json({ message: "Failed to get coaching content" });
+    }
+  });
+
   // Get or create active inspection session for a property
   app.get("/api/inspection/session/active", async (req, res) => {
     try {
@@ -1236,6 +1258,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting coaching content:', error);
       res.status(500).json({ message: "Failed to get coaching content" });
+    }
+  });
+
+  // Chat with Stormy - conversational AI endpoint
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message, context } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const { currentStep, experienceLevel, propertyId, sessionId, evidenceCount, recentMessages } = context || {};
+
+      // Build contextual system prompt
+      let systemContext = `You are Stormy, an AI assistant for WinnStorm damage assessment consultants. You are friendly, helpful, and knowledgeable about the Winn Methodology for roof and property damage assessment.`;
+      
+      if (currentStep) {
+        systemContext += `\n\nThe consultant is currently working on the "${currentStep.replace(/_/g, ' ')}" step of the Winn Methodology.`;
+      }
+      
+      if (experienceLevel) {
+        systemContext += ` They are at the ${experienceLevel} level.`;
+        if (experienceLevel === 'beginner') {
+          systemContext += ` Provide detailed explanations and encourage questions.`;
+        } else if (experienceLevel === 'expert') {
+          systemContext += ` Be concise and technical.`;
+        }
+      }
+
+      if (evidenceCount !== undefined) {
+        systemContext += `\n\nThey have captured ${evidenceCount} pieces of evidence so far for this step.`;
+      }
+
+      // Use the AI assistant to generate response
+      const aiResponse = await getAIAssistance({
+        context: systemContext,
+        currentStep: currentStep,
+        experienceLevel: experienceLevel || 'intermediate',
+        question: message,
+      });
+
+      res.json({ 
+        response: aiResponse.response,
+        suggestedActions: aiResponse.suggestedActions || []
+      });
+
+    } catch (error) {
+      console.error('Error in AI chat:', error);
+      res.status(500).json({ message: "Failed to get AI response" });
     }
   });
 
