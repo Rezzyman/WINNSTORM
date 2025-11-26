@@ -1,4 +1,12 @@
-import { User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase, users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase } from "@shared/schema";
+import { 
+  User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, 
+  CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase,
+  InspectionSession, InsertInspectionSession, EvidenceAsset, InsertEvidenceAsset,
+  LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
+  WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
+  users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
+  inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress
+} from "@shared/schema";
 import { db } from './db';
 import { eq } from 'drizzle-orm';
 
@@ -44,6 +52,30 @@ export interface IStorage {
   createKnowledgeEntry(entry: InsertKnowledgeBase): Promise<KnowledgeBase>;
   updateKnowledgeEntry(id: number, entry: Partial<KnowledgeBase>): Promise<KnowledgeBase | undefined>;
   deleteKnowledgeEntry(id: number): Promise<boolean>;
+  
+  // Inspection Session methods (Winn Methodology State Machine)
+  getInspectionSession(id: number): Promise<InspectionSession | undefined>;
+  getInspectionSessionsByProperty(propertyId: number): Promise<InspectionSession[]>;
+  getInspectionSessionsByInspector(inspectorId: number): Promise<InspectionSession[]>;
+  getActiveInspectionSession(propertyId: number, inspectorId: number): Promise<InspectionSession | undefined>;
+  createInspectionSession(session: InsertInspectionSession): Promise<InspectionSession>;
+  updateInspectionSession(id: number, updates: Partial<InspectionSession>): Promise<InspectionSession | undefined>;
+  advanceInspectionStep(id: number, nextStep: WinnMethodologyStep): Promise<InspectionSession | undefined>;
+  completeInspectionSession(id: number): Promise<InspectionSession | undefined>;
+  
+  // Evidence Asset methods
+  getEvidenceAsset(id: number): Promise<EvidenceAsset | undefined>;
+  getEvidenceAssetsBySession(sessionId: number): Promise<EvidenceAsset[]>;
+  getEvidenceAssetsByStep(sessionId: number, step: WinnMethodologyStep): Promise<EvidenceAsset[]>;
+  createEvidenceAsset(asset: InsertEvidenceAsset): Promise<EvidenceAsset>;
+  updateEvidenceAsset(id: number, updates: Partial<EvidenceAsset>): Promise<EvidenceAsset | undefined>;
+  deleteEvidenceAsset(id: number): Promise<boolean>;
+  
+  // Limitless Transcript methods
+  getLimitlessTranscript(id: number): Promise<LimitlessTranscript | undefined>;
+  getAllLimitlessTranscripts(): Promise<LimitlessTranscript[]>;
+  createLimitlessTranscript(transcript: InsertLimitlessTranscript): Promise<LimitlessTranscript>;
+  updateLimitlessTranscript(id: number, updates: Partial<LimitlessTranscript>): Promise<LimitlessTranscript | undefined>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -350,6 +382,252 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error deleting knowledge entry:', error);
       return false;
+    }
+  }
+
+  // ============================================================================
+  // INSPECTION SESSION METHODS - Winn Methodology State Machine
+  // ============================================================================
+
+  async getInspectionSession(id: number): Promise<InspectionSession | undefined> {
+    try {
+      const [session] = await db.select().from(inspectionSessions).where(eq(inspectionSessions.id, id));
+      return session || undefined;
+    } catch (error) {
+      console.error('Error fetching inspection session:', error);
+      return undefined;
+    }
+  }
+
+  async getInspectionSessionsByProperty(propertyId: number): Promise<InspectionSession[]> {
+    try {
+      return await db.select().from(inspectionSessions).where(eq(inspectionSessions.propertyId, propertyId));
+    } catch (error) {
+      console.error('Error fetching inspection sessions by property:', error);
+      return [];
+    }
+  }
+
+  async getInspectionSessionsByInspector(inspectorId: number): Promise<InspectionSession[]> {
+    try {
+      return await db.select().from(inspectionSessions).where(eq(inspectionSessions.inspectorId, inspectorId));
+    } catch (error) {
+      console.error('Error fetching inspection sessions by inspector:', error);
+      return [];
+    }
+  }
+
+  async getActiveInspectionSession(propertyId: number, inspectorId: number): Promise<InspectionSession | undefined> {
+    try {
+      const sessions = await db.select().from(inspectionSessions)
+        .where(eq(inspectionSessions.propertyId, propertyId));
+      
+      // Find active session for this inspector
+      const activeSession = sessions.find(s => 
+        s.inspectorId === inspectorId && 
+        (s.status === 'in_progress' || s.status === 'paused')
+      );
+      
+      return activeSession;
+    } catch (error) {
+      console.error('Error fetching active inspection session:', error);
+      return undefined;
+    }
+  }
+
+  async createInspectionSession(session: InsertInspectionSession): Promise<InspectionSession> {
+    const [newSession] = await db.insert(inspectionSessions).values({
+      ...session,
+      status: session.status || 'in_progress',
+      currentStep: session.currentStep || 'weather_verification',
+      stepsCompleted: [],
+      startedAt: new Date(),
+      lastActivityAt: new Date(),
+    }).returning();
+    return newSession;
+  }
+
+  async updateInspectionSession(id: number, updates: Partial<InspectionSession>): Promise<InspectionSession | undefined> {
+    try {
+      const [updatedSession] = await db
+        .update(inspectionSessions)
+        .set({
+          ...updates,
+          lastActivityAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(inspectionSessions.id, id))
+        .returning();
+      return updatedSession || undefined;
+    } catch (error) {
+      console.error('Error updating inspection session:', error);
+      return undefined;
+    }
+  }
+
+  async advanceInspectionStep(id: number, nextStep: WinnMethodologyStep): Promise<InspectionSession | undefined> {
+    try {
+      const session = await this.getInspectionSession(id);
+      if (!session) return undefined;
+
+      const stepsCompleted = [...(session.stepsCompleted || [])];
+      if (session.currentStep && !stepsCompleted.includes(session.currentStep)) {
+        stepsCompleted.push(session.currentStep);
+      }
+
+      const [updatedSession] = await db
+        .update(inspectionSessions)
+        .set({
+          currentStep: nextStep,
+          stepsCompleted,
+          lastActivityAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(inspectionSessions.id, id))
+        .returning();
+      return updatedSession || undefined;
+    } catch (error) {
+      console.error('Error advancing inspection step:', error);
+      return undefined;
+    }
+  }
+
+  async completeInspectionSession(id: number): Promise<InspectionSession | undefined> {
+    try {
+      const session = await this.getInspectionSession(id);
+      if (!session) return undefined;
+
+      const stepsCompleted = [...(session.stepsCompleted || [])];
+      if (session.currentStep && !stepsCompleted.includes(session.currentStep)) {
+        stepsCompleted.push(session.currentStep);
+      }
+
+      const [updatedSession] = await db
+        .update(inspectionSessions)
+        .set({
+          status: 'completed',
+          stepsCompleted,
+          completedAt: new Date(),
+          lastActivityAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(inspectionSessions.id, id))
+        .returning();
+      return updatedSession || undefined;
+    } catch (error) {
+      console.error('Error completing inspection session:', error);
+      return undefined;
+    }
+  }
+
+  // ============================================================================
+  // EVIDENCE ASSET METHODS - Photos, Thermal Images, Documents
+  // ============================================================================
+
+  async getEvidenceAsset(id: number): Promise<EvidenceAsset | undefined> {
+    try {
+      const [asset] = await db.select().from(evidenceAssets).where(eq(evidenceAssets.id, id));
+      return asset || undefined;
+    } catch (error) {
+      console.error('Error fetching evidence asset:', error);
+      return undefined;
+    }
+  }
+
+  async getEvidenceAssetsBySession(sessionId: number): Promise<EvidenceAsset[]> {
+    try {
+      return await db.select().from(evidenceAssets).where(eq(evidenceAssets.inspectionSessionId, sessionId));
+    } catch (error) {
+      console.error('Error fetching evidence assets by session:', error);
+      return [];
+    }
+  }
+
+  async getEvidenceAssetsByStep(sessionId: number, step: WinnMethodologyStep): Promise<EvidenceAsset[]> {
+    try {
+      const assets = await db.select().from(evidenceAssets)
+        .where(eq(evidenceAssets.inspectionSessionId, sessionId));
+      return assets.filter(a => a.step === step);
+    } catch (error) {
+      console.error('Error fetching evidence assets by step:', error);
+      return [];
+    }
+  }
+
+  async createEvidenceAsset(asset: InsertEvidenceAsset): Promise<EvidenceAsset> {
+    const [newAsset] = await db.insert(evidenceAssets).values(asset).returning();
+    return newAsset;
+  }
+
+  async updateEvidenceAsset(id: number, updates: Partial<EvidenceAsset>): Promise<EvidenceAsset | undefined> {
+    try {
+      const [updatedAsset] = await db
+        .update(evidenceAssets)
+        .set(updates)
+        .where(eq(evidenceAssets.id, id))
+        .returning();
+      return updatedAsset || undefined;
+    } catch (error) {
+      console.error('Error updating evidence asset:', error);
+      return undefined;
+    }
+  }
+
+  async deleteEvidenceAsset(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(evidenceAssets).where(eq(evidenceAssets.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error('Error deleting evidence asset:', error);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // LIMITLESS TRANSCRIPT METHODS - Eric Winn Recording Ingestion
+  // ============================================================================
+
+  async getLimitlessTranscript(id: number): Promise<LimitlessTranscript | undefined> {
+    try {
+      const [transcript] = await db.select().from(limitlessTranscripts).where(eq(limitlessTranscripts.id, id));
+      return transcript || undefined;
+    } catch (error) {
+      console.error('Error fetching limitless transcript:', error);
+      return undefined;
+    }
+  }
+
+  async getAllLimitlessTranscripts(): Promise<LimitlessTranscript[]> {
+    try {
+      return await db.select().from(limitlessTranscripts);
+    } catch (error) {
+      console.error('Error fetching all limitless transcripts:', error);
+      return [];
+    }
+  }
+
+  async createLimitlessTranscript(transcript: InsertLimitlessTranscript): Promise<LimitlessTranscript> {
+    const [newTranscript] = await db.insert(limitlessTranscripts).values({
+      ...transcript,
+      status: 'pending',
+    }).returning();
+    return newTranscript;
+  }
+
+  async updateLimitlessTranscript(id: number, updates: Partial<LimitlessTranscript>): Promise<LimitlessTranscript | undefined> {
+    try {
+      const [updatedTranscript] = await db
+        .update(limitlessTranscripts)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(limitlessTranscripts.id, id))
+        .returning();
+      return updatedTranscript || undefined;
+    } catch (error) {
+      console.error('Error updating limitless transcript:', error);
+      return undefined;
     }
   }
 }

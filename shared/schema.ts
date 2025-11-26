@@ -945,3 +945,246 @@ export const insertKnowledgeBaseSchema = createInsertSchema(knowledgeBase).pick(
 
 export type KnowledgeBase = typeof knowledgeBase.$inferSelect;
 export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;
+
+// ============================================================================
+// MULTIMODAL INSPECTION COACH - Eric Winn Methodology State Machine
+// ============================================================================
+
+// Winn Methodology Steps (strict sequential order)
+export const WINN_METHODOLOGY_STEPS = [
+  'weather_verification',
+  'thermal_imaging', 
+  'terrestrial_walk',
+  'test_squares',
+  'soft_metals',
+  'moisture_testing',
+  'core_samples',
+  'report_assembly'
+] as const;
+
+export type WinnMethodologyStep = typeof WINN_METHODOLOGY_STEPS[number];
+
+// Step requirements and gating rules
+export interface StepRequirements {
+  minPhotos: number;
+  requiredFields: string[];
+  aiValidationRequired: boolean;
+  canSkip: boolean;
+  skipReasons?: string[];
+}
+
+// AI validation result for each step
+export interface AIStepValidation {
+  isValid: boolean;
+  confidence: number;
+  findings: string[];
+  recommendations: string[];
+  warnings: string[];
+  analysisTimestamp: string;
+}
+
+// Evidence Asset - Photos, thermal images, transcripts with GPT analysis
+export const evidenceAssets = pgTable("evidence_assets", {
+  id: serial("id").primaryKey(),
+  inspectionSessionId: integer("inspection_session_id").notNull(),
+  step: text("step").notNull(), // Which methodology step this evidence belongs to
+  assetType: text("asset_type").notNull(), // 'photo', 'thermal', 'audio', 'transcript', 'document'
+  filename: text("filename").notNull(),
+  fileUrl: text("file_url").notNull(),
+  mimeType: text("mime_type"),
+  fileSize: integer("file_size"),
+  caption: text("caption"),
+  location: text("location"), // GPS or description of where on property
+  aiAnalysis: jsonb("ai_analysis").$type<AIStepValidation>(),
+  rawAiResponse: text("raw_ai_response"), // Full GPT response for debugging
+  metadata: jsonb("metadata").$type<Record<string, any>>(), // Flexible metadata (EXIF, thermal calibration, etc.)
+  createdAt: timestamp("created_at").defaultNow(),
+  uploadedBy: integer("uploaded_by").references(() => users.id),
+});
+
+// Inspection Session - State machine tracking progress through methodology
+export const inspectionSessions = pgTable("inspection_sessions", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  inspectorId: integer("inspector_id").references(() => users.id).notNull(),
+  
+  // State machine
+  status: text("status").notNull().default('in_progress'), // 'not_started', 'in_progress', 'paused', 'completed', 'abandoned'
+  currentStep: text("current_step").notNull().default('weather_verification'), // Current step in WINN_METHODOLOGY_STEPS
+  
+  // Step completion tracking
+  stepsCompleted: text("steps_completed").array().default([]), // Array of completed step names
+  stepData: jsonb("step_data").$type<Record<WinnMethodologyStep, StepData>>(), // Data collected at each step
+  stepValidations: jsonb("step_validations").$type<Record<WinnMethodologyStep, AIStepValidation>>(), // AI validations per step
+  
+  // Compliance tracking
+  overrides: jsonb("overrides").$type<StepOverride[]>(), // When inspector skips steps with reason
+  complianceScore: integer("compliance_score"), // 0-100 based on methodology adherence
+  
+  // Timing
+  startedAt: timestamp("started_at").defaultNow(),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  // AI coaching context
+  stormyConversation: jsonb("stormy_conversation").$type<ConversationMessage[]>(), // Chat history for context
+  aiRecommendations: text("ai_recommendations").array(), // Current coaching tips
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Step data collected during inspection
+export interface StepData {
+  completed: boolean;
+  completedAt?: string;
+  evidenceCount: number;
+  notes: string;
+  findings: string[];
+  measurements?: Record<string, any>; // Step-specific measurements
+}
+
+// Override record when inspector skips a step
+export interface StepOverride {
+  step: WinnMethodologyStep;
+  reason: string;
+  timestamp: string;
+  approvedBy?: number; // Senior consultant ID if escalated
+}
+
+// Stormy conversation message
+export interface ConversationMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+  step?: WinnMethodologyStep; // Which step this message relates to
+  evidenceRef?: number; // Reference to evidence asset if discussing an image
+}
+
+// Inspector Progress - Long-term performance tracking
+export const inspectorProgress = pgTable("inspector_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  
+  // Aggregate metrics
+  totalInspections: integer("total_inspections").default(0),
+  completedInspections: integer("completed_inspections").default(0),
+  averageComplianceScore: integer("average_compliance_score"),
+  
+  // Per-step proficiency
+  stepProficiency: jsonb("step_proficiency").$type<Record<WinnMethodologyStep, StepProficiency>>(),
+  
+  // Knowledge gaps identified by AI
+  knowledgeGaps: text("knowledge_gaps").array(), // Topics needing improvement
+  recommendedTraining: text("recommended_training").array(), // Course IDs
+  
+  // Achievements
+  certificationsEarned: text("certifications_earned").array(),
+  lastAssessmentDate: timestamp("last_assessment_date"),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Proficiency tracking per methodology step
+export interface StepProficiency {
+  attemptCount: number;
+  averageTimeMinutes: number;
+  aiInterventionCount: number;
+  overrideCount: number;
+  lastAttempt: string;
+  proficiencyLevel: 'novice' | 'learning' | 'competent' | 'proficient' | 'expert';
+}
+
+// Limitless Transcript - For ingesting Eric Winn recordings
+export const limitlessTranscripts = pgTable("limitless_transcripts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  rawTranscript: text("raw_transcript").notNull(), // Full transcript text
+  duration: integer("duration"), // Recording duration in seconds
+  recordingDate: timestamp("recording_date"),
+  
+  // AI-parsed content
+  parsedSegments: jsonb("parsed_segments").$type<TranscriptSegment[]>(),
+  extractedKnowledge: jsonb("extracted_knowledge").$type<ExtractedKnowledge[]>(),
+  
+  // Review status
+  status: text("status").notNull().default('pending'), // 'pending', 'processing', 'reviewed', 'approved', 'rejected'
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewNotes: text("review_notes"),
+  
+  // Integration
+  knowledgeEntriesCreated: integer("knowledge_entries_created").array(), // IDs of knowledge_base entries created
+  
+  uploadedBy: integer("uploaded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Parsed segment from transcript
+export interface TranscriptSegment {
+  startTime: number;
+  endTime: number;
+  speaker?: string;
+  text: string;
+  topic?: string; // AI-classified topic
+  methodologyStep?: WinnMethodologyStep; // Which step this relates to
+  confidence: number;
+}
+
+// Knowledge extracted from transcript for review
+export interface ExtractedKnowledge {
+  category: 'procedure' | 'decision_tree' | 'terminology' | 'best_practice' | 'common_mistake';
+  title: string;
+  content: string;
+  sourceSegments: number[]; // Indices into parsedSegments
+  suggestedTags: string[];
+  suggestedStep: WinnMethodologyStep;
+  confidence: number;
+  approved?: boolean;
+}
+
+// Insert schemas
+export const insertEvidenceAssetSchema = createInsertSchema(evidenceAssets).pick({
+  inspectionSessionId: true,
+  step: true,
+  assetType: true,
+  filename: true,
+  fileUrl: true,
+  mimeType: true,
+  fileSize: true,
+  caption: true,
+  location: true,
+  aiAnalysis: true,
+  rawAiResponse: true,
+  metadata: true,
+  uploadedBy: true,
+});
+
+export const insertInspectionSessionSchema = createInsertSchema(inspectionSessions).pick({
+  propertyId: true,
+  inspectorId: true,
+  status: true,
+  currentStep: true,
+});
+
+export const insertInspectorProgressSchema = createInsertSchema(inspectorProgress).pick({
+  userId: true,
+});
+
+export const insertLimitlessTranscriptSchema = createInsertSchema(limitlessTranscripts).pick({
+  title: true,
+  rawTranscript: true,
+  duration: true,
+  recordingDate: true,
+  uploadedBy: true,
+});
+
+// Types
+export type EvidenceAsset = typeof evidenceAssets.$inferSelect;
+export type InsertEvidenceAsset = z.infer<typeof insertEvidenceAssetSchema>;
+export type InspectionSession = typeof inspectionSessions.$inferSelect;
+export type InsertInspectionSession = z.infer<typeof insertInspectionSessionSchema>;
+export type InspectorProgress = typeof inspectorProgress.$inferSelect;
+export type InsertInspectorProgress = z.infer<typeof insertInspectorProgressSchema>;
+export type LimitlessTranscript = typeof limitlessTranscripts.$inferSelect;
+export type InsertLimitlessTranscript = z.infer<typeof insertLimitlessTranscriptSchema>;
