@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
+import { SEO } from '@/components/seo';
 
 // Conditionally load Stripe only if the key is available
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
@@ -171,6 +172,12 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-background py-12 px-6">
+      <SEO
+        title={`Subscribe to ${planName} Plan`}
+        description={`Subscribe to WinnStorm™ ${planName} plan. Get access to AI-powered thermal analysis, Winn Reports, certification training, and comprehensive damage assessment tools.`}
+        canonical={`/subscribe/${planName.toLowerCase()}`}
+        noindex={true}
+      />
       <div className="container max-w-2xl mx-auto">
         <div className="mb-8">
           <Button 

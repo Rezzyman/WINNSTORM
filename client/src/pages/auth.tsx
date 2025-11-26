@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Flame } from 'lucide-react';
+import { SEO } from '@/components/seo';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -74,6 +75,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/20 flex flex-col items-center justify-center p-6">
+      <SEO
+        title="Sign In - Access Your Account"
+        description="Sign in to WinnStorm™ to access your damage assessment dashboard, training portal, and Winn Reports. Secure login with Google or email."
+        canonical="/auth"
+        keywords={['WinnStorm login', 'damage assessment platform login', 'consultant portal access']}
+      />
       <div className="max-w-md w-full">
         {/* WinnStorm Logo */}
         <div className="text-center mb-8">
