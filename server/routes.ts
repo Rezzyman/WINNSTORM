@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
@@ -11,8 +11,16 @@ import {
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest, analyzeInspectionImage, getStepCoaching, parseTranscript, ImageAnalysisRequest } from './ai-assistant';
-import { requireAuth } from './auth';
+import { requireAuth, optionalAuth, AuthenticatedRequest } from './auth';
 import Stripe from 'stripe';
+
+function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
+  if (!req.user?.dbUserId) {
+    res.status(401).json({ message: "Authentication required. Please sign in." });
+    return null;
+  }
+  return req.user.dbUserId;
+}
 
 // Step requirements and gating rules for Winn Methodology
 const STEP_REQUIREMENTS: Record<WinnMethodologyStep, StepRequirements> = {
@@ -77,33 +85,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // These endpoints are for server session management
 
   // User routes
-  app.get("/api/user", async (req, res) => {
-    if (!requireAuth(req)) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  app.get("/api/user", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
     
-    const demoUser = await storage.getUserByEmail("demo@example.com");
-    if (!demoUser) {
+    const user = await storage.getUser(userId);
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     
-    const { password, ...userWithoutPassword } = demoUser;
+    const { password, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
   });
 
   // Property routes
-  app.get("/api/properties", async (req, res) => {
-    // Would normally get user ID from authenticated session
-    const demoUser = await storage.getUserByEmail("demo@example.com");
-    if (!demoUser) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  app.get("/api/properties", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
     
-    const properties = await storage.getPropertiesByUser(demoUser.id);
+    const properties = await storage.getPropertiesByUser(userId);
     res.json(properties);
   });
 
-  app.get("/api/properties/:id", async (req, res) => {
+  app.get("/api/properties/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
+    
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid property ID" });
@@ -117,16 +124,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(property);
   });
 
-  app.post("/api/properties", async (req, res) => {
+  app.post("/api/properties", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      // Get demo user for MVP - try both demo and test user emails
-      let demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        demoUser = await storage.getUserByEmail("test@example.com");
-      }
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
       
       // Extract and validate relevant fields
       const { name, address, imageUrls, scanType, notes, captureDate } = req.body;
@@ -136,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name,
         address,
         imageUrl: imageUrls[0], // Use the first image as property image
-        userId: demoUser.id
+        userId: userId
       });
       
       // Create the property
@@ -151,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         standardImageUrl: imageUrls[0],
         thermalImageUrl: imageUrls.length > 1 ? imageUrls[1] : imageUrls[0],
         notes,
-        userId: demoUser.id
+        userId: userId
       });
       
       // Create scan with mock analysis
@@ -171,7 +172,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Scan routes
-  app.get("/api/scans/:id", async (req, res) => {
+  app.get("/api/scans/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
+    
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid scan ID" });
@@ -185,7 +189,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(scan);
   });
 
-  app.get("/api/properties/:id/scans", async (req, res) => {
+  app.get("/api/properties/:id/scans", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
+    
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid property ID" });
@@ -196,8 +203,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Report routes
-  app.post("/api/reports/send/:scanId", async (req, res) => {
+  app.post("/api/reports/send/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
         return res.status(400).json({ message: "Invalid scan ID" });
@@ -214,19 +224,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Scan not found" });
       }
       
-      // Get demo user for MVP
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      
       // Create a report
       const reportData = insertReportSchema.parse({
         scanId,
         title: "Thermal Roof Assessment",
         pdfUrl: "", // In MVP, we don't actually generate a PDF
         sentTo: email,
-        userId: demoUser.id
+        userId: userId
       });
       
       const report = await storage.createReport(reportData);
@@ -246,8 +250,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/download/:scanId", async (req, res) => {
+  app.get("/api/reports/download/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
         return res.status(400).json({ message: "Invalid scan ID" });
@@ -265,12 +272,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Property not found" });
       }
       
-      // Get demo user for MVP
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      
       // In a real implementation, you would generate and return a PDF here
       
       // Instead, for the MVP, we just return success
@@ -284,14 +285,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // CRM Configuration routes
-  app.get("/api/crm/configs", async (req, res) => {
+  app.get("/api/crm/configs", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
       
-      const configs = await storage.getCrmConfigsByUser(demoUser.id);
+      const configs = await storage.getCrmConfigsByUser(userId);
       res.json(configs);
     } catch (error) {
       console.error('Error fetching CRM configs:', error);
@@ -299,17 +298,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/crm/configs", async (req, res) => {
+  app.post("/api/crm/configs", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
       
       const configData = insertCrmConfigSchema.parse(req.body);
       const config = await storage.createCrmConfig({
         ...configData,
-        userId: demoUser.id
+        userId: userId
       });
       
       // Add configuration to CRM manager
@@ -328,8 +325,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/crm/configs/:id", async (req, res) => {
+  app.put("/api/crm/configs/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid configuration ID" });
@@ -349,8 +349,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/crm/configs/:id", async (req, res) => {
+  app.delete("/api/crm/configs/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid configuration ID" });
@@ -369,8 +372,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // CRM Sync routes
-  app.post("/api/crm/sync/property", async (req, res) => {
+  app.post("/api/crm/sync/property", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { crmConfigId, propertyId, ownerInfo } = req.body;
       
       if (!crmConfigId || !propertyId || !ownerInfo) {
@@ -423,8 +429,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/crm/sync/logs/:configId", async (req, res) => {
+  app.get("/api/crm/sync/logs/:configId", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const configId = parseInt(req.params.configId);
       if (isNaN(configId)) {
         return res.status(400).json({ message: "Invalid configuration ID" });
@@ -439,8 +448,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Thermal Analysis API routes
-  app.post("/api/thermal/analyze", async (req, res) => {
+  app.post("/api/thermal/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { imageBase64, metadata } = req.body;
       
       if (!imageBase64) {
@@ -468,8 +480,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/thermal/generate-report", async (req, res) => {
+  app.post("/api/thermal/generate-report", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { analysisResults, buildingInfo } = req.body;
       
       if (!analysisResults || !Array.isArray(analysisResults)) {
@@ -493,8 +508,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Assistant routes
-  app.post("/api/ai-assistant", async (req, res) => {
+  app.post("/api/ai-assistant", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { message, context, conversationHistory } = req.body;
       
       if (!message) {
@@ -519,8 +537,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ai-assistant/analyze-inspection", async (req, res) => {
+  app.post("/api/ai-assistant/analyze-inspection", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { thermalReadings, roofSections, weatherData, inspectionType } = req.body;
       
       if (!inspectionType) {
@@ -608,8 +629,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Knowledge Base routes
-  app.get("/api/knowledge", async (req, res) => {
+  app.get("/api/knowledge", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { search, workflowStep } = req.query;
       
       if (search) {
@@ -628,8 +652,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/knowledge/:id", async (req, res) => {
+  app.get("/api/knowledge/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid knowledge entry ID" });
@@ -647,8 +674,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/knowledge", async (req, res) => {
+  app.post("/api/knowledge", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const entryData = insertKnowledgeBaseSchema.parse(req.body);
       const entry = await storage.createKnowledgeEntry(entryData);
       res.status(201).json(entry);
@@ -664,8 +694,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/knowledge/:id", async (req, res) => {
+  app.patch("/api/knowledge/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid knowledge entry ID" });
@@ -683,8 +716,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/knowledge/:id", async (req, res) => {
+  app.delete("/api/knowledge/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid knowledge entry ID" });
@@ -737,26 +773,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get or create active inspection session for a property
-  app.get("/api/inspection/session/active", async (req, res) => {
+  app.get("/api/inspection/session/active", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const propertyId = parseInt(req.query.propertyId as string);
       if (isNaN(propertyId)) {
         return res.status(400).json({ message: "Invalid property ID" });
       }
 
-      // Get demo user for MVP
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      let session = await storage.getActiveInspectionSession(propertyId, demoUser.id);
+      let session = await storage.getActiveInspectionSession(propertyId, userId);
       
       if (!session) {
         // Create new session
         session = await storage.createInspectionSession({
           propertyId,
-          inspectorId: demoUser.id,
+          inspectorId: userId,
         });
       }
 
@@ -779,8 +812,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single inspection session by ID
-  app.get("/api/inspection/session/:id", async (req, res) => {
+  app.get("/api/inspection/session/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -807,14 +843,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all inspection sessions for current user
-  app.get("/api/inspection/sessions", async (req, res) => {
+  app.get("/api/inspection/sessions", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
-      const sessions = await storage.getInspectionSessionsByInspector(demoUser.id);
+      const sessions = await storage.getInspectionSessionsByInspector(userId);
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching inspection sessions:', error);
@@ -823,16 +857,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new inspection session
-  app.post("/api/inspection/session", async (req, res) => {
+  app.post("/api/inspection/session", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
       const sessionData = insertInspectionSessionSchema.parse({
         ...req.body,
-        inspectorId: demoUser.id,
+        inspectorId: userId,
       });
       
       const session = await storage.createInspectionSession(sessionData);
@@ -847,8 +879,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update inspection session
-  app.patch("/api/inspection/session/:id", async (req, res) => {
+  app.patch("/api/inspection/session/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -867,8 +902,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Validate step completion and advance to next step
-  app.post("/api/inspection/session/:id/advance", async (req, res) => {
+  app.post("/api/inspection/session/:id/advance", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -941,8 +979,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Skip current step with reason (compliance tracking)
-  app.post("/api/inspection/session/:id/skip", async (req, res) => {
+  app.post("/api/inspection/session/:id/skip", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -1030,8 +1071,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Complete inspection session
-  app.post("/api/inspection/session/:id/complete", async (req, res) => {
+  app.post("/api/inspection/session/:id/complete", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -1066,8 +1110,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================================================
 
   // Get evidence for a session
-  app.get("/api/inspection/session/:sessionId/evidence", async (req, res) => {
+  app.get("/api/inspection/session/:sessionId/evidence", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const sessionId = parseInt(req.params.sessionId);
       if (isNaN(sessionId)) {
         return res.status(400).json({ message: "Invalid session ID" });
@@ -1090,13 +1137,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload new evidence asset
-  app.post("/api/inspection/evidence", async (req, res) => {
+  app.post("/api/inspection/evidence", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
       
       const assetData = insertEvidenceAssetSchema.parse({
         ...req.body,
-        uploadedBy: demoUser?.id,
+        uploadedBy: userId,
       });
       
       const asset = await storage.createEvidenceAsset(assetData);
@@ -1111,8 +1159,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update evidence asset (e.g., add AI analysis)
-  app.patch("/api/inspection/evidence/:id", async (req, res) => {
+  app.patch("/api/inspection/evidence/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid evidence ID" });
@@ -1131,8 +1182,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete evidence asset
-  app.delete("/api/inspection/evidence/:id", async (req, res) => {
+  app.delete("/api/inspection/evidence/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid evidence ID" });
@@ -1155,8 +1209,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================================================
 
   // Analyze an image using GPT-5.1 vision
-  app.post("/api/ai/analyze-image", async (req, res) => {
+  app.post("/api/ai/analyze-image", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { imageUrl, imageType, step, propertyContext, previousFindings } = req.body;
       
       if (!imageUrl || !step) {
@@ -1188,8 +1245,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analyze image and update evidence asset with results
-  app.post("/api/inspection/evidence/:id/analyze", async (req, res) => {
+  app.post("/api/inspection/evidence/:id/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid evidence ID" });
@@ -1238,8 +1298,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get step-specific coaching content
-  app.get("/api/ai/coaching/:step", async (req, res) => {
+  app.get("/api/ai/coaching/:step", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const step = req.params.step as WinnMethodologyStep;
       
       if (!WINN_METHODOLOGY_STEPS.includes(step)) {
@@ -1263,8 +1326,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat with Stormy - conversational AI endpoint
-  app.post("/api/ai/chat", async (req, res) => {
+  app.post("/api/ai/chat", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { message, context } = req.body;
       
       if (!message) {
@@ -1313,8 +1379,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Parse Limitless transcript and extract knowledge
-  app.post("/api/ai/parse-transcript", async (req, res) => {
+  app.post("/api/ai/parse-transcript", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const { rawTranscript, title } = req.body;
       
       if (!rawTranscript || !title) {
@@ -1335,8 +1404,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================================================
 
   // Get all transcripts
-  app.get("/api/transcripts", async (req, res) => {
+  app.get("/api/transcripts", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const transcripts = await storage.getAllLimitlessTranscripts();
       res.json(transcripts);
     } catch (error) {
@@ -1346,8 +1418,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single transcript
-  app.get("/api/transcripts/:id", async (req, res) => {
+  app.get("/api/transcripts/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid transcript ID" });
@@ -1366,13 +1441,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload new transcript
-  app.post("/api/transcripts", async (req, res) => {
+  app.post("/api/transcripts", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
       
       const transcriptData = insertLimitlessTranscriptSchema.parse({
         ...req.body,
-        uploadedBy: demoUser?.id,
+        uploadedBy: userId,
       });
       
       const transcript = await storage.createLimitlessTranscript(transcriptData);
@@ -1387,8 +1463,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update transcript (e.g., after AI processing or review)
-  app.patch("/api/transcripts/:id", async (req, res) => {
+  app.patch("/api/transcripts/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid transcript ID" });
@@ -1411,17 +1490,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================================================
 
   // Get inspector progress and compliance data
-  app.get("/api/compliance/progress", async (req, res) => {
+  app.get("/api/compliance/progress", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
-      let progress = await storage.getInspectorProgress(demoUser.id);
+      let progress = await storage.getInspectorProgress(userId);
       
       if (!progress) {
-        progress = await storage.createInspectorProgress({ userId: demoUser.id });
+        progress = await storage.createInspectorProgress({ userId: userId });
       }
 
       res.json(progress);
@@ -1432,12 +1509,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update proficiency after completing an inspection step
-  app.post("/api/compliance/record-step", async (req, res) => {
+  app.post("/api/compliance/record-step", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
       const parseResult = recordStepPayloadSchema.safeParse(req.body);
       if (!parseResult.success) {
@@ -1449,9 +1524,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { step, timeSpentMinutes, aiInterventions, wasOverridden } = parseResult.data;
 
-      let progress = await storage.getInspectorProgress(demoUser.id);
+      let progress = await storage.getInspectorProgress(userId);
       if (!progress) {
-        progress = await storage.createInspectorProgress({ userId: demoUser.id });
+        progress = await storage.createInspectorProgress({ userId: userId });
       }
 
       const currentProficiency = progress.stepProficiency || {};
@@ -1492,7 +1567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      const updatedProgress = await storage.updateInspectorProgress(demoUser.id, {
+      const updatedProgress = await storage.updateInspectorProgress(userId, {
         stepProficiency: updatedStepProficiency
       });
 
@@ -1508,12 +1583,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Record an override (when step is skipped)
-  app.post("/api/compliance/record-override", async (req, res) => {
+  app.post("/api/compliance/record-override", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
       const parseResult = recordOverridePayloadSchema.safeParse(req.body);
       if (!parseResult.success) {
@@ -1541,7 +1614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overrides: [...currentOverrides, newOverride]
       });
 
-      let progress = await storage.getInspectorProgress(demoUser.id);
+      let progress = await storage.getInspectorProgress(userId);
       if (progress) {
         const currentProficiency = progress.stepProficiency || {};
         const stepData = currentProficiency[step as WinnMethodologyStep] || {
@@ -1562,7 +1635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         };
 
-        await storage.updateInspectorProgress(demoUser.id, {
+        await storage.updateInspectorProgress(userId, {
           stepProficiency: updatedStepProficiency
         });
       }
@@ -1578,14 +1651,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get training recommendations based on performance gaps
-  app.get("/api/compliance/recommendations", async (req, res) => {
+  app.get("/api/compliance/recommendations", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const demoUser = await storage.getUserByEmail("demo@example.com");
-      if (!demoUser) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
 
-      const progress = await storage.getInspectorProgress(demoUser.id);
+      const progress = await storage.getInspectorProgress(userId);
       
       const recommendations: {
         step: WinnMethodologyStep;
