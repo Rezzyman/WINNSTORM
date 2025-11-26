@@ -9,7 +9,7 @@ export async function seedDemoData() {
     // 1. Create demo user (consultant)
     console.log('👤 Creating demo user...');
     const demoUser = await storage.createUser({
-      email: 'demo@winnstorm.com',
+      email: 'demo@example.com',
       password: 'demo',
       firstName: 'Sarah',
       lastName: 'Martinez',
@@ -129,7 +129,7 @@ export async function seedDemoData() {
     console.log('  Status: Ready for terrestrial walk and test squares\n');
 
     console.log('🎉 Demo data seeding complete!');
-    console.log('💡 Login with demo@winnstorm.com to see the Kansas City inspection\n');
+    console.log('💡 Login with demo@example.com to see the Kansas City inspection\n');
 
   } catch (error) {
     console.error('❌ Error seeding demo data:', error);
