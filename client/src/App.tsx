@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -63,14 +64,16 @@ function Router() {
 
 function App() {
   return (
-    <AuthProvider>
-      <TooltipProvider>
-        <div className="min-h-screen flex flex-col relative">
-          <LoadingOverlay />
-          <Router />
-        </div>
-      </TooltipProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <div className="min-h-screen flex flex-col relative">
+            <LoadingOverlay />
+            <Router />
+          </div>
+        </TooltipProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 
