@@ -11,7 +11,8 @@ import {
 import {
   ArrowLeft,
   Camera,
-  Share
+  Share,
+  Sparkles
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Property, Scan } from '@shared/schema';
@@ -204,7 +205,17 @@ const PropertyDetail = () => {
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Primary Action - Start Inspection */}
+          <Button
+            className="w-full h-14 mb-4 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white font-medium rounded-lg transition flex items-center justify-center text-lg"
+            onClick={() => navigate(`/inspection/${propertyId}`)}
+            data-testid="button-start-inspection"
+          >
+            <Sparkles className="mr-2 h-6 w-6" />
+            Inspect with Stormy
+          </Button>
+
+          {/* Secondary Action Buttons */}
           <div className="grid grid-cols-2 gap-4">
             <Button
               className="bg-primary hover:bg-primary-light text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center"

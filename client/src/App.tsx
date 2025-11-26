@@ -16,6 +16,7 @@ import Projects from "@/pages/projects";
 import Landing from "@/pages/landing";
 import Subscribe from "@/pages/subscribe";
 import SubscriptionSuccess from "@/pages/subscription-success";
+import InspectionWizard from "@/pages/inspection-wizard";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/crm-integrations" component={CrmIntegrations} />
       <Route path="/training" component={Training} />
       <Route path="/projects" component={Projects} />
+      <Route path="/inspection/:propertyId" component={InspectionWizard} />
       <Route component={NotFound} />
     </Switch>
   );
