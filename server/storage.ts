@@ -76,6 +76,11 @@ export interface IStorage {
   getAllLimitlessTranscripts(): Promise<LimitlessTranscript[]>;
   createLimitlessTranscript(transcript: InsertLimitlessTranscript): Promise<LimitlessTranscript>;
   updateLimitlessTranscript(id: number, updates: Partial<LimitlessTranscript>): Promise<LimitlessTranscript | undefined>;
+  
+  // Inspector Progress methods (Compliance tracking)
+  getInspectorProgress(userId: number): Promise<InspectorProgress | undefined>;
+  createInspectorProgress(progress: InsertInspectorProgress): Promise<InspectorProgress>;
+  updateInspectorProgress(userId: number, updates: Partial<InspectorProgress>): Promise<InspectorProgress | undefined>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -627,6 +632,46 @@ export class DatabaseStorage implements IStorage {
       return updatedTranscript || undefined;
     } catch (error) {
       console.error('Error updating limitless transcript:', error);
+      return undefined;
+    }
+  }
+
+  // ============================================================================
+  // INSPECTOR PROGRESS METHODS - Compliance & Proficiency Tracking
+  // ============================================================================
+
+  async getInspectorProgress(userId: number): Promise<InspectorProgress | undefined> {
+    try {
+      const [progress] = await db.select().from(inspectorProgress).where(eq(inspectorProgress.userId, userId));
+      return progress || undefined;
+    } catch (error) {
+      console.error('Error fetching inspector progress:', error);
+      return undefined;
+    }
+  }
+
+  async createInspectorProgress(progress: InsertInspectorProgress): Promise<InspectorProgress> {
+    const [newProgress] = await db.insert(inspectorProgress).values({
+      ...progress,
+      totalInspections: 0,
+      completedInspections: 0,
+    }).returning();
+    return newProgress;
+  }
+
+  async updateInspectorProgress(userId: number, updates: Partial<InspectorProgress>): Promise<InspectorProgress | undefined> {
+    try {
+      const [updatedProgress] = await db
+        .update(inspectorProgress)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(inspectorProgress.userId, userId))
+        .returning();
+      return updatedProgress || undefined;
+    } catch (error) {
+      console.error('Error updating inspector progress:', error);
       return undefined;
     }
   }

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { 
   insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema, insertKnowledgeBaseSchema,
   insertInspectionSessionSchema, insertEvidenceAssetSchema, insertLimitlessTranscriptSchema,
-  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation
+  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation, StepOverride
 } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
@@ -1402,6 +1402,252 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating transcript:', error);
       res.status(500).json({ message: "Failed to update transcript" });
+    }
+  });
+
+  // ============================================================================
+  // COMPLIANCE & PROFICIENCY TRACKING ROUTES
+  // ============================================================================
+
+  // Get inspector progress and compliance data
+  app.get("/api/compliance/progress", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let progress = await storage.getInspectorProgress(demoUser.id);
+      
+      if (!progress) {
+        progress = await storage.createInspectorProgress({ userId: demoUser.id });
+      }
+
+      res.json(progress);
+    } catch (error) {
+      console.error('Error fetching inspector progress:', error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  // Update proficiency after completing an inspection step
+  app.post("/api/compliance/record-step", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { step, timeSpentMinutes, aiInterventions, wasOverridden } = req.body;
+
+      if (!step || !WINN_METHODOLOGY_STEPS.includes(step)) {
+        return res.status(400).json({ message: "Invalid methodology step" });
+      }
+
+      let progress = await storage.getInspectorProgress(demoUser.id);
+      if (!progress) {
+        progress = await storage.createInspectorProgress({ userId: demoUser.id });
+      }
+
+      const currentProficiency = progress.stepProficiency || {};
+      const stepData = currentProficiency[step as WinnMethodologyStep] || {
+        attemptCount: 0,
+        averageTimeMinutes: 0,
+        aiInterventionCount: 0,
+        overrideCount: 0,
+        lastAttempt: new Date().toISOString(),
+        proficiencyLevel: 'novice' as const
+      };
+
+      const newAttemptCount = stepData.attemptCount + 1;
+      const newAverageTime = ((stepData.averageTimeMinutes * stepData.attemptCount) + (timeSpentMinutes || 0)) / newAttemptCount;
+      const newAiInterventions = stepData.aiInterventionCount + (aiInterventions || 0);
+      const newOverrides = stepData.overrideCount + (wasOverridden ? 1 : 0);
+
+      let proficiencyLevel: 'novice' | 'learning' | 'competent' | 'proficient' | 'expert' = 'novice';
+      if (newAttemptCount >= 50 && newAiInterventions / newAttemptCount < 0.1) {
+        proficiencyLevel = 'expert';
+      } else if (newAttemptCount >= 25 && newAiInterventions / newAttemptCount < 0.2) {
+        proficiencyLevel = 'proficient';
+      } else if (newAttemptCount >= 10 && newAiInterventions / newAttemptCount < 0.3) {
+        proficiencyLevel = 'competent';
+      } else if (newAttemptCount >= 5) {
+        proficiencyLevel = 'learning';
+      }
+
+      const updatedStepProficiency = {
+        ...currentProficiency,
+        [step]: {
+          attemptCount: newAttemptCount,
+          averageTimeMinutes: Math.round(newAverageTime * 10) / 10,
+          aiInterventionCount: newAiInterventions,
+          overrideCount: newOverrides,
+          lastAttempt: new Date().toISOString(),
+          proficiencyLevel
+        }
+      };
+
+      const updatedProgress = await storage.updateInspectorProgress(demoUser.id, {
+        stepProficiency: updatedStepProficiency
+      });
+
+      res.json({
+        step,
+        proficiency: updatedStepProficiency[step as WinnMethodologyStep],
+        overallProgress: updatedProgress
+      });
+    } catch (error) {
+      console.error('Error recording step proficiency:', error);
+      res.status(500).json({ message: "Failed to record step" });
+    }
+  });
+
+  // Record an override (when step is skipped)
+  app.post("/api/compliance/record-override", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { sessionId, step, reason } = req.body;
+
+      if (!step || !WINN_METHODOLOGY_STEPS.includes(step) || !reason) {
+        return res.status(400).json({ message: "step and reason are required" });
+      }
+
+      const session = await storage.getInspectionSession(sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const currentOverrides = session.overrides || [];
+      const newOverride: StepOverride = {
+        step,
+        reason,
+        timestamp: new Date().toISOString()
+      };
+
+      const updatedSession = await storage.updateInspectionSession(sessionId, {
+        overrides: [...currentOverrides, newOverride]
+      });
+
+      let progress = await storage.getInspectorProgress(demoUser.id);
+      if (progress) {
+        const currentProficiency = progress.stepProficiency || {};
+        const stepData = currentProficiency[step as WinnMethodologyStep] || {
+          attemptCount: 0,
+          averageTimeMinutes: 0,
+          aiInterventionCount: 0,
+          overrideCount: 0,
+          lastAttempt: new Date().toISOString(),
+          proficiencyLevel: 'novice' as const
+        };
+
+        const updatedStepProficiency = {
+          ...currentProficiency,
+          [step]: {
+            ...stepData,
+            overrideCount: stepData.overrideCount + 1,
+            lastAttempt: new Date().toISOString()
+          }
+        };
+
+        await storage.updateInspectorProgress(demoUser.id, {
+          stepProficiency: updatedStepProficiency
+        });
+      }
+
+      res.json({
+        override: newOverride,
+        session: updatedSession
+      });
+    } catch (error) {
+      console.error('Error recording override:', error);
+      res.status(500).json({ message: "Failed to record override" });
+    }
+  });
+
+  // Get training recommendations based on performance gaps
+  app.get("/api/compliance/recommendations", async (req, res) => {
+    try {
+      const demoUser = await storage.getUserByEmail("demo@example.com");
+      if (!demoUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const progress = await storage.getInspectorProgress(demoUser.id);
+      
+      const recommendations: {
+        step: WinnMethodologyStep;
+        issue: string;
+        recommendation: string;
+        priority: 'high' | 'medium' | 'low';
+      }[] = [];
+
+      if (progress?.stepProficiency) {
+        for (const step of WINN_METHODOLOGY_STEPS) {
+          const proficiency = progress.stepProficiency[step];
+          if (!proficiency) continue;
+
+          if (proficiency.overrideCount > 2 && proficiency.attemptCount > 0) {
+            const overrideRate = proficiency.overrideCount / proficiency.attemptCount;
+            if (overrideRate > 0.3) {
+              recommendations.push({
+                step,
+                issue: `High skip rate (${Math.round(overrideRate * 100)}%)`,
+                recommendation: `Review training materials for ${step.replace(/_/g, ' ')} step`,
+                priority: 'high'
+              });
+            }
+          }
+
+          if (proficiency.aiInterventionCount > 5 && proficiency.attemptCount > 0) {
+            const interventionRate = proficiency.aiInterventionCount / proficiency.attemptCount;
+            if (interventionRate > 0.5) {
+              recommendations.push({
+                step,
+                issue: `Frequent AI assistance needed (${Math.round(interventionRate * 100)}%)`,
+                recommendation: `Complete additional practice sessions for ${step.replace(/_/g, ' ')}`,
+                priority: 'medium'
+              });
+            }
+          }
+
+          if (proficiency.proficiencyLevel === 'novice' && proficiency.attemptCount > 3) {
+            recommendations.push({
+              step,
+              issue: 'Still at novice level after multiple attempts',
+              recommendation: `Schedule a mentoring session for ${step.replace(/_/g, ' ')}`,
+              priority: 'high'
+            });
+          }
+        }
+      }
+
+      for (const step of WINN_METHODOLOGY_STEPS) {
+        const proficiency = progress?.stepProficiency?.[step];
+        if (!proficiency || proficiency.attemptCount === 0) {
+          recommendations.push({
+            step,
+            issue: 'No experience with this step',
+            recommendation: `Start training for ${step.replace(/_/g, ' ')} step`,
+            priority: 'low'
+          });
+        }
+      }
+
+      res.json({
+        recommendations: recommendations.sort((a, b) => {
+          const priorityOrder = { high: 0, medium: 1, low: 2 };
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }),
+        overallComplianceScore: progress?.averageComplianceScore || 0,
+        totalInspections: progress?.totalInspections || 0
+      });
+    } catch (error) {
+      console.error('Error getting recommendations:', error);
+      res.status(500).json({ message: "Failed to get recommendations" });
     }
   });
 
