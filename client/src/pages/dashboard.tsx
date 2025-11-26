@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Property, Project, DamageAssessment } from '@shared/schema';
-import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle } from 'lucide-react';
+import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 
@@ -164,6 +164,16 @@ const Dashboard = () => {
               >
                 <Users className="h-6 w-6 mb-2 text-blue-500" />
                 <span>CRM Integration</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="p-4 h-auto flex flex-col items-center border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50"
+                onClick={() => navigate('/transcripts')}
+                data-testid="button-transcripts"
+              >
+                <Mic className="h-6 w-6 mb-2 text-purple-500" />
+                <span>Transcripts</span>
               </Button>
             </div>
           </div>

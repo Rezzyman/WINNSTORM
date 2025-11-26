@@ -17,6 +17,7 @@ import Landing from "@/pages/landing";
 import Subscribe from "@/pages/subscribe";
 import SubscriptionSuccess from "@/pages/subscription-success";
 import InspectionWizard from "@/pages/inspection-wizard";
+import Transcripts from "@/pages/transcripts";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/training" component={Training} />
       <Route path="/projects" component={Projects} />
       <Route path="/inspection/:propertyId" component={InspectionWizard} />
+      <Route path="/transcripts" component={Transcripts} />
       <Route component={NotFound} />
     </Switch>
   );
