@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Eye
 } from 'lucide-react';
+import { SEO, breadcrumbSchema } from '@/components/seo';
 
 const Projects = () => {
   const { user, role } = useAuth();
@@ -83,6 +84,16 @@ const Projects = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground">
+      <SEO
+        title="Project Management"
+        description="Manage damage assessment projects, track client progress, and coordinate inspections. Comprehensive project management for property consultants."
+        canonical="/projects"
+        noindex={true}
+        structuredData={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Projects', url: '/projects' }
+        ])}
+      />
       <Header />
       
       <main className="flex-grow pb-20">

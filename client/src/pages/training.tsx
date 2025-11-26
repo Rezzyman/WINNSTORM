@@ -22,6 +22,7 @@ import {
   TrendingUp,
   AlertCircle
 } from 'lucide-react';
+import { SEO, courseSchema, breadcrumbSchema } from '@/components/seo';
 
 interface TrainingCourse {
   id: number;
@@ -173,8 +174,28 @@ const Training = () => {
 
   const filteredCourses = mockCourses.filter(course => course.day === selectedDay);
 
+  const trainingStructuredData = [
+    breadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Training Portal', url: '/training' }
+    ]),
+    courseSchema({
+      name: 'WinnStorm™ Damage Assessment Certification',
+      description: 'Comprehensive training program covering the Winn Methodology for professional damage assessment, thermal imaging analysis, and industry-leading reporting techniques.',
+      provider: 'WinnStorm™'
+    })
+  ];
+
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground">
+      <SEO
+        title="Training Portal - Certification Program"
+        description="Master the Winn Methodology with our comprehensive training portal. Earn Junior and Senior Consultant certifications through video courses, quizzes, and hands-on assessments."
+        canonical="/training"
+        noindex={true}
+        keywords={['damage assessment training', 'property inspection certification', 'Winn Methodology course', 'thermal imaging training', 'consultant certification']}
+        structuredData={trainingStructuredData}
+      />
       <Header />
       
       <main className="flex-grow pb-20">

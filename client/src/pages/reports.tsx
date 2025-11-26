@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,7 @@ import {
 import { useLocation } from 'wouter';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 import { Header, Footer } from '@/components/navbar';
+import { SEO, breadcrumbSchema } from '@/components/seo';
 
 interface Report {
   id: number;
@@ -190,6 +191,16 @@ const ReportsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground">
+      <SEO
+        title="Reports Library"
+        description="Access and manage your damage assessment reports. View Winn Reports, thermal analysis documents, and comprehensive property evaluations."
+        canonical="/reports"
+        noindex={true}
+        structuredData={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Reports', url: '/reports' }
+        ])}
+      />
       <Header />
       
       <main className="flex-grow pb-20">

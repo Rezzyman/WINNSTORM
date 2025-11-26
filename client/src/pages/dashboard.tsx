@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Property, Project, DamageAssessment } from '@shared/schema';
 import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SEO, breadcrumbSchema } from '@/components/seo';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 
 const Dashboard = () => {
@@ -62,6 +63,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground">
+      <SEO
+        title="Dashboard"
+        description="Manage your damage assessment projects, track inspections, and view certification progress. Access thermal analysis tools and generate comprehensive Winn Reports."
+        canonical="/dashboard"
+        noindex={true}
+        structuredData={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Dashboard', url: '/dashboard' }
+        ])}
+      />
       <Header />
       
       <main className="flex-grow pb-20">
