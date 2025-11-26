@@ -33,6 +33,14 @@ import {
   X
 } from 'lucide-react';
 import { StormyAvatar } from '@/components/stormy-avatar';
+import { 
+  SEO, 
+  organizationSchema, 
+  softwareApplicationSchema, 
+  websiteSchema,
+  faqSchema,
+  professionalServiceSchema 
+} from '@/components/seo';
 import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
 import winnstormVideo from '@assets/WINNSTORM™ (1)_1756326492392.mp4';
 
@@ -180,8 +188,41 @@ const Landing = () => {
     }
   ];
 
+  const landingFaqs = [
+    {
+      question: "What is the Winn Methodology?",
+      answer: "The Winn Methodology is an industry-leading approach to property damage assessment developed by Eric Winn. It provides a systematic 8-step process for comprehensive storm and hail damage evaluation, ensuring accurate and defensible reports for insurance claims."
+    },
+    {
+      question: "How does Stormy AI help with inspections?",
+      answer: "Stormy is our AI-powered assistant that provides real-time guidance during property inspections. It analyzes thermal images, identifies damage patterns, suggests next steps based on the Winn Methodology, and helps consultants produce comprehensive assessment reports."
+    },
+    {
+      question: "What certifications can I earn through WinnStorm?",
+      answer: "WinnStorm offers a multi-level certification program including Junior Consultant and Senior Consultant certifications. Our training portal includes courses, quizzes, and progress tracking to help you master the Winn Methodology and advance your career."
+    },
+    {
+      question: "Is WinnStorm available on mobile devices?",
+      answer: "Yes! WinnStorm is a mobile-first platform available as a progressive web app and native applications for iOS and Android. It's designed for field use with features like offline capability, native camera integration, and one-handed operation."
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Professional Damage Assessment Platform"
+        description="AI-powered property damage assessment platform using the proven Winn Methodology. Thermal analysis, comprehensive reporting, consultant certification, and mobile-first field inspector tools."
+        canonical="/"
+        keywords={['hail damage assessment', 'storm damage inspection', 'property damage consultant', 'thermal imaging analysis', 'insurance claim documentation', 'roof inspection software', 'damage assessment certification']}
+        structuredData={[
+          organizationSchema,
+          softwareApplicationSchema,
+          websiteSchema,
+          professionalServiceSchema,
+          faqSchema(landingFaqs)
+        ]}
+      />
+      
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-lg' : 'bg-transparent'
