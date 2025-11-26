@@ -1095,6 +1095,22 @@ export interface StepProficiency {
   proficiencyLevel: 'novice' | 'learning' | 'competent' | 'proficient' | 'expert';
 }
 
+// Zod schemas for compliance API validation
+export const recordStepPayloadSchema = z.object({
+  step: z.enum(WINN_METHODOLOGY_STEPS),
+  timeSpentMinutes: z.number().min(0).optional(),
+  aiInterventions: z.number().min(0).optional(),
+  wasOverridden: z.boolean().optional(),
+});
+export type RecordStepPayload = z.infer<typeof recordStepPayloadSchema>;
+
+export const recordOverridePayloadSchema = z.object({
+  sessionId: z.string(),
+  step: z.enum(WINN_METHODOLOGY_STEPS),
+  reason: z.string().min(5, 'Override reason must be at least 5 characters'),
+});
+export type RecordOverridePayload = z.infer<typeof recordOverridePayloadSchema>;
+
 // Limitless Transcript - For ingesting Eric Winn recordings
 export const limitlessTranscripts = pgTable("limitless_transcripts", {
   id: serial("id").primaryKey(),

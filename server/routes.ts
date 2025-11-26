@@ -5,7 +5,8 @@ import { z } from "zod";
 import { 
   insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema, insertKnowledgeBaseSchema,
   insertInspectionSessionSchema, insertEvidenceAssetSchema, insertLimitlessTranscriptSchema,
-  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation, StepOverride
+  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation, StepOverride,
+  recordStepPayloadSchema, recordOverridePayloadSchema
 } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
@@ -1438,11 +1439,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { step, timeSpentMinutes, aiInterventions, wasOverridden } = req.body;
-
-      if (!step || !WINN_METHODOLOGY_STEPS.includes(step)) {
-        return res.status(400).json({ message: "Invalid methodology step" });
+      const parseResult = recordStepPayloadSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: parseResult.error.errors 
+        });
       }
+      
+      const { step, timeSpentMinutes, aiInterventions, wasOverridden } = parseResult.data;
 
       let progress = await storage.getInspectorProgress(demoUser.id);
       if (!progress) {
@@ -1510,11 +1515,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { sessionId, step, reason } = req.body;
-
-      if (!step || !WINN_METHODOLOGY_STEPS.includes(step) || !reason) {
-        return res.status(400).json({ message: "step and reason are required" });
+      const parseResult = recordOverridePayloadSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: parseResult.error.errors 
+        });
       }
+      
+      const { sessionId, step, reason } = parseResult.data;
 
       const session = await storage.getInspectionSession(sessionId);
       if (!session) {
