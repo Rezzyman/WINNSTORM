@@ -9,7 +9,7 @@ import {
 } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
-import { getAIAssistance, analyzeInspectionData, AIAssistantRequest } from './ai-assistant';
+import { getAIAssistance, analyzeInspectionData, AIAssistantRequest, analyzeInspectionImage, getStepCoaching, parseTranscript, ImageAnalysisRequest } from './ai-assistant';
 import { requireAuth } from './auth';
 import Stripe from 'stripe';
 
@@ -1124,6 +1124,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting evidence asset:', error);
       res.status(500).json({ message: "Failed to delete evidence asset" });
+    }
+  });
+
+  // ============================================================================
+  // MULTIMODAL AI ANALYSIS ROUTES - GPT-5.1 Vision & Coaching
+  // ============================================================================
+
+  // Analyze an image using GPT-5.1 vision
+  app.post("/api/ai/analyze-image", async (req, res) => {
+    try {
+      const { imageUrl, imageType, step, propertyContext, previousFindings } = req.body;
+      
+      if (!imageUrl || !step) {
+        return res.status(400).json({ message: "imageUrl and step are required" });
+      }
+
+      if (!WINN_METHODOLOGY_STEPS.includes(step)) {
+        return res.status(400).json({ 
+          message: "Invalid methodology step",
+          validSteps: WINN_METHODOLOGY_STEPS 
+        });
+      }
+
+      const analysisRequest: ImageAnalysisRequest = {
+        imageUrl,
+        imageType: imageType || 'photo',
+        step,
+        propertyContext,
+        previousFindings
+      };
+
+      const result = await analyzeInspectionImage(analysisRequest);
+      res.json(result);
+
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      res.status(500).json({ message: "Failed to analyze image" });
+    }
+  });
+
+  // Analyze image and update evidence asset with results
+  app.post("/api/inspection/evidence/:id/analyze", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid evidence ID" });
+      }
+
+      const evidence = await storage.getEvidenceAsset(id);
+      if (!evidence) {
+        return res.status(404).json({ message: "Evidence asset not found" });
+      }
+
+      // Get session for property context
+      const session = await storage.getInspectionSession(evidence.inspectionSessionId);
+      let propertyContext = '';
+      if (session) {
+        const property = await storage.getProperty(session.propertyId);
+        if (property) {
+          propertyContext = `Property: ${property.name} at ${property.address}`;
+        }
+      }
+
+      // Analyze the image
+      const analysisRequest: ImageAnalysisRequest = {
+        imageUrl: evidence.fileUrl,
+        imageType: evidence.assetType as 'photo' | 'thermal' | 'drone' | 'document',
+        step: evidence.step as WinnMethodologyStep,
+        propertyContext
+      };
+
+      const result = await analyzeInspectionImage(analysisRequest);
+
+      // Update evidence with analysis results
+      const updatedEvidence = await storage.updateEvidenceAsset(id, {
+        aiAnalysis: result.validation,
+        rawAiResponse: JSON.stringify(result)
+      });
+
+      res.json({
+        evidence: updatedEvidence,
+        analysis: result
+      });
+
+    } catch (error) {
+      console.error('Error analyzing evidence:', error);
+      res.status(500).json({ message: "Failed to analyze evidence" });
+    }
+  });
+
+  // Get step-specific coaching content
+  app.get("/api/ai/coaching/:step", async (req, res) => {
+    try {
+      const step = req.params.step as WinnMethodologyStep;
+      
+      if (!WINN_METHODOLOGY_STEPS.includes(step)) {
+        return res.status(400).json({ 
+          message: "Invalid methodology step",
+          validSteps: WINN_METHODOLOGY_STEPS 
+        });
+      }
+
+      const experienceLevel = (req.query.level as 'beginner' | 'intermediate' | 'expert') || 'beginner';
+      const findingsParam = req.query.findings as string;
+      const currentFindings = findingsParam ? findingsParam.split(',') : undefined;
+
+      const coaching = await getStepCoaching(step, experienceLevel, currentFindings);
+      res.json(coaching);
+
+    } catch (error) {
+      console.error('Error getting coaching content:', error);
+      res.status(500).json({ message: "Failed to get coaching content" });
+    }
+  });
+
+  // Parse Limitless transcript and extract knowledge
+  app.post("/api/ai/parse-transcript", async (req, res) => {
+    try {
+      const { rawTranscript, title } = req.body;
+      
+      if (!rawTranscript || !title) {
+        return res.status(400).json({ message: "rawTranscript and title are required" });
+      }
+
+      const result = await parseTranscript(rawTranscript, title);
+      res.json(result);
+
+    } catch (error) {
+      console.error('Error parsing transcript:', error);
+      res.status(500).json({ message: "Failed to parse transcript" });
     }
   });
 
