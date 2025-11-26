@@ -1,0 +1,29 @@
+# WinnStorm Robots.txt
+# https://winnstorm.com
+
+User-agent: *
+Allow: /
+Allow: /auth
+Allow: /subscribe/
+
+# Disallow authenticated/private pages
+Disallow: /dashboard
+Disallow: /upload
+Disallow: /analysis/
+Disallow: /property/
+Disallow: /report/
+Disallow: /reports
+Disallow: /winn-report/
+Disallow: /crm-integrations
+Disallow: /training
+Disallow: /projects
+Disallow: /inspection/
+Disallow: /transcripts
+Disallow: /subscription-success
+Disallow: /api/
+
+# Crawl delay for good citizenship
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://winnstorm.com/sitemap.xml
