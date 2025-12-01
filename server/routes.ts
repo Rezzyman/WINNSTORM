@@ -5,7 +5,7 @@ import { z } from "zod";
 import { 
   insertPropertySchema, insertReportSchema, insertScanSchema, insertCrmConfigSchema, insertCrmSyncLogSchema, insertKnowledgeBaseSchema,
   insertInspectionSessionSchema, insertEvidenceAssetSchema, insertLimitlessTranscriptSchema,
-  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation, StepOverride,
+  WINN_METHODOLOGY_STEPS, WinnMethodologyStep, StepRequirements, AIStepValidation, StepOverride, StepProficiency,
   recordStepPayloadSchema, recordOverridePayloadSchema
 } from "@shared/schema";
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
@@ -648,22 +648,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Get the payment intent from the invoice
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
-      let paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent | null;
+      // Since we expanded 'latest_invoice.payment_intent', the invoice includes payment_intent
+      const invoice = subscription.latest_invoice;
+      
+      if (!invoice || typeof invoice === 'string') {
+        console.error('Subscription created but invoice not expanded');
+        return res.status(500).json({ 
+          message: "Subscription created but invoice not available. Please contact support.",
+          subscriptionId: subscription.id
+        });
+      }
 
-      // If no payment intent exists on the invoice, we need to finalize it to create one
-      if (!paymentIntent && invoice?.id) {
+      // Access payment_intent from expanded invoice (need to cast as it's an expanded relation)
+      let paymentIntent = (invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent | string | null }).payment_intent;
+      
+      // If payment_intent is a string (not expanded) or null, try to finalize the invoice
+      if ((!paymentIntent || typeof paymentIntent === 'string') && invoice.id) {
         try {
           const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
             expand: ['payment_intent'],
           });
-          paymentIntent = finalizedInvoice.payment_intent as Stripe.PaymentIntent | null;
+          paymentIntent = (finalizedInvoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent | string | null }).payment_intent;
         } catch (finalizeError) {
           console.error('Error finalizing invoice:', finalizeError);
         }
       }
 
-      if (!paymentIntent?.client_secret) {
+      // Validate we have a proper PaymentIntent with client_secret
+      if (!paymentIntent || typeof paymentIntent === 'string' || !paymentIntent.client_secret) {
         // Fall back to creating a setup intent for the customer
         console.log('Creating setup intent as fallback for customer:', customer.id);
         const setupIntent = await stripe.setupIntents.create({
@@ -1428,14 +1440,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use the AI assistant to generate response
       const aiResponse = await getAIAssistance({
         context: systemContext,
-        currentStep: currentStep,
-        experienceLevel: experienceLevel || 'intermediate',
-        question: message,
+        message: message,
       });
 
       res.json({ 
         response: aiResponse.response,
-        suggestedActions: aiResponse.suggestedActions || []
+        suggestedActions: aiResponse.suggestions || []
       });
 
     } catch (error) {
@@ -1595,8 +1605,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         progress = await storage.createInspectorProgress({ userId: userId });
       }
 
-      const currentProficiency = progress.stepProficiency || {};
-      const stepData = currentProficiency[step as WinnMethodologyStep] || {
+      const currentProficiency = (progress.stepProficiency || {}) as Partial<Record<WinnMethodologyStep, StepProficiency>>;
+      const stepData = currentProficiency[step] || {
         attemptCount: 0,
         averageTimeMinutes: 0,
         aiInterventionCount: 0,
@@ -1621,7 +1631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         proficiencyLevel = 'learning';
       }
 
-      const updatedStepProficiency = {
+      const updatedStepProficiency: Partial<Record<WinnMethodologyStep, StepProficiency>> = {
         ...currentProficiency,
         [step]: {
           attemptCount: newAttemptCount,
@@ -1634,12 +1644,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const updatedProgress = await storage.updateInspectorProgress(userId, {
-        stepProficiency: updatedStepProficiency
+        stepProficiency: updatedStepProficiency as Record<WinnMethodologyStep, StepProficiency>
       });
 
       res.json({
         step,
-        proficiency: updatedStepProficiency[step as WinnMethodologyStep],
+        proficiency: updatedStepProficiency[step],
         overallProgress: updatedProgress
       });
     } catch (error) {
@@ -1663,8 +1673,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { sessionId, step, reason } = parseResult.data;
+      const sessionIdNum = parseInt(sessionId, 10);
+      
+      if (isNaN(sessionIdNum) || sessionIdNum <= 0) {
+        return res.status(400).json({ message: "Invalid session ID format" });
+      }
 
-      const session = await storage.getInspectionSession(sessionId);
+      const session = await storage.getInspectionSession(sessionIdNum);
       if (!session) {
         return res.status(404).json({ message: "Session not found" });
       }
@@ -1676,14 +1691,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString()
       };
 
-      const updatedSession = await storage.updateInspectionSession(sessionId, {
+      const updatedSession = await storage.updateInspectionSession(sessionIdNum, {
         overrides: [...currentOverrides, newOverride]
       });
 
       let progress = await storage.getInspectorProgress(userId);
       if (progress) {
-        const currentProficiency = progress.stepProficiency || {};
-        const stepData = currentProficiency[step as WinnMethodologyStep] || {
+        const currentProficiency = (progress.stepProficiency || {}) as Partial<Record<WinnMethodologyStep, StepProficiency>>;
+        const stepData = currentProficiency[step] || {
           attemptCount: 0,
           averageTimeMinutes: 0,
           aiInterventionCount: 0,
@@ -1692,7 +1707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           proficiencyLevel: 'novice' as const
         };
 
-        const updatedStepProficiency = {
+        const updatedStepProficiency: Partial<Record<WinnMethodologyStep, StepProficiency>> = {
           ...currentProficiency,
           [step]: {
             ...stepData,
@@ -1702,7 +1717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         await storage.updateInspectorProgress(userId, {
-          stepProficiency: updatedStepProficiency
+          stepProficiency: updatedStepProficiency as Record<WinnMethodologyStep, StepProficiency>
         });
       }
 
