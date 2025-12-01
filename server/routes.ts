@@ -568,43 +568,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe subscription routes
   app.post("/api/create-subscription", async (req, res) => {
     try {
-      if (!process.env.STRIPE_SECRET_KEY) {
+      // Prefer testing keys for development, fall back to production keys
+      const stripeSecretKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
+      
+      if (!stripeSecretKey) {
         return res.status(500).json({ message: "Stripe is not configured" });
       }
 
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      const stripe = new Stripe(stripeSecretKey, {
         apiVersion: '2025-10-29.clover',
       });
 
-      const { plan } = req.body;
+      const { plan, email } = req.body;
 
-      // Map plan names to Stripe price IDs
-      // You'll need to create these products in your Stripe Dashboard
+      // Map plan names to Stripe price IDs (configured in Stripe Dashboard)
+      // For development without price IDs, we'll create ad-hoc prices
       const priceMap: Record<string, string> = {
         'starter': process.env.STRIPE_PRICE_STARTER || '',
         'professional': process.env.STRIPE_PRICE_PROFESSIONAL || '',
         'enterprise': process.env.STRIPE_PRICE_ENTERPRISE || ''
       };
 
-      const priceId = priceMap[plan.toLowerCase()];
+      // Plan pricing in cents for development mode
+      const planPricing: Record<string, number> = {
+        'starter': 4900,        // $49/month
+        'professional': 14900,  // $149/month
+        'enterprise': 49900     // $499/month
+      };
+
+      const planLower = plan?.toLowerCase() || 'starter';
+      let priceId = priceMap[planLower];
       
+      // If no price ID is configured, create an ad-hoc price for development
       if (!priceId) {
-        // For development, create a subscription without a specific price
-        // In production, you should have actual price IDs from Stripe
-        console.warn(`No Stripe price ID configured for plan: ${plan}. Using demo mode.`);
+        console.log(`No Stripe price ID for plan: ${plan}. Creating ad-hoc price for development.`);
+        
+        // First create or get a product
+        const products = await stripe.products.list({ limit: 1 });
+        let productId: string;
+        
+        if (products.data.length > 0) {
+          productId = products.data[0].id;
+        } else {
+          const product = await stripe.products.create({
+            name: 'WinnStorm Subscription',
+            description: 'WinnStorm damage assessment platform subscription',
+          });
+          productId = product.id;
+        }
+        
+        // Create a price for this subscription
+        const price = await stripe.prices.create({
+          product: productId,
+          unit_amount: planPricing[planLower] || 4900,
+          currency: 'usd',
+          recurring: { interval: 'month' },
+        });
+        priceId = price.id;
       }
 
-      // Create a customer (in production, check if customer already exists)
+      // Create a customer with email if provided
       const customer = await stripe.customers.create({
+        email: email || undefined,
         metadata: {
           plan: plan,
         },
       });
 
-      // Create a subscription with payment intent
+      // Create a PaymentIntent for the subscription using the invoice approach
+      // First create an incomplete subscription, then finalize the invoice
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
-        items: priceId ? [{ price: priceId }] : [],
+        items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
         payment_settings: { 
           save_default_payment_method: 'on_subscription',
@@ -612,8 +647,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expand: ['latest_invoice.payment_intent'],
       });
 
-      const invoice = subscription.latest_invoice as any;
-      const paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent;
+      // Get the payment intent from the invoice
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      let paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent | null;
+
+      // If no payment intent exists on the invoice, we need to finalize it to create one
+      if (!paymentIntent && invoice?.id) {
+        try {
+          const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
+            expand: ['payment_intent'],
+          });
+          paymentIntent = finalizedInvoice.payment_intent as Stripe.PaymentIntent | null;
+        } catch (finalizeError) {
+          console.error('Error finalizing invoice:', finalizeError);
+        }
+      }
+
+      if (!paymentIntent?.client_secret) {
+        // Fall back to creating a setup intent for the customer
+        console.log('Creating setup intent as fallback for customer:', customer.id);
+        const setupIntent = await stripe.setupIntents.create({
+          customer: customer.id,
+          payment_method_types: ['card'],
+          metadata: {
+            subscriptionId: subscription.id,
+          },
+        });
+
+        return res.json({
+          subscriptionId: subscription.id,
+          clientSecret: setupIntent.client_secret,
+          setupMode: true,
+        });
+      }
 
       res.json({
         subscriptionId: subscription.id,

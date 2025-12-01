@@ -10,12 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
 import { SEO } from '@/components/seo';
 
-// Conditionally load Stripe only if the key is available
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+// Conditionally load Stripe - prefer testing key for development
+const stripePublicKey = import.meta.env.TESTING_VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = stripePublicKey
+  ? loadStripe(stripePublicKey)
   : null;
 
-const SubscribeForm = ({ planName }: { planName: string }) => {
+const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMode: boolean }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -31,17 +32,29 @@ const SubscribeForm = ({ planName }: { planName: string }) => {
 
     setIsProcessing(true);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/subscription-success`,
-      },
-    });
+    let result;
+    if (isSetupMode) {
+      // For setup intents, use confirmSetup
+      result = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/subscription-success`,
+        },
+      });
+    } else {
+      // For payment intents, use confirmPayment
+      result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/subscription-success`,
+        },
+      });
+    }
 
-    if (error) {
+    if (result.error) {
       toast({
         title: "Payment Failed",
-        description: error.message,
+        description: result.error.message,
         variant: "destructive",
       });
       setIsProcessing(false);
@@ -87,6 +100,7 @@ export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSetupMode, setIsSetupMode] = useState(false);
 
   const planName = params?.plan || 'Professional';
 
@@ -128,6 +142,7 @@ export default function Subscribe() {
     })
       .then((data) => {
         setClientSecret(data.clientSecret);
+        setIsSetupMode(data.setupMode || false);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -201,7 +216,7 @@ export default function Subscribe() {
           </CardHeader>
           <CardContent>
             <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <SubscribeForm planName={planName} />
+              <SubscribeForm planName={planName} isSetupMode={isSetupMode} />
             </Elements>
           </CardContent>
         </Card>
