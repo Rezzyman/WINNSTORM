@@ -362,6 +362,8 @@ const Landing = () => {
                 size="lg" 
                 variant="outline"
                 className="text-lg px-10 py-7 border-primary/40 hover:bg-primary/5 backdrop-blur-sm hover:border-primary/60 transition-all duration-300"
+                onClick={() => window.location.href = 'mailto:hello@winnstorm.com?subject=Video%20Demo%20Request'}
+                data-testid="button-see-action"
               >
                 <Play className="mr-3 h-5 w-5" />
                 See It In Action
@@ -925,6 +927,7 @@ const Landing = () => {
                 size="lg" 
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
+                onClick={() => window.location.href = 'mailto:hello@winnstorm.com?subject=Schedule%20a%20Demo'}
               >
                 Schedule Demo
               </Button>
@@ -977,20 +980,20 @@ const Landing = () => {
             <div>
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">API Reference</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Support Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Winn Methodology Guide</a></li>
+                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">Documentation</a></li>
+                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">API Reference</a></li>
+                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">Support Center</a></li>
+                <li><a href="/training" className="hover:text-foreground transition-colors">Winn Methodology Guide</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+                <li><a href="mailto:hello@winnstorm.com" className="hover:text-foreground transition-colors">About Us</a></li>
+                <li><a href="mailto:careers@winnstorm.com" className="hover:text-foreground transition-colors">Careers</a></li>
+                <li><a href="mailto:legal@winnstorm.com" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+                <li><a href="mailto:legal@winnstorm.com" className="hover:text-foreground transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </div>
