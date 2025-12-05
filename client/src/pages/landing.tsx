@@ -980,20 +980,20 @@ const Landing = () => {
             <div>
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">API Reference</a></li>
-                <li><a href="mailto:support@winnstorm.com" className="hover:text-foreground transition-colors">Support Center</a></li>
-                <li><a href="/training" className="hover:text-foreground transition-colors">Winn Methodology Guide</a></li>
+                <li><a href="/docs" className="hover:text-foreground transition-colors">Documentation</a></li>
+                <li><a href="/api-docs" className="hover:text-foreground transition-colors">API Reference</a></li>
+                <li><a href="/support" className="hover:text-foreground transition-colors">Support Center</a></li>
+                <li><a href="/methodology" className="hover:text-foreground transition-colors">Winn Methodology Guide</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="mailto:hello@winnstorm.com" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="mailto:careers@winnstorm.com" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="mailto:legal@winnstorm.com" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="mailto:legal@winnstorm.com" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+                <li><a href="/about" className="hover:text-foreground transition-colors">About Us</a></li>
+                <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
+                <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-foreground transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </div>

@@ -19,6 +19,14 @@ import Subscribe from "@/pages/subscribe";
 import SubscriptionSuccess from "@/pages/subscription-success";
 import InspectionWizard from "@/pages/inspection-wizard";
 import Transcripts from "@/pages/transcripts";
+import Docs from "@/pages/docs";
+import ApiDocs from "@/pages/api-docs";
+import Support from "@/pages/support";
+import Methodology from "@/pages/methodology";
+import About from "@/pages/about";
+import Careers from "@/pages/careers";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -57,6 +65,14 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/inspection/:propertyId" component={InspectionWizard} />
       <Route path="/transcripts" component={Transcripts} />
+      <Route path="/docs" component={Docs} />
+      <Route path="/api-docs" component={ApiDocs} />
+      <Route path="/support" component={Support} />
+      <Route path="/methodology" component={Methodology} />
+      <Route path="/about" component={About} />
+      <Route path="/careers" component={Careers} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );
