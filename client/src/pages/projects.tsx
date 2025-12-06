@@ -8,15 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Property, Project } from '@shared/schema';
+import { Project } from '@shared/schema';
 import { 
   Briefcase, 
   Plus, 
   Search, 
   Filter, 
-  MapPin, 
   Calendar, 
-  User,
   FileText,
   Clock,
   CheckCircle,
@@ -26,59 +24,60 @@ import {
 import { SEO, breadcrumbSchema } from '@/components/seo';
 
 const Projects = () => {
-  const { user, role } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
-  // Fetch properties (which serve as projects in our system)
-  const { data: properties, isLoading } = useQuery<Property[]>({
-    queryKey: ['/api/properties'],
+  // Fetch real projects from database
+  const { data: projects, isLoading, error, refetch } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+    enabled: !!user,
   });
 
-  // Mock project data based on properties
-  const mockProjects = properties?.map(property => ({
-    id: property.id,
-    name: property.name,
-    address: property.address,
-    client: 'Insurance Company ABC', // Mock client data
-    status: Math.random() > 0.5 ? 'active' : 'completed',
-    startDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-    completedTasks: Math.floor(Math.random() * 8) + 2,
-    totalTasks: 10,
-    priority: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low'
-  })) || [];
+  // Show loading during auth resolution or data fetch
+  const showLoading = authLoading || (!!user && isLoading);
+
+  // Transform projects for display
+  const displayProjects = (projects || []).map(project => ({
+    id: project.id,
+    projectId: project.projectId,
+    name: project.propertyAddress,
+    address: project.propertyAddress,
+    lossType: project.lossType,
+    status: project.status,
+    dateOfLoss: project.dateOfLoss ? new Date(project.dateOfLoss) : null,
+    inspectionDate: project.inspectionDate ? new Date(project.inspectionDate) : null,
+    estimatedValue: project.estimatedValue,
+    approvedAmount: project.approvedAmount
+  }));
 
   // Filter projects
-  const filteredProjects = mockProjects.filter(project => {
+  const filteredProjects = displayProjects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.client.toLowerCase().includes(searchTerm.toLowerCase());
+                         project.projectId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.lossType.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'prospecting': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'inspection_scheduled': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'report_draft': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'submitted_to_insurance': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
+      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'denied': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'on-hold': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
     }
   };
 
@@ -113,7 +112,7 @@ const Projects = () => {
                 </div>
               </div>
               
-              <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90">
+              <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90" data-testid="btn-new-project">
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
               </Button>
@@ -124,36 +123,40 @@ const Projects = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search projects or clients..."
+                  placeholder="Search projects..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  data-testid="input-search-projects"
                 />
               </div>
               
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[200px]" data-testid="status-filter">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Projects</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="prospecting">Prospecting</SelectItem>
+                  <SelectItem value="inspection_scheduled">Inspection Scheduled</SelectItem>
+                  <SelectItem value="report_draft">Report Draft</SelectItem>
+                  <SelectItem value="submitted_to_insurance">Submitted</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="on-hold">On Hold</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Project Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-testid="project-stats">
               <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
                     <Briefcase className="h-5 w-5 text-primary mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Total Projects</p>
-                      <p className="text-2xl font-bold text-primary">{mockProjects.length}</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="stat-total-projects">{displayProjects.length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -164,9 +167,9 @@ const Projects = () => {
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 text-blue-500 mr-2" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Active</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {mockProjects.filter(p => p.status === 'active').length}
+                      <p className="text-sm text-muted-foreground">In Progress</p>
+                      <p className="text-2xl font-bold text-blue-600" data-testid="stat-in-progress">
+                        {displayProjects.filter(p => !['completed', 'approved', 'denied'].includes(p.status)).length}
                       </p>
                     </div>
                   </div>
@@ -179,8 +182,8 @@ const Projects = () => {
                     <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {mockProjects.filter(p => p.status === 'completed').length}
+                      <p className="text-2xl font-bold text-green-600" data-testid="stat-completed">
+                        {displayProjects.filter(p => p.status === 'completed' || p.status === 'approved').length}
                       </p>
                     </div>
                   </div>
@@ -192,9 +195,9 @@ const Projects = () => {
                   <div className="flex items-center">
                     <FileText className="h-5 w-5 text-cyan-500 mr-2" />
                     <div>
-                      <p className="text-sm text-muted-foreground">This Month</p>
-                      <p className="text-2xl font-bold text-cyan-600">
-                        {Math.floor(mockProjects.length * 0.6)}
+                      <p className="text-sm text-muted-foreground">Total Value</p>
+                      <p className="text-2xl font-bold text-cyan-600" data-testid="stat-total-value">
+                        ${((displayProjects.reduce((sum, p) => sum + (p.estimatedValue || 0), 0)) / 100).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -204,8 +207,8 @@ const Projects = () => {
           </div>
 
           {/* Projects List */}
-          <div className="space-y-4">
-            {isLoading ? (
+          <div className="space-y-4" data-testid="projects-list">
+            {showLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                   <Card key={i} className="animate-pulse">
@@ -217,6 +220,19 @@ const Projects = () => {
                   </Card>
                 ))}
               </div>
+            ) : error ? (
+              <Card className="border-destructive">
+                <CardContent className="p-12 text-center">
+                  <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Failed to load projects</h3>
+                  <p className="text-muted-foreground mb-4">
+                    There was an error loading your projects. Please try again.
+                  </p>
+                  <Button variant="outline" onClick={() => refetch()} data-testid="btn-retry">
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
             ) : filteredProjects.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
@@ -227,7 +243,7 @@ const Projects = () => {
                       ? "Try adjusting your search or filters" 
                       : "Create your first project to get started"}
                   </p>
-                  <Button className="bg-gradient-to-r from-primary to-cyan-500">
+                  <Button className="bg-gradient-to-r from-primary to-cyan-500" data-testid="btn-create-project-empty">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Project
                   </Button>
@@ -235,55 +251,52 @@ const Projects = () => {
               </Card>
             ) : (
               filteredProjects.map((project) => (
-                <Card key={project.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card key={project.id} className="hover:shadow-md transition-shadow cursor-pointer" data-testid={`project-card-${project.id}`}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-semibold">{project.name}</h3>
-                          <Badge className={getStatusColor(project.status)}>
-                            {project.status}
+                          <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded" data-testid={`project-id-${project.id}`}>
+                            {project.projectId}
+                          </span>
+                          <Badge className={getStatusColor(project.status)} data-testid={`project-status-${project.id}`}>
+                            {project.status.replace(/_/g, ' ')}
                           </Badge>
-                          <div className={`text-sm font-medium ${getPriorityColor(project.priority)}`}>
-                            {project.priority.toUpperCase()}
-                          </div>
+                          <Badge variant="outline" className="capitalize">
+                            {project.lossType}
+                          </Badge>
                         </div>
+                        
+                        <h3 className="text-lg font-semibold mb-3" data-testid={`project-address-${project.id}`}>{project.address}</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mr-2" />
-                            {project.address}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <User className="h-4 w-4 mr-2" />
-                            {project.client}
+                            <AlertTriangle className="h-4 w-4 mr-2 text-orange-500" />
+                            <span>Loss Date: {project.dateOfLoss ? project.dateOfLoss.toLocaleDateString() : 'N/A'}</span>
                           </div>
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-2" />
-                            {project.startDate.toLocaleDateString()}
+                            <span>Inspection: {project.inspectionDate ? project.inspectionDate.toLocaleDateString() : 'Not scheduled'}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <FileText className="h-4 w-4 mr-2" />
+                            <span>Est. Value: ${project.estimatedValue ? (project.estimatedValue / 100).toLocaleString() : '0'}</span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-4">
-                          <div className="flex-1">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Progress</span>
-                              <span>{project.completedTasks}/{project.totalTasks} tasks</span>
-                            </div>
-                            <div className="w-full bg-muted rounded-full h-2">
-                              <div 
-                                className="bg-gradient-to-r from-primary to-cyan-500 h-2 rounded-full"
-                                style={{ width: `${(project.completedTasks / project.totalTasks) * 100}%` }}
-                              ></div>
-                            </div>
+                        {project.approvedAmount && (
+                          <div className="flex items-center text-sm text-green-600 font-medium">
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            <span>Approved: ${(project.approvedAmount / 100).toLocaleString()}</span>
                           </div>
-                        </div>
+                        )}
                       </div>
                       
                       <div className="ml-4 flex flex-col space-y-2">
                         <Button
                           size="sm"
                           onClick={() => navigate(`/property/${project.id}`)}
+                          data-testid={`btn-view-project-${project.id}`}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
@@ -292,6 +305,7 @@ const Projects = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/winn-report/${project.id}`)}
+                          data-testid={`btn-generate-report-${project.id}`}
                         >
                           <FileText className="h-4 w-4 mr-2" />
                           Generate Report
