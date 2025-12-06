@@ -290,8 +290,8 @@ const Landing = () => {
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
-            style={{ filter: 'grayscale(100%) brightness(0.5) contrast(1.3)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+            style={{ filter: 'grayscale(100%) brightness(0.65) contrast(1.2)' }}
           >
             <source src={winnstormVideo} type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
@@ -313,7 +313,7 @@ const Landing = () => {
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
-                  className="h-48 md:h-64 lg:h-80 w-auto mx-auto filter drop-shadow-2xl"
+                  className="h-56 md:h-72 lg:h-96 w-auto mx-auto filter drop-shadow-2xl"
                 />
               </div>
             </div>
