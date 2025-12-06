@@ -119,6 +119,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(userWithoutPassword);
   });
 
+  // Complete user onboarding
+  app.patch("/api/user/onboarding", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
+    
+    const updatedUser = await storage.updateUser(userId, { onboardingCompleted: true });
+    if (!updatedUser) {
+      return res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+    
+    const { password, ...userWithoutPassword } = updatedUser;
+    res.json(userWithoutPassword);
+  });
+
   // Property routes
   app.get("/api/properties", requireAuth, async (req: AuthenticatedRequest, res) => {
     const userId = getAuthenticatedUserId(req, res);

@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   approvedDARs: integer("approved_dars").default(0),
   trainingProgress: jsonb("training_progress").$type<TrainingProgress>(),
   performanceMetrics: jsonb("performance_metrics").$type<PerformanceMetrics>(),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -36,9 +36,19 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = async () => {
     if (user) {
       localStorage.setItem(`onboarding_completed_${user.uid}`, 'true');
+      // Persist to database
+      try {
+        await fetch('/api/user/onboarding', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error('Failed to persist onboarding status:', error);
+      }
     }
     setShowOnboarding(false);
   };
