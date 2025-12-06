@@ -27,6 +27,7 @@ import About from "@/pages/about";
 import Careers from "@/pages/careers";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
+import Pricing from "@/pages/pricing";
 import { DallasPage, HoustonPage, KansasCityPage } from "@/pages/city-landing";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
@@ -52,6 +53,7 @@ function Router() {
     <Switch>
       <Route path="/auth" component={Auth} />
       <Route path="/" component={Landing} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/subscribe/:plan" component={Subscribe} />
       <Route path="/subscription-success" component={SubscriptionSuccess} />
       <Route path="/dashboard" component={Dashboard} />
