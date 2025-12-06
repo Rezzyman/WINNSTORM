@@ -1,10 +1,12 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { Cloud, Home, CloudUpload, ChartScatter, PersonStanding, Database } from "lucide-react";
+import { Cloud, Home, CloudUpload, ChartScatter, PersonStanding, Database, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 
 export const Header = () => {
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
   
   // Get user initials
   const getUserInitials = () => {
@@ -17,26 +19,39 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-background to-background/95 shadow-md border-b border-primary/20 backdrop-blur-sm">
+    <header className="section-dark border-b border-white/10">
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center">
-          <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-10 mr-3" />
+        <button 
+          className="flex items-center cursor-pointer"
+          onClick={() => navigate('/dashboard')}
+          data-testid="link-home"
+        >
+          <img src={winnstormLogo} alt="WinnStorm Restoration Pro" className="h-10 mr-3" />
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold text-foreground leading-tight">WinnStorm™</h1>
-            <span className="text-xs text-muted-foreground -mt-1">Restoration Pro</span>
+            <h1 className="text-lg font-heading font-bold text-white leading-tight">WinnStorm™</h1>
+            <span className="text-xs text-white/60 -mt-1">Restoration Pro</span>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <span className="text-sm text-muted-foreground mr-3 hidden sm:inline-block">
-            {user?.email ? user.email.split('@')[0] : 'User'}
-          </span>
-          <button 
-            className="w-9 h-9 bg-primary hover:bg-accent transition-colors text-white rounded-full flex items-center justify-center shadow-glow"
-            onClick={logout}
-          >
-            {getUserInitials()}
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              className="w-9 h-9 bg-primary hover:bg-primary/80 transition-colors text-white rounded-none flex items-center justify-center font-heading font-bold text-sm"
+              onClick={logout}
+              data-testid="button-user-avatar"
+              title={`Signed in as ${user?.email || 'User'}`}
+            >
+              {getUserInitials()}
+            </button>
+            <button 
+              className="w-9 h-9 bg-white/10 hover:bg-white/20 transition-colors text-white rounded-none flex items-center justify-center"
+              onClick={logout}
+              data-testid="button-logout"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -47,43 +62,40 @@ export const Footer = () => {
   const [location, navigate] = useLocation();
   
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 z-10">
-      <div className="flex flex-col">
-        <div className="mb-2 flex justify-center items-center">
-          <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-5 mr-2" />
-          <span className="text-xs text-muted-foreground">© 2025 WinnStorm™ Restoration Pro</span>
-        </div>
-        <div className="flex justify-around items-center">
-          <button 
-            className={`flex flex-col items-center ${location === '/dashboard' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => navigate('/dashboard')}
-          >
-            <Home className="h-6 w-6" />
-            <span className="text-xs mt-1">Home</span>
-          </button>
-          <button 
-            className={`flex flex-col items-center ${location === '/upload' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => navigate('/upload')}
-          >
-            <CloudUpload className="h-6 w-6" />
-            <span className="text-xs mt-1">Upload</span>
-          </button>
-          <button 
-            className={`flex flex-col items-center ${location === '/crm-integrations' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => navigate('/crm-integrations')}
-          >
-            <Database className="h-6 w-6" />
-            <span className="text-xs mt-1">CRM</span>
-          </button>
-          <button 
-            className={`flex flex-col items-center ${location === '/reports' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => navigate('/reports')}
-            data-testid="button-reports"
-          >
-            <ChartScatter className="h-6 w-6" />
-            <span className="text-xs mt-1">Reports</span>
-          </button>
-        </div>
+    <footer className="fixed bottom-0 left-0 right-0 section-dark border-t border-white/10 py-3 px-6 z-10">
+      <div className="flex justify-around items-center">
+        <button 
+          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/dashboard' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          onClick={() => navigate('/dashboard')}
+          data-testid="nav-dashboard"
+        >
+          <Home className="h-6 w-6" />
+          <span className="text-xs mt-1 font-heading uppercase tracking-wide">Home</span>
+        </button>
+        <button 
+          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/upload' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          onClick={() => navigate('/upload')}
+          data-testid="nav-upload"
+        >
+          <CloudUpload className="h-6 w-6" />
+          <span className="text-xs mt-1 font-heading uppercase tracking-wide">Upload</span>
+        </button>
+        <button 
+          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/crm-integrations' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          onClick={() => navigate('/crm-integrations')}
+          data-testid="nav-crm"
+        >
+          <Database className="h-6 w-6" />
+          <span className="text-xs mt-1 font-heading uppercase tracking-wide">CRM</span>
+        </button>
+        <button 
+          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/reports' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          onClick={() => navigate('/reports')}
+          data-testid="nav-reports"
+        >
+          <ChartScatter className="h-6 w-6" />
+          <span className="text-xs mt-1 font-heading uppercase tracking-wide">Reports</span>
+        </button>
       </div>
     </footer>
   );
