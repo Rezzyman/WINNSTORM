@@ -1,11 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles for WinnStorm™ brand */
+/* Custom styles for WinnStorm™ brand - Industrial Safety Orange Theme */
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 
@@ -15,102 +21,143 @@
   }
   
   .shadow-glow {
-    box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
+    box-shadow: 0 0 15px rgba(255, 102, 0, 0.4);
   }
   
   /* Mobile-First Field App Optimizations */
   .touch-target {
-    @apply min-h-[44px] min-w-[44px]; /* Apple Human Interface Guidelines minimum */
+    @apply min-h-[44px] min-w-[44px];
   }
   
   .field-input {
-    @apply text-base h-12 px-4; /* Larger for outdoor use, prevents iOS zoom */
+    @apply text-base h-12 px-4;
   }
   
   .outdoor-readable {
-    @apply text-lg font-medium; /* Enhanced outdoor visibility */
+    @apply text-lg font-medium;
   }
   
   .mobile-nav-btn {
-    @apply h-14 text-base font-semibold; /* Larger nav buttons for field use */
+    @apply h-14 text-base font-semibold;
+  }
+  
+  /* New Design System Classes */
+  .headline-xl {
+    @apply font-heading text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight;
+  }
+  
+  .headline-lg {
+    @apply font-heading text-3xl md:text-4xl font-bold uppercase tracking-tight;
+  }
+  
+  .headline-md {
+    @apply font-heading text-2xl md:text-3xl font-semibold uppercase tracking-tight;
+  }
+  
+  .accent-bar {
+    @apply w-16 h-1 bg-primary mb-4;
+  }
+  
+  .accent-bar-lg {
+    @apply w-24 h-1.5 bg-primary mb-6;
+  }
+  
+  .section-dark {
+    @apply bg-[#1A1A1A] text-white;
+  }
+  
+  .section-light {
+    @apply bg-white text-[#1A1A1A];
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white font-heading font-semibold uppercase tracking-wide px-8 py-4 rounded-none hover:bg-primary/90 transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent border-2 border-white text-white font-heading font-semibold uppercase tracking-wide px-8 py-4 rounded-none hover:bg-white hover:text-[#1A1A1A] transition-colors;
+  }
+  
+  .card-sharp {
+    @apply bg-card border border-border rounded-none;
   }
 }
 
 :root {
-  /* Light mode theme for WinnStorm™ - Inspired by shield logo blues */
-  --background: 210 50% 98%; /* Soft blue-white background */
-  --foreground: 215 30% 15%; /* Deep navy text */
-  --muted: 210 40% 93%; /* Light steel blue */
-  --muted-foreground: 215 20% 45%; /* Medium blue-gray text */
-  --popover: 210 50% 99%; /* Near white with blue tint */
-  --popover-foreground: 215 30% 15%; /* Deep navy text */
-  --card: 210 50% 99%; /* Light blue-white cards */
-  --card-foreground: 215 30% 15%; /* Deep navy text */
-  --border: 210 30% 85%; /* Soft blue border */
-  --input: 210 30% 90%;
-  --primary: 195 100% 50%; /* Bright cyan blue from logo */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 60% 85%; /* Light blue accent */
-  --secondary-foreground: 215 30% 15%;
-  --accent: 200 80% 88%; /* Soft cyan accent */
-  --accent-foreground: 215 30% 15%;
+  /* Light mode theme for WinnStorm™ - Clean white with Safety Orange accents */
+  --background: 0 0% 100%; /* Pure white background */
+  --foreground: 0 0% 10%; /* Charcoal text */
+  --muted: 0 0% 96%; /* Light gray */
+  --muted-foreground: 0 0% 45%; /* Medium gray text */
+  --popover: 0 0% 100%; /* White popover */
+  --popover-foreground: 0 0% 10%; /* Charcoal text */
+  --card: 0 0% 100%; /* White cards */
+  --card-foreground: 0 0% 10%; /* Charcoal text */
+  --border: 0 0% 90%; /* Light gray border */
+  --input: 0 0% 95%;
+  --primary: 16 100% 50%; /* Safety Orange */
+  --primary-foreground: 0 0% 100%; /* White on orange */
+  --secondary: 0 0% 96%; /* Light gray accent */
+  --secondary-foreground: 0 0% 10%;
+  --accent: 16 100% 95%; /* Light orange accent */
+  --accent-foreground: 16 100% 40%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --ring: 195 100% 50%;
-  --radius: 0.5rem;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 16 100% 50%;
+  --radius: 0px; /* Sharp edges */
   
-  --chart-1: 195 100% 50%; /* Bright cyan from logo */
-  --chart-2: 210 80% 60%; /* Medium blue */
-  --chart-3: 200 70% 55%; /* Teal blue */
-  --chart-4: 180 65% 50%; /* Deep cyan */
-  --chart-5: 170 60% 45%; /* Blue-green */
+  --chart-1: 16 100% 50%; /* Safety Orange */
+  --chart-2: 16 100% 60%; /* Light orange */
+  --chart-3: 0 0% 40%; /* Gray */
+  --chart-4: 0 0% 60%; /* Light gray */
+  --chart-5: 0 0% 20%; /* Dark gray */
   
-  --sidebar-background: 195 100% 50%; /* Logo cyan */
-  --sidebar-foreground: 215 30% 15%; /* Deep navy text */
-  --sidebar-primary: 215 30% 15%; /* Deep navy */
-  --sidebar-primary-foreground: 195 100% 50%; /* Logo cyan */
-  --sidebar-accent: 210 60% 85%; /* Light blue */
-  --sidebar-accent-foreground: 215 30% 15%; /* Deep navy */
-  --sidebar-border: 200 80% 88%; /* Soft cyan border */
-  --sidebar-ring: 215 30% 15%; /* Deep navy ring */
+  --sidebar-background: 0 0% 10%; /* Charcoal sidebar */
+  --sidebar-foreground: 0 0% 100%; /* White text */
+  --sidebar-primary: 16 100% 50%; /* Safety Orange */
+  --sidebar-primary-foreground: 0 0% 100%; /* White */
+  --sidebar-accent: 0 0% 20%; /* Dark gray accent */
+  --sidebar-accent-foreground: 0 0% 100%; /* White */
+  --sidebar-border: 0 0% 20%; /* Dark border */
+  --sidebar-ring: 16 100% 50%; /* Orange ring */
 }
 
 .dark {
-  /* Dark mode theme for WinnStorm™ - Professional consulting with logo blues */
-  --background: 215 35% 8%; /* Deep navy background */
-  --foreground: 200 50% 95%; /* Light cyan-white text */
-  --muted: 215 30% 15%; /* Dark navy-gray */
-  --muted-foreground: 200 20% 70%; /* Light blue-gray text */
-  --popover: 215 35% 10%; /* Deep navy popover */
-  --popover-foreground: 200 50% 95%; /* Light cyan-white text */
-  --card: 215 40% 12%; /* Dark navy-blue cards */
-  --card-foreground: 200 50% 95%; /* Light cyan-white text */
-  --border: 210 40% 20%; /* Medium dark blue border */
-  --input: 210 40% 18%;
-  --primary: 195 100% 60%; /* Bright cyan blue from logo */
-  --primary-foreground: 215 35% 8%;
-  --secondary: 210 50% 25%; /* Medium blue accent */
-  --secondary-foreground: 200 50% 95%;
-  --accent: 200 60% 30%; /* Deep cyan accent */
-  --accent-foreground: 200 50% 95%;
+  /* Dark mode theme for WinnStorm™ - Charcoal with Safety Orange accents */
+  --background: 0 0% 10%; /* Charcoal #1A1A1A */
+  --foreground: 0 0% 98%; /* Near white text */
+  --muted: 0 0% 15%; /* Dark gray */
+  --muted-foreground: 0 0% 65%; /* Light gray text */
+  --popover: 0 0% 12%; /* Dark popover */
+  --popover-foreground: 0 0% 98%; /* Near white text */
+  --card: 0 0% 12%; /* Dark cards */
+  --card-foreground: 0 0% 98%; /* Near white text */
+  --border: 0 0% 20%; /* Medium dark border */
+  --input: 0 0% 18%;
+  --primary: 16 100% 50%; /* Safety Orange */
+  --primary-foreground: 0 0% 100%; /* White on orange */
+  --secondary: 0 0% 20%; /* Dark gray accent */
+  --secondary-foreground: 0 0% 98%;
+  --accent: 0 0% 18%; /* Dark accent */
+  --accent-foreground: 0 0% 98%;
   --destructive: 0 62% 50%;
-  --destructive-foreground: 200 50% 95%;
-  --ring: 195 100% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 16 100% 50%;
   
-  --chart-1: 195 100% 60%; /* Bright cyan from logo */
-  --chart-2: 210 70% 65%; /* Medium blue */
-  --chart-3: 200 80% 70%; /* Light teal */
-  --chart-4: 180 75% 65%; /* Deep cyan */
-  --chart-5: 170 70% 60%; /* Blue-green */
+  --chart-1: 16 100% 50%; /* Safety Orange */
+  --chart-2: 16 100% 60%; /* Light orange */
+  --chart-3: 0 0% 50%; /* Gray */
+  --chart-4: 0 0% 70%; /* Light gray */
+  --chart-5: 0 0% 30%; /* Dark gray */
   
-  --sidebar-background: 195 100% 60%; /* Logo cyan */
-  --sidebar-foreground: 215 35% 8%; /* Deep navy text */
-  --sidebar-primary: 215 35% 8%; /* Deep navy */
-  --sidebar-primary-foreground: 195 100% 60%; /* Logo cyan */
-  --sidebar-accent: 210 50% 25%; /* Medium blue accent */
-  --sidebar-accent-foreground: 200 50% 95%; /* Light cyan-white */
-  --sidebar-border: 200 60% 30%; /* Deep cyan border */
-  --sidebar-ring: 215 35% 8%; /* Deep navy ring */
+  --sidebar-background: 0 0% 8%; /* Darker sidebar */
+  --sidebar-foreground: 0 0% 98%; /* Near white text */
+  --sidebar-primary: 16 100% 50%; /* Safety Orange */
+  --sidebar-primary-foreground: 0 0% 100%; /* White */
+  --sidebar-accent: 0 0% 15%; /* Dark gray accent */
+  --sidebar-accent-foreground: 0 0% 98%; /* Near white */
+  --sidebar-border: 0 0% 20%; /* Dark border */
+  --sidebar-ring: 16 100% 50%; /* Orange ring */
 }
 
 @layer base {

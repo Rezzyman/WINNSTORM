@@ -225,7 +225,7 @@ const Landing = () => {
       
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-lg' : 'bg-transparent'
+        isScrolled ? 'bg-[#1A1A1A]/98 backdrop-blur-md border-b border-white/10 shadow-lg' : 'bg-transparent'
       }`}>
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -239,12 +239,12 @@ const Landing = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-              <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
-              <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
-              <Button variant="outline" onClick={() => navigate('/auth')}>Sign In</Button>
-              <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90">
+              <a href="#features" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Features</a>
+              <a href="#pricing" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Pricing</a>
+              <a href="#testimonials" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Testimonials</a>
+              <a href="#contact" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Contact</a>
+              <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
+              <Button className="btn-primary" onClick={() => navigate('/subscribe/professional')}>
                 Start Free Trial
               </Button>
             </div>
@@ -253,7 +253,7 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -262,15 +262,15 @@ const Landing = () => {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 border-t border-border">
+            <div className="md:hidden mt-4 pb-4 border-t border-white/20">
               <div className="flex flex-col space-y-4 pt-4">
-                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-                <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
-                <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+                <a href="#features" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Features</a>
+                <a href="#pricing" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Pricing</a>
+                <a href="#testimonials" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Testimonials</a>
+                <a href="#contact" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Contact</a>
                 <div className="flex flex-col space-y-2 pt-4">
-                  <Button variant="outline" onClick={() => navigate('/auth')}>Sign In</Button>
-                  <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90">
+                  <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
+                  <Button className="btn-primary" onClick={() => navigate('/subscribe/professional')}>
                     Start Free Trial
                   </Button>
                 </div>
@@ -281,38 +281,23 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Lightning Video Background */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden section-dark">
+        {/* Grayscale Video Background */}
         <div className="absolute inset-0 w-full h-full">
           <video 
             autoPlay 
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-70"
-            style={{ filter: 'brightness(0.8) contrast(1.2)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            style={{ filter: 'grayscale(100%) brightness(0.5) contrast(1.3)' }}
           >
             <source src={winnstormVideo} type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
-            {/* Fallback gradient background */}
           </video>
-          {/* Overlay to ensure readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/10 to-black/20"></div>
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A1A]/60 via-[#1A1A1A]/40 to-[#1A1A1A]/80"></div>
         </div>
-        
-        {/* Parallax Background Elements */}
-        <div 
-          className="absolute inset-0 z-10"
-          style={{
-            transform: `translateY(${scrollY * 0.3}px)`,
-          }}
-        >
-          <div className="absolute top-32 left-[10%] w-80 h-80 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-3xl opacity-40"></div>
-          <div className="absolute bottom-32 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full blur-2xl opacity-30"></div>
-        </div>
-        
-
 
         <div 
           className="container mx-auto px-6 text-center relative z-20 pt-20"
@@ -320,39 +305,37 @@ const Landing = () => {
             transform: `translateY(${scrollY * -0.1}px)`,
           }}
         >
-          <div className="max-w-4xl mx-auto">
-            {/* Animated Logo with Lightning Effects */}
-            <div className="mb-16 relative">
-              <div className="absolute inset-0 opacity-30">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/40 via-cyan-400/50 to-blue-600/40 rounded-full blur-3xl animate-pulse"></div>
-              </div>
-              
-
-              
-              {/* Main Logo */}
-              <div className="relative z-10" style={{ animation: 'fadeInScale 3s ease-out both' }}>
+          <div className="max-w-5xl mx-auto">
+            {/* Logo */}
+            <div className="mb-12 relative">
+              <div className="relative z-10" style={{ animation: 'fadeInScale 2s ease-out both' }}>
                 <img 
                   src={winnstormLogo} 
                   alt="WinnStorm Logo" 
-                  className="h-[16.8rem] md:h-[21.6rem] lg:h-96 xl:h-[28.8rem] w-auto mx-auto filter drop-shadow-2xl"
+                  className="h-48 md:h-64 lg:h-80 w-auto mx-auto filter drop-shadow-2xl"
                 />
               </div>
             </div>
             
+            {/* Orange Accent Bar */}
+            <div className="flex justify-center mb-6" style={{ animation: 'fadeInUp 1s ease-out 0.3s both' }}>
+              <div className="accent-bar-lg"></div>
+            </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white leading-tight tracking-tight animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 0.5s both', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              Master Roof Damage Assessment with Proven Expertise
+            {/* Headline - Bold Uppercase Montserrat */}
+            <h1 className="headline-xl text-white mb-8 leading-tight animate-fade-in" style={{ animation: 'fadeInUp 1s ease-out 0.5s both' }}>
+              Master Roof Damage Assessment
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 1.5s both' }}>
-              Harness decades of industry-leading expertise through AI-powered thermal analysis, 
-              comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
+            <p className="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-3xl mx-auto font-sans animate-fade-in" style={{ animation: 'fadeInUp 1s ease-out 0.8s both' }}>
+              AI-powered thermal analysis, comprehensive reporting, and professional certification training—all built on Eric Winn's proven methodology.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 2s both' }}>
+            {/* CTA Buttons - Sharp Orange */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-in" style={{ animation: 'fadeInUp 1s ease-out 1s both' }}>
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-lg px-10 py-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                className="btn-primary text-lg"
                 onClick={() => navigate('/auth')}
               >
                 Begin Your Assessment Journey
@@ -361,7 +344,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-lg px-10 py-7 border-primary/40 hover:bg-primary/5 backdrop-blur-sm hover:border-primary/60 transition-all duration-300"
+                className="btn-secondary text-lg"
                 onClick={() => window.location.href = 'mailto:hello@winnstorm.com?subject=Video%20Demo%20Request'}
                 data-testid="button-see-action"
               >
@@ -370,23 +353,25 @@ const Landing = () => {
               </Button>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto animate-fade-in" style={{ animation: 'fadeInUp 1.5s ease-out 2.5s both' }}>
-              <div className="text-center group">
-                <div className="text-4xl font-bold bg-gradient-to-br from-primary to-cyan-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">10,000+</div>
-                <div className="text-sm text-muted-foreground font-medium">Properties Assessed</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-4xl font-bold bg-gradient-to-br from-cyan-500 to-blue-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">98.7%</div>
-                <div className="text-sm text-muted-foreground font-medium">Precision Rate</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-4xl font-bold bg-gradient-to-br from-blue-500 to-purple-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">750+</div>
-                <div className="text-sm text-muted-foreground font-medium">Certified Professionals</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-4xl font-bold bg-gradient-to-br from-primary to-blue-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">24/7</div>
-                <div className="text-sm text-muted-foreground font-medium">Expert AI Guidance</div>
+            {/* Event Details Strip */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 animate-fade-in" style={{ animation: 'fadeInUp 1s ease-out 1.2s both' }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-heading font-bold text-primary mb-1">10,000+</div>
+                  <div className="text-xs md:text-sm text-white/60 uppercase tracking-wider font-heading">Properties Assessed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-heading font-bold text-primary mb-1">98.7%</div>
+                  <div className="text-xs md:text-sm text-white/60 uppercase tracking-wider font-heading">Precision Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-heading font-bold text-primary mb-1">750+</div>
+                  <div className="text-xs md:text-sm text-white/60 uppercase tracking-wider font-heading">Certified Pros</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-heading font-bold text-primary mb-1">24/7</div>
+                  <div className="text-xs md:text-sm text-white/60 uppercase tracking-wider font-heading">AI Guidance</div>
+                </div>
               </div>
             </div>
           </div>
@@ -394,7 +379,7 @@ const Landing = () => {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-6 w-6 text-muted-foreground" />
+          <ChevronDown className="h-6 w-6 text-white/50" />
         </div>
       </section>
 
@@ -402,27 +387,8 @@ const Landing = () => {
       <section 
         ref={featuresRef} 
         id="features" 
-        className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden"
+        className="py-24 section-light relative overflow-hidden"
       >
-        {/* Floating Background Elements */}
-        <motion.div 
-          style={{ y: backgroundY }}
-          className="absolute inset-0 z-0"
-        >
-          <div className="absolute top-20 left-[5%] w-72 h-72 bg-gradient-to-r from-primary/10 to-cyan-500/10 rounded-full blur-3xl opacity-60"></div>
-          <div className="absolute bottom-20 right-[8%] w-96 h-96 bg-gradient-to-r from-cyan-500/8 to-blue-500/8 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-500/6 to-purple-500/6 rounded-full blur-2xl opacity-40"></div>
-        </motion.div>
-
-        {/* Geometric patterns */}
-        <motion.div 
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '30%']) }}
-          className="absolute inset-0 z-0 opacity-20"
-        >
-          <div className="absolute top-40 right-[15%] w-32 h-32 border border-primary/20 rotate-45 animate-pulse"></div>
-          <div className="absolute bottom-40 left-[10%] w-24 h-24 border border-cyan-500/30 rotate-12"></div>
-        </motion.div>
-        
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 60 }}
@@ -431,20 +397,23 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
+            <div className="flex justify-center mb-6">
+              <div className="accent-bar"></div>
+            </div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 backdrop-blur-sm">Core Capabilities</Badge>
+              <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 rounded-none font-heading uppercase tracking-wide">Core Capabilities</Badge>
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent leading-tight"
+              className="headline-lg text-[#1A1A1A] mb-8"
             >
               Professional-Grade Assessment Tools
             </motion.h2>
@@ -453,7 +422,7 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               viewport={{ once: true }}
-              className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light"
+              className="text-lg text-[#1A1A1A]/70 max-w-4xl mx-auto leading-relaxed"
             >
               Experience the intersection of decades of field expertise and modern technology. Our platform transforms 
               complex damage assessment into streamlined, accurate, and defensible reports that stand up to scrutiny.
@@ -480,20 +449,17 @@ const Landing = () => {
                     transition: { duration: 0.3 }
                   }}
                 >
-                  <Card className="group hover:shadow-2xl transition-all duration-500 bg-card/60 backdrop-blur-md border-border/40 hover:border-primary/30 relative overflow-hidden h-full">
-                    {/* Subtle gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
+                  <Card className="group hover:shadow-xl transition-all duration-500 bg-white border border-[#1A1A1A]/10 hover:border-primary/50 relative overflow-hidden h-full rounded-none">
                     <CardContent className="p-8 relative z-10">
                       <motion.div 
-                        whileHover={{ scale: 1.1, rotate: 3 }}
+                        whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-gradient-to-br from-primary/15 to-cyan-500/15 w-14 h-14 rounded-xl flex items-center justify-center mb-6"
+                        className="bg-primary/10 w-14 h-14 flex items-center justify-center mb-6"
                       >
                         <Icon className="h-7 w-7 text-primary" />
                       </motion.div>
-                      <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors">{feature.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                      <h3 className="text-xl font-heading font-semibold mb-4 text-[#1A1A1A] group-hover:text-primary transition-colors uppercase tracking-wide">{feature.title}</h3>
+                      <p className="text-[#1A1A1A]/70 leading-relaxed">{feature.description}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -502,65 +468,64 @@ const Landing = () => {
           </div>
 
           {/* Stormy AI Showcase */}
-          <Card className="bg-gradient-to-r from-primary/8 to-cyan-500/8 border-primary/25 overflow-hidden backdrop-blur-sm">
+          <Card className="bg-[#1A1A1A] border-primary/30 overflow-hidden rounded-none">
             
             <CardContent className="p-10 relative z-10">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <div className="flex items-center mb-6">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-full blur-lg"></div>
                       <StormyAvatar size={56} className="relative z-10" />
                     </div>
                     <div className="ml-6">
-                      <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Meet Stormy</h3>
-                      <p className="text-muted-foreground text-lg">Your Expert AI Assessment Partner</p>
+                      <h3 className="text-3xl font-heading font-bold text-primary uppercase tracking-wide">Meet Stormy</h3>
+                      <p className="text-white/70 text-lg">Your Expert AI Assessment Partner</p>
                     </div>
                   </div>
-                  <p className="text-lg mb-8 text-muted-foreground leading-relaxed">
+                  <p className="text-lg mb-8 text-white/70 leading-relaxed">
                     Powered by decades of field expertise, Stormy provides intelligent guidance throughout your inspection process. 
                     From thermal analysis to methodology recommendations, it's like having Eric Winn's expertise available 24/7 
                     for every assessment.
                   </p>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="flex items-center group">
-                      <div className="bg-green-500/20 p-2 rounded-full mr-3 group-hover:bg-green-500/30 transition-colors">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      </div>
-                      <span className="font-medium">Contextual Guidance</span>
-                    </div>
-                    <div className="flex items-center group">
-                      <div className="bg-blue-500/20 p-2 rounded-full mr-3 group-hover:bg-blue-500/30 transition-colors">
-                        <CheckCircle className="h-4 w-4 text-blue-500" />
-                      </div>
-                      <span className="font-medium">Thermal Insights</span>
-                    </div>
-                    <div className="flex items-center group">
-                      <div className="bg-purple-500/20 p-2 rounded-full mr-3 group-hover:bg-purple-500/30 transition-colors">
-                        <CheckCircle className="h-4 w-4 text-purple-500" />
-                      </div>
-                      <span className="font-medium">Methodology Training</span>
-                    </div>
-                    <div className="flex items-center group">
-                      <div className="bg-primary/20 p-2 rounded-full mr-3 group-hover:bg-primary/30 transition-colors">
+                      <div className="bg-primary/20 p-2 mr-3">
                         <CheckCircle className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="font-medium">Always Available</span>
+                      <span className="font-medium text-white">Contextual Guidance</span>
+                    </div>
+                    <div className="flex items-center group">
+                      <div className="bg-primary/20 p-2 mr-3">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium text-white">Thermal Insights</span>
+                    </div>
+                    <div className="flex items-center group">
+                      <div className="bg-primary/20 p-2 mr-3">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium text-white">Methodology Training</span>
+                    </div>
+                    <div className="flex items-center group">
+                      <div className="bg-primary/20 p-2 mr-3">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium text-white">Always Available</span>
                     </div>
                   </div>
                 </div>
-                <div className="bg-background/70 backdrop-blur-md rounded-xl p-8 border border-border/40 shadow-lg relative overflow-hidden">
+                <div className="bg-white/5 p-8 border border-white/10 relative overflow-hidden">
                   {/* Chat simulation */}
-                  <div className="bg-gradient-to-br from-muted/60 to-muted/40 rounded-xl p-6 mb-6 relative">
+                  <div className="bg-white/5 p-6 mb-6 relative">
                     <div className="flex items-start space-x-4">
                       <StormyAvatar size={40} className="flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center mb-3">
-                          <p className="font-semibold text-foreground">Stormy</p>
-                          <div className="w-2 h-2 bg-green-500 rounded-full ml-3 animate-pulse"></div>
-                          <span className="text-xs text-muted-foreground ml-2">Active</span>
+                          <p className="font-semibold text-white">Stormy</p>
+                          <div className="w-2 h-2 bg-primary rounded-full ml-3 animate-pulse"></div>
+                          <span className="text-xs text-white/60 ml-2">Active</span>
                         </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-sm text-white/70 leading-relaxed">
                           "Thermal signature analysis complete. Northwest section shows 8°F differential indicating moisture intrusion. 
                           Core sample recommended at grid N-3, W-2 following Winn protocols. Shall I generate the preliminary damage assessment?"
                         </p>
@@ -569,7 +534,7 @@ const Landing = () => {
                   </div>
                   
                   {/* Status indicator */}
-                  <div className="flex items-center text-xs text-muted-foreground">
+                  <div className="flex items-center text-xs text-white/50">
                     <span>Powered by advanced AI trained on expert methodology</span>
                   </div>
                 </div>
@@ -583,30 +548,8 @@ const Landing = () => {
       <section 
         ref={pricingRef}
         id="pricing" 
-        className="py-24 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden"
+        className="py-24 section-dark relative overflow-hidden"
       >
-        {/* Floating Background Elements */}
-        <motion.div 
-          style={{ y: useTransform(scrollYProgress, [0.3, 1], ['0%', '60%']) }}
-          className="absolute inset-0 z-0"
-        >
-          <div className="absolute top-32 right-[10%] w-80 h-80 bg-gradient-to-r from-green-500/8 to-emerald-500/8 rounded-full blur-3xl opacity-70"></div>
-          <div className="absolute bottom-32 left-[15%] w-72 h-72 bg-gradient-to-r from-primary/8 to-cyan-500/8 rounded-full blur-3xl opacity-60"></div>
-          <div className="absolute top-1/3 left-[8%] w-48 h-48 bg-gradient-to-r from-blue-500/6 to-indigo-500/6 rounded-full blur-2xl opacity-50"></div>
-        </motion.div>
-
-        {/* Geometric accents */}
-        <motion.div 
-          style={{ 
-            y: useTransform(scrollYProgress, [0.3, 1], ['0%', '40%']),
-            rotate: useTransform(scrollYProgress, [0.3, 1], [0, 10])
-          }}
-          className="absolute inset-0 z-0 opacity-15"
-        >
-          <div className="absolute top-1/4 left-[5%] w-16 h-16 border-2 border-green-500/40 rounded-lg rotate-45"></div>
-          <div className="absolute bottom-1/3 right-[12%] w-20 h-20 border border-primary/30 rounded-full"></div>
-        </motion.div>
-
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
@@ -615,20 +558,23 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="flex justify-center mb-6">
+              <div className="accent-bar"></div>
+            </div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Simple Pricing</Badge>
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/30 rounded-none font-heading uppercase tracking-wide">Investment</Badge>
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              className="headline-lg text-white mb-6"
             >
               Choose Your Plan
             </motion.h2>
@@ -637,7 +583,7 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               viewport={{ once: true }}
-              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+              className="text-lg text-white/70 max-w-3xl mx-auto"
             >
               Transparent pricing that scales with your business. All plans include core features with no hidden fees.
             </motion.p>
@@ -661,47 +607,45 @@ const Landing = () => {
                   transition: { duration: 0.3 }
                 }}
               >
-                <Card className={`relative overflow-hidden h-full ${
+                <Card className={`relative overflow-hidden h-full rounded-none ${
                   plan.badge === "Most Popular" 
-                    ? "border-primary shadow-xl bg-gradient-to-b from-primary/5 to-cyan-500/5" 
-                    : "border-border hover:shadow-lg transition-shadow"
+                    ? "border-2 border-primary bg-white" 
+                    : "border border-white/20 bg-white/5 hover:border-white/40 transition-all"
                 }`}>
                 {plan.badge && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-cyan-500 text-white px-3 py-1 text-sm font-medium">
+                  <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-sm font-heading uppercase tracking-wide">
                     {plan.badge}
                   </div>
                 )}
                 <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
+                  <CardTitle className={`text-xl font-heading font-bold mb-2 uppercase tracking-wide ${plan.badge === "Most Popular" ? "text-[#1A1A1A]" : "text-white"}`}>{plan.name}</CardTitle>
                   <div className="mb-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
+                    <span className={`text-4xl font-heading font-bold ${plan.badge === "Most Popular" ? "text-primary" : "text-primary"}`}>{plan.price}</span>
+                    <span className={plan.badge === "Most Popular" ? "text-[#1A1A1A]/60" : "text-white/60"}>/{plan.period}</span>
                   </div>
-                  <p className="text-muted-foreground text-sm">{plan.description}</p>
+                  <p className={`text-sm ${plan.badge === "Most Popular" ? "text-[#1A1A1A]/70" : "text-white/70"}`}>{plan.description}</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
+                        <CheckCircle className={`h-5 w-5 mr-3 mt-0.5 flex-shrink-0 ${plan.badge === "Most Popular" ? "text-primary" : "text-primary"}`} />
+                        <span className={`text-sm ${plan.badge === "Most Popular" ? "text-[#1A1A1A]/80" : "text-white/80"}`}>{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Button 
-                    className={`w-full ${
+                    className={`w-full rounded-none font-heading uppercase tracking-wide ${
                       plan.buttonVariant === "default" 
-                        ? "bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90" 
-                        : ""
+                        ? "btn-primary" 
+                        : plan.badge === "Most Popular" ? "border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white" : "border-white text-white hover:bg-white hover:text-[#1A1A1A]"
                     }`}
                     variant={plan.buttonVariant}
                     size="lg"
                     onClick={() => {
                       if (plan.name === "Enterprise") {
-                        // Scroll to contact section for enterprise
                         window.location.hash = 'contact';
                       } else {
-                        // Navigate to subscription checkout
                         navigate(`/subscribe/${plan.name.toLowerCase()}`);
                       }
                     }}
@@ -716,20 +660,20 @@ const Landing = () => {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-muted-foreground mb-4">
+            <p className="text-white/60 mb-4 font-heading uppercase tracking-wide text-sm">
               All plans include 14-day free trial - No setup fees - Cancel anytime
             </p>
-            <div className="flex justify-center space-x-8 text-sm text-muted-foreground">
+            <div className="flex justify-center space-x-8 text-sm text-white/50">
               <div className="flex items-center">
-                <Shield className="h-4 w-4 mr-2" />
+                <Shield className="h-4 w-4 mr-2 text-primary" />
                 Enterprise Security
               </div>
               <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 mr-2 text-primary" />
                 24/7 Support
               </div>
               <div className="flex items-center">
-                <Award className="h-4 w-4 mr-2" />
+                <Award className="h-4 w-4 mr-2 text-primary" />
                 99.9% Uptime SLA
               </div>
             </div>
@@ -741,30 +685,8 @@ const Landing = () => {
       <section 
         ref={testimonialsRef}
         id="testimonials" 
-        className="py-20 bg-gradient-to-b from-muted/30 via-background to-cyan-500/40 relative overflow-hidden"
+        className="py-20 section-light relative overflow-hidden"
       >
-        {/* Floating Background Elements */}
-        <motion.div 
-          style={{ y: useTransform(scrollYProgress, [0.5, 1], ['0%', '80%']) }}
-          className="absolute inset-0 z-0"
-        >
-          <div className="absolute top-24 left-[8%] w-64 h-64 bg-gradient-to-r from-yellow-500/8 to-orange-500/8 rounded-full blur-3xl opacity-60"></div>
-          <div className="absolute bottom-24 right-[12%] w-80 h-80 bg-gradient-to-r from-primary/6 to-purple-500/6 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-full blur-2xl opacity-40"></div>
-        </motion.div>
-
-        {/* Subtle geometric patterns */}
-        <motion.div 
-          style={{ 
-            y: useTransform(scrollYProgress, [0.5, 1], ['0%', '50%']),
-            rotate: useTransform(scrollYProgress, [0.5, 1], [0, -8])
-          }}
-          className="absolute inset-0 z-0 opacity-10"
-        >
-          <div className="absolute top-1/3 right-[8%] w-24 h-24 border border-yellow-500/30 rounded-full"></div>
-          <div className="absolute bottom-1/4 left-[15%] w-20 h-20 border-2 border-primary/20 rotate-45"></div>
-        </motion.div>
-
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
@@ -773,20 +695,23 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="flex justify-center mb-6">
+              <div className="accent-bar"></div>
+            </div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-4 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">Testimonials</Badge>
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/30 rounded-none font-heading uppercase tracking-wide">Testimonials</Badge>
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              className="headline-lg text-[#1A1A1A] mb-6"
             >
               Trusted by Industry Leaders
             </motion.h2>
@@ -795,7 +720,7 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               viewport={{ once: true }}
-              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+              className="text-lg text-[#1A1A1A]/70 max-w-3xl mx-auto"
             >
               See how WinnStorm is transforming damage assessment for consultants, adjusters, and insurance professionals worldwide.
             </motion.p>
@@ -819,19 +744,19 @@ const Landing = () => {
                   transition: { duration: 0.3 }
                 }}
               >
-                <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:shadow-lg transition-shadow h-full">
+                <Card className="bg-white border border-[#1A1A1A]/10 hover:border-primary/30 hover:shadow-lg transition-all h-full rounded-none">
                   <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <Quote className="h-8 w-8 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
+                  <Quote className="h-8 w-8 text-primary/40 mb-4" />
+                  <p className="text-[#1A1A1A]/70 mb-6 italic">"{testimonial.content}"</p>
                   <div>
-                    <div className="font-semibold">{testimonial.name}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                    <div className="text-sm text-primary">{testimonial.company}</div>
+                    <div className="font-heading font-semibold text-[#1A1A1A]">{testimonial.name}</div>
+                    <div className="text-sm text-[#1A1A1A]/60">{testimonial.role}</div>
+                    <div className="text-sm text-primary font-medium">{testimonial.company}</div>
                   </div>
                   </CardContent>
                 </Card>
@@ -844,47 +769,18 @@ const Landing = () => {
       {/* CTA Section */}
       <section 
         ref={ctaRef}
-        className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white relative overflow-hidden"
+        className="py-20 bg-primary text-white relative overflow-hidden"
       >
-        {/* Dynamic Background Effects */}
-        <motion.div 
-          style={{ 
-            y: useTransform(scrollYProgress, [0.7, 1], ['0%', '40%']),
-            scale: useTransform(scrollYProgress, [0.7, 1], [1, 1.1])
-          }}
-          className="absolute inset-0 bg-black/10"
-        ></motion.div>
-
-        {/* Floating particles */}
-        <motion.div 
-          style={{ y: useTransform(scrollYProgress, [0.7, 1], ['0%', '60%']) }}
-          className="absolute inset-0 z-0"
-        >
-          <div className="absolute top-20 left-[10%] w-32 h-32 bg-white/10 rounded-full blur-xl opacity-60"></div>
-          <div className="absolute bottom-20 right-[15%] w-48 h-48 bg-white/8 rounded-full blur-2xl opacity-50"></div>
-          <div className="absolute top-1/3 right-[25%] w-24 h-24 bg-white/12 rounded-full blur-lg opacity-40"></div>
-          <div className="absolute bottom-1/3 left-[20%] w-40 h-40 bg-white/6 rounded-full blur-xl opacity-30"></div>
-        </motion.div>
-
-        {/* Geometric accents */}
-        <motion.div 
-          style={{ 
-            y: useTransform(scrollYProgress, [0.7, 1], ['0%', '30%']),
-            rotate: useTransform(scrollYProgress, [0.7, 1], [0, 15])
-          }}
-          className="absolute inset-0 z-0 opacity-20"
-        >
-          <div className="absolute top-1/4 left-[8%] w-16 h-16 border-2 border-white/30 rotate-45"></div>
-          <div className="absolute bottom-1/4 right-[12%] w-20 h-20 border border-white/40 rounded-lg rotate-12"></div>
-        </motion.div>
-
         <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="flex justify-center mb-6">
+            <div className="w-24 h-1.5 bg-white/30 mb-6"></div>
+          </div>
           <motion.h2 
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold mb-6"
+            className="headline-lg text-white mb-6"
           >
             Ready to Transform Your Damage Assessments?
           </motion.h2>
@@ -912,7 +808,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6"
+                className="bg-white text-[#1A1A1A] hover:bg-white/90 text-lg px-8 py-6 rounded-none font-heading uppercase tracking-wide"
                 onClick={() => navigate('/auth')}
               >
                 Start Free Trial
@@ -926,7 +822,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
+                className="border-2 border-white text-white hover:bg-white hover:text-[#1A1A1A] text-lg px-8 py-6 rounded-none font-heading uppercase tracking-wide"
                 onClick={() => window.location.href = 'mailto:hello@winnstorm.com?subject=Schedule%20a%20Demo'}
               >
                 Schedule Demo
@@ -937,7 +833,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="bg-background border-t border-border">
+      <footer id="contact" className="section-dark border-t border-white/10">
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -948,69 +844,69 @@ const Landing = () => {
                   className="h-12 w-auto"
                 />
               </div>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-white/60 mb-4">
                 The professional damage assessment platform powered by Eric Winn's proven methodology.
               </p>
               <div className="space-y-2">
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-sm text-white/60">
+                  <Phone className="h-4 w-4 mr-2 text-primary" />
                   +1 (555) 123-WINN
                 </div>
-                <div className="flex items-center text-sm">
-                  <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-sm text-white/60">
+                  <Mail className="h-4 w-4 mr-2 text-primary" />
                   hello@winnstorm.com
                 </div>
-                <div className="flex items-center text-sm">
-                  <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-sm text-white/60">
+                  <Globe className="h-4 w-4 mr-2 text-primary" />
                   www.winnstorm.com
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Platform</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="/auth" className="hover:text-foreground transition-colors">Sign In</a></li>
-                <li><a href="/training" className="hover:text-foreground transition-colors">Training Portal</a></li>
+              <h3 className="font-heading font-semibold mb-4 text-white uppercase tracking-wide text-sm">Platform</h3>
+              <ul className="space-y-2 text-sm text-white/60">
+                <li><a href="#features" className="hover:text-primary transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
+                <li><a href="/auth" className="hover:text-primary transition-colors">Sign In</a></li>
+                <li><a href="/training" className="hover:text-primary transition-colors">Training Portal</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/docs" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="/api-docs" className="hover:text-foreground transition-colors">API Reference</a></li>
-                <li><a href="/support" className="hover:text-foreground transition-colors">Support Center</a></li>
-                <li><a href="/methodology" className="hover:text-foreground transition-colors">Winn Methodology Guide</a></li>
+              <h3 className="font-heading font-semibold mb-4 text-white uppercase tracking-wide text-sm">Resources</h3>
+              <ul className="space-y-2 text-sm text-white/60">
+                <li><a href="/docs" className="hover:text-primary transition-colors">Documentation</a></li>
+                <li><a href="/api-docs" className="hover:text-primary transition-colors">API Reference</a></li>
+                <li><a href="/support" className="hover:text-primary transition-colors">Support Center</a></li>
+                <li><a href="/methodology" className="hover:text-primary transition-colors">Winn Methodology Guide</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/about" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+              <h3 className="font-heading font-semibold mb-4 text-white uppercase tracking-wide text-sm">Company</h3>
+              <ul className="space-y-2 text-sm text-white/60">
+                <li><a href="/about" className="hover:text-primary transition-colors">About Us</a></li>
+                <li><a href="/careers" className="hover:text-primary transition-colors">Careers</a></li>
+                <li><a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </div>
 
-          <Separator className="my-8" />
+          <Separator className="my-8 bg-white/10" />
           
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/50">
               © 2025 WinnStorm™. All rights reserved. Built with the proven Winn Methodology.
             </p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
-              <Badge variant="outline" className="text-xs">
-                <Shield className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
+                <Shield className="h-3 w-3 mr-1 text-primary" />
                 SOC 2 Compliant
               </Badge>
-              <Badge variant="outline" className="text-xs">
-                <Award className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
+                <Award className="h-3 w-3 mr-1 text-primary" />
                 ISO 27001 Certified
               </Badge>
             </div>
