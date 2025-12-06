@@ -54,20 +54,30 @@ const Dashboard = () => {
   };
 
   // Fetch properties and projects
-  const { data: properties, isLoading } = useQuery<Property[]>({
+  const { data: properties, isLoading: propertiesLoading } = useQuery<Property[]>({
     queryKey: ['/api/properties'],
   });
 
+  const { data: projectsList, isLoading: projectsLoading } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+  });
+
+  const isLoading = propertiesLoading || projectsLoading;
+
   // Stats calculation for WinnStorm™ dashboard
+  const activeProjects = projectsList?.filter(p => !['completed', 'denied'].includes(p.status)).length || 0;
+  const completedProjects = projectsList?.filter(p => p.status === 'completed').length || 0;
+  
   const stats = {
-    activeProjects: properties?.length || 0,
-    completedAssessments: properties?.length || 0,
+    activeProjects,
+    completedAssessments: properties?.length || completedProjects,
     avgCondition: properties && properties.length > 0 
       ? 'Good'
       : 'N/A',
-    certificationLevel: 'Junior',
-    scans: '—',
-    reports: '—',
+    certificationLevel: role === 'senior_consultant' ? 'Senior' : 
+                        role === 'admin' ? 'Admin' : 'Junior',
+    scans: properties?.length || 0,
+    reports: completedProjects || '—',
     avgScore: '—'
   };
 

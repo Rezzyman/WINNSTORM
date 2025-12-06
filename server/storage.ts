@@ -3,12 +3,13 @@ import {
   CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase,
   InspectionSession, InsertInspectionSession, EvidenceAsset, InsertEvidenceAsset,
   LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
+  Project, InsertProject,
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
-  inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress
+  inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients
 } from "@shared/schema";
 import { db } from './db';
-import { eq } from 'drizzle-orm';
+import { eq, or, inArray } from 'drizzle-orm';
 
 // Interface for storage
 export interface IStorage {
@@ -17,6 +18,12 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  
+  // Project methods
+  getProject(id: number): Promise<Project | undefined>;
+  getProjectsByConsultant(consultantId: number): Promise<Project[]>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined>;
   
   // Property methods
   getProperty(id: number): Promise<Property | undefined>;
@@ -118,6 +125,64 @@ export class DatabaseStorage implements IStorage {
       return updatedUser as User || undefined;
     } catch (error) {
       console.error('Error updating user:', error);
+      return undefined;
+    }
+  }
+
+  // Project methods
+  async getProject(id: number): Promise<Project | undefined> {
+    try {
+      const [project] = await db.select().from(projects).where(eq(projects.id, id));
+      return project as Project || undefined;
+    } catch (error) {
+      console.error('Error fetching project:', error);
+      return undefined;
+    }
+  }
+
+  async getProjectsByConsultant(consultantId: number): Promise<Project[]> {
+    try {
+      // Get projects assigned directly to consultant OR projects whose clients belong to consultant
+      const consultantClients = await db.select({ id: clients.id }).from(clients).where(eq(clients.userId, consultantId));
+      const clientIds = consultantClients.map(c => c.id);
+      
+      let result: Project[] = [];
+      
+      if (clientIds.length > 0) {
+        // Get projects for consultant's clients
+        const clientProjects = await db.select().from(projects).where(inArray(projects.clientId, clientIds));
+        result = clientProjects as Project[];
+      }
+      
+      // Also get directly assigned projects (if assignedConsultantId is set)
+      const assignedProjects = await db.select().from(projects).where(eq(projects.assignedConsultantId, consultantId));
+      
+      // Merge and dedupe
+      const existingIds = new Set(result.map(p => p.id));
+      for (const project of assignedProjects) {
+        if (!existingIds.has(project.id)) {
+          result.push(project as Project);
+        }
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching projects by consultant:', error);
+      return [];
+    }
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const [newProject] = await db.insert(projects).values(project).returning();
+    return newProject as Project;
+  }
+
+  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+    try {
+      const [updatedProject] = await db.update(projects).set(updates).where(eq(projects.id, id)).returning();
+      return updatedProject as Project || undefined;
+    } catch (error) {
+      console.error('Error updating project:', error);
       return undefined;
     }
   }
