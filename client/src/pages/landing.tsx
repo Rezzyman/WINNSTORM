@@ -41,7 +41,8 @@ import {
   faqSchema,
   professionalServiceSchema 
 } from '@/components/seo';
-import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
+import winnstormLogo from '@assets/logo-dark_1765042579232.png';
+import winnstormLogoLight from '@assets/logo-light_1765042579233.png';
 import winnstormVideo from '@assets/WINNSTORM™ (1)_1756326492392.mp4';
 
 const Landing = () => {

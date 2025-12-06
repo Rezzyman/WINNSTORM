@@ -11,7 +11,7 @@ import { Property, Project, DamageAssessment } from '@shared/schema';
 import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO, breadcrumbSchema } from '@/components/seo';
-import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
+import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 
 const Dashboard = () => {
   const { user, role } = useAuth();

@@ -22,7 +22,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useLocation } from 'wouter';
-import winnstormLogo from '@assets/Untitled_design__72_-removebg-preview_1753995395882.png';
+import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 import { Header, Footer } from '@/components/navbar';
 import { SEO, breadcrumbSchema } from '@/components/seo';
 
