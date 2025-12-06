@@ -113,7 +113,7 @@ const Auth = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
+                  className="w-full h-12 p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40 text-base"
                   placeholder="your@email.com"
                   disabled={isLoading}
                   data-testid="input-email"
@@ -128,7 +128,7 @@ const Auth = () => {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
+                  className="w-full h-12 p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40 text-base"
                   placeholder="••••••••"
                   disabled={isLoading}
                   data-testid="input-password"

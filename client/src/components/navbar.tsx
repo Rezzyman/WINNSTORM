@@ -22,7 +22,7 @@ export const Header = () => {
     <header className="bg-[#1A1A1A] border-b border-white/10">
       <div className="flex items-center justify-between p-4">
         <button 
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer touch-target"
           onClick={() => navigate('/dashboard')}
           data-testid="link-home"
         >
@@ -32,24 +32,23 @@ export const Header = () => {
             <span className="text-xs text-white/60 -mt-1">Restoration Pro</span>
           </div>
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <div className="flex items-center gap-2">
-            <button 
-              className="w-9 h-9 bg-primary hover:bg-primary/80 transition-colors text-white rounded-none flex items-center justify-center font-heading font-bold text-sm"
-              onClick={logout}
-              data-testid="button-user-avatar"
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-11 h-11 bg-primary text-white rounded-none flex items-center justify-center font-heading font-bold text-sm touch-target"
+              data-testid="text-user-avatar"
               title={`Signed in as ${user?.email || 'User'}`}
             >
               {getUserInitials()}
-            </button>
+            </div>
             <button 
-              className="w-9 h-9 bg-white/10 hover:bg-white/20 transition-colors text-white rounded-none flex items-center justify-center"
+              className="w-11 h-11 bg-white/10 hover:bg-white/20 transition-colors text-white rounded-none flex items-center justify-center touch-target"
               onClick={logout}
               data-testid="button-logout"
               title="Sign out"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -62,10 +61,10 @@ export const Footer = () => {
   const [location, navigate] = useLocation();
   
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-white/10 py-3 px-6 z-10">
-      <div className="flex justify-around items-center">
+    <footer className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-white/10 py-2 px-4 z-10 safe-area-bottom">
+      <div className="flex justify-around items-center max-w-md mx-auto">
         <button 
-          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/dashboard' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          className={`flex flex-col items-center min-w-[56px] min-h-[48px] py-2 px-2 touch-target ${location === '/dashboard' ? 'text-primary' : 'text-white/60 hover:text-white active:text-primary'}`}
           onClick={() => navigate('/dashboard')}
           data-testid="nav-dashboard"
         >
@@ -73,7 +72,7 @@ export const Footer = () => {
           <span className="text-xs mt-1 font-heading uppercase tracking-wide">Home</span>
         </button>
         <button 
-          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/upload' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          className={`flex flex-col items-center min-w-[56px] min-h-[48px] py-2 px-2 touch-target ${location === '/upload' ? 'text-primary' : 'text-white/60 hover:text-white active:text-primary'}`}
           onClick={() => navigate('/upload')}
           data-testid="nav-upload"
         >
@@ -81,7 +80,7 @@ export const Footer = () => {
           <span className="text-xs mt-1 font-heading uppercase tracking-wide">Upload</span>
         </button>
         <button 
-          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/crm-integrations' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          className={`flex flex-col items-center min-w-[56px] min-h-[48px] py-2 px-2 touch-target ${location === '/crm-integrations' ? 'text-primary' : 'text-white/60 hover:text-white active:text-primary'}`}
           onClick={() => navigate('/crm-integrations')}
           data-testid="nav-crm"
         >
@@ -89,7 +88,7 @@ export const Footer = () => {
           <span className="text-xs mt-1 font-heading uppercase tracking-wide">CRM</span>
         </button>
         <button 
-          className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/reports' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
+          className={`flex flex-col items-center min-w-[56px] min-h-[48px] py-2 px-2 touch-target ${location === '/reports' ? 'text-primary' : 'text-white/60 hover:text-white active:text-primary'}`}
           onClick={() => navigate('/reports')}
           data-testid="nav-reports"
         >
