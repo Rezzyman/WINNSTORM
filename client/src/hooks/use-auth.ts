@@ -8,7 +8,7 @@ import {
   onAuthChange 
 } from '@/lib/firebase';
 
-export type UserRole = 'field-rep' | 'sales-rep' | 'admin' | null;
+export type UserRole = 'junior_consultant' | 'senior_consultant' | 'admin' | 'client' | null;
 
 interface AuthContextType {
   user: User | null;
@@ -18,7 +18,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<User>;
   register: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
-  setUserRole: (role: UserRole) => void;
+  setUserRole: (role: UserRole) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -99,11 +99,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const setUserRole = (newRole: UserRole) => {
+  const setUserRole = async (newRole: UserRole) => {
     setRole(newRole);
     if (user) {
-      // Save role to localStorage
+      // Save role to localStorage for quick access
       localStorage.setItem(`role_${user.uid}`, newRole as string);
+      
+      // Persist to database
+      try {
+        const idToken = await user.getIdToken();
+        await fetch('/api/user/role', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ role: newRole })
+        });
+      } catch (error) {
+        console.error('Failed to persist role to database:', error);
+      }
     }
   };
 

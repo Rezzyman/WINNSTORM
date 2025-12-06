@@ -69,12 +69,18 @@ const Auth = () => {
   };
 
   // If user is logged in but no role is selected yet
-  if (user && !localStorage.getItem('userRole')) {
+  if (user && !localStorage.getItem(`role_${user.uid}`)) {
     return <RoleSelector />;
+  }
+  
+  // If user is logged in with a role, redirect to dashboard
+  if (user && localStorage.getItem(`role_${user.uid}`)) {
+    navigate('/dashboard');
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/20 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen section-dark flex flex-col items-center justify-center p-6">
       <SEO
         title="Sign In - Access Your Account"
         description="Sign in to WinnStorm™ to access your damage assessment dashboard, training portal, and Winn Reports. Secure login with Google or email."
@@ -84,20 +90,22 @@ const Auth = () => {
       <div className="max-w-md w-full">
         {/* WinnStorm Logo */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur-xl"></div>
-            <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-32 relative z-10" />
+          <div className="flex justify-center mb-4">
+            <img src="/winnstorm-logo.png" alt="WinnStorm Restoration Pro" className="h-28" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent mb-1">WinnStorm™</h1>
-          <p className="text-muted-foreground">Restoration Pro - Damage Assessment Platform</p>
+          <div className="flex justify-center mb-4">
+            <div className="accent-bar"></div>
+          </div>
+          <h1 className="headline-lg text-white mb-2">Sign In</h1>
+          <p className="text-white/60">Access your damage assessment dashboard</p>
         </div>
 
         {/* Login Form */}
-        <Card className="border border-border shadow-lg bg-gradient-to-b from-card to-card/95 backdrop-blur-sm">
+        <Card className="border border-white/20 shadow-lg bg-white/5 backdrop-blur-sm rounded-none">
           <CardContent className="pt-6">
             <form onSubmit={handleLogin}>
               <div className="mb-6">
-                <Label htmlFor="email" className="block text-foreground text-sm font-medium mb-2">
+                <Label htmlFor="email" className="block text-white text-sm font-heading uppercase tracking-wide mb-2">
                   Email
                 </Label>
                 <Input
@@ -105,13 +113,14 @@ const Auth = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground"
+                  className="w-full p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
                   placeholder="your@email.com"
                   disabled={isLoading}
+                  data-testid="input-email"
                 />
               </div>
               <div className="mb-6">
-                <Label htmlFor="password" className="block text-foreground text-sm font-medium mb-2">
+                <Label htmlFor="password" className="block text-white text-sm font-heading uppercase tracking-wide mb-2">
                   Password
                 </Label>
                 <Input
@@ -119,15 +128,17 @@ const Auth = () => {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground"
+                  className="w-full p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
                   placeholder="••••••••"
                   disabled={isLoading}
+                  data-testid="input-password"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-4 rounded-lg transition"
+                className="w-full btn-primary rounded-none font-heading uppercase tracking-wide py-6"
                 disabled={isLoading}
+                data-testid="button-signin"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
@@ -137,14 +148,14 @@ const Auth = () => {
                     id="remember" 
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(!!checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-neutral-medium rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-white/30 rounded-none"
                   />
-                  <Label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
+                  <Label htmlFor="remember" className="ml-2 block text-sm text-white/60">
                     Remember me
                   </Label>
                 </div>
                 <div className="text-sm">
-                  <a href="#" className="font-medium text-primary hover:text-primary-light">
+                  <a href="#" className="font-medium text-primary hover:text-primary/80">
                     Forgot password?
                   </a>
                 </div>
@@ -157,19 +168,20 @@ const Auth = () => {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-medium"></div>
+              <div className="w-full border-t border-white/20"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
+              <span className="px-2 bg-[#1A1A1A] text-white/60">Or continue with</span>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-1 gap-3">
             <Button
               type="button"
               variant="outline"
-              className="w-full inline-flex justify-center py-3 px-4 border border-border rounded-lg shadow-md bg-card text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              className="w-full inline-flex justify-center py-6 px-4 border-2 border-white/20 rounded-none bg-white/5 text-sm font-heading uppercase tracking-wide text-white hover:bg-white hover:text-[#1A1A1A] transition-colors"
               onClick={handleGoogleLogin}
               disabled={isLoading}
+              data-testid="button-google-signin"
             >
               <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>

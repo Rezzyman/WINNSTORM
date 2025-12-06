@@ -98,6 +98,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(userWithoutPassword);
   });
 
+  // Update user role
+  app.patch("/api/user/role", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const userId = getAuthenticatedUserId(req, res);
+    if (!userId) return;
+    
+    const { role } = req.body;
+    const validRoles = ['junior_consultant', 'senior_consultant', 'admin', 'client'];
+    
+    if (!role || !validRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role. Must be one of: " + validRoles.join(', ') });
+    }
+    
+    const updatedUser = await storage.updateUser(userId, { role });
+    if (!updatedUser) {
+      return res.status(500).json({ message: "Failed to update user role" });
+    }
+    
+    const { password, ...userWithoutPassword } = updatedUser;
+    res.json(userWithoutPassword);
+  });
+
   // Property routes
   app.get("/api/properties", requireAuth, async (req: AuthenticatedRequest, res) => {
     const userId = getAuthenticatedUserId(req, res);
