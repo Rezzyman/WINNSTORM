@@ -290,14 +290,14 @@ const Landing = () => {
             loop 
             muted 
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-            style={{ filter: 'grayscale(100%) brightness(0.65) contrast(1.2)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            style={{ filter: 'grayscale(100%) brightness(0.75) contrast(1.2)' }}
           >
             <source src={winnstormVideo} type="video/mp4" />
             <source src="https://assets.mixkit.co/videos/preview/mixkit-lightning-in-the-dark-sky-4164-large.mp4" type="video/mp4" />
           </video>
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A1A]/60 via-[#1A1A1A]/40 to-[#1A1A1A]/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A1A]/50 via-[#1A1A1A]/30 to-[#1A1A1A]/70"></div>
         </div>
 
         <div 
