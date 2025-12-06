@@ -237,7 +237,7 @@ export default function InspectionWizard() {
         <Card className="p-6">
           <CardTitle className="text-destructive">No Property Selected</CardTitle>
           <CardDescription className="mt-2">Please select a property to start inspection</CardDescription>
-          <Button className="mt-4" onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
+          <Button className="mt-4 touch-target h-12" onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
         </Card>
       </div>
     );
@@ -257,7 +257,7 @@ export default function InspectionWizard() {
         <Card className="p-6">
           <CardTitle className="text-destructive">Error Loading Session</CardTitle>
           <CardDescription className="mt-2">Failed to load inspection session</CardDescription>
-          <Button className="mt-4" onClick={() => refetch()}>Retry</Button>
+          <Button className="mt-4 touch-target h-12" onClick={() => refetch()}>Retry</Button>
         </Card>
       </div>
     );
@@ -612,7 +612,7 @@ export default function InspectionWizard() {
                       <Button
                         key={reason}
                         variant={skipReason === reason ? "default" : "outline"}
-                        className="w-full justify-start h-12"
+                        className="w-full justify-start h-12 touch-target"
                         onClick={() => setSkipReason(reason)}
                       >
                         {reason}
@@ -620,9 +620,10 @@ export default function InspectionWizard() {
                     ))}
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowSkipDialog(false)}>Cancel</Button>
+                    <Button variant="outline" className="touch-target h-12" onClick={() => setShowSkipDialog(false)}>Cancel</Button>
                     <Button 
                       variant="destructive"
+                      className="touch-target h-12"
                       disabled={!skipReason || skipMutation.isPending}
                       onClick={() => skipMutation.mutate(skipReason)}
                     >
@@ -674,7 +675,7 @@ export default function InspectionWizard() {
               )}
               <div className="flex gap-2">
                 <Button 
-                  className="flex-1"
+                  className="flex-1 touch-target h-12"
                   onClick={() => {
                     analyzeEvidence(selectedEvidence.id);
                     setSelectedEvidence(null);
@@ -684,7 +685,7 @@ export default function InspectionWizard() {
                   <Brain className="h-4 w-4 mr-2" />
                   Analyze
                 </Button>
-                <Button variant="outline" onClick={() => setSelectedEvidence(null)}>
+                <Button variant="outline" className="touch-target h-12" onClick={() => setSelectedEvidence(null)}>
                   Close
                 </Button>
               </div>
