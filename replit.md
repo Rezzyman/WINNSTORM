@@ -31,10 +31,26 @@ The platform features a robust technical stack including a **React, TypeScript, 
 - **Mobile-First Transformation**: Utilizes **Capacitor** for native iOS and Android applications, integrating native camera, filesystem, and preferences.
 - **AI Features**: Context-aware Stormy AI assistant adapting to user experience levels, real-time inspection coaching, thermal image analysis for anomaly and damage detection, automated metric generation, and professional executive summary generation for reports.
 
+## Phase 1 Mobile-First Infrastructure (In Progress)
+
+**Offline-First Architecture:**
+- **SQLite/IndexedDB Database** (`client/src/lib/offline-database.ts`): Local persistence for properties, inspections, evidence, and sync queue. Uses Capacitor SQLite on native, IndexedDB on web.
+- **Sync Service** (`client/src/lib/sync-service.ts`): Bidirectional sync with conflict resolution (last-write-wins with timestamp comparison), automatic retry queue, and network status detection.
+- **Network Status Hooks** (`client/src/hooks/use-network-status.ts`): Real-time online/offline/syncing state with UI indicators.
+
+**Evidence Capture Services:**
+- **Camera Service** (`client/src/lib/camera-service.ts`): High-resolution photo capture via Capacitor Camera with GPS location tagging, supports gallery import and thermal image import from FLIR/Seek devices.
+- **Voice Memo Service** (`client/src/lib/voice-memo-service.ts`): Audio recording with automatic location tagging, playback support, and transcription API integration (pending Whisper API).
+- **Evidence Capture Component** (`client/src/components/evidence-capture.tsx`): Unified UI for photos, thermal images, and voice memos with step-aware storage.
+
+**Step Validation System:**
+- **Step Validation Service** (`client/src/lib/step-validation-service.ts`): Enforces Winn Methodology requirements per step (min photos, AI validation, required fields), provides Stormy AI feedback messages, step guidance with tips/common mistakes/best practices.
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for persistent data storage.
 - **Firebase**: Authentication service for user management and access control.
 - **Replit AI Integrations (GPT-5.1)**: Powers the Stormy AI assistant and various AI analysis features.
 - **Capacitor**: Used for transforming the web application into native iOS and Android mobile applications.
+- **Capacitor Plugins**: Camera, Filesystem, Geolocation, Preferences, SQLite for offline-first mobile capabilities.
 - **Stripe**: Integrated for subscription payment processing.
 - **Google Maps**: Used for property address lookup, satellite view, and drawing tools.

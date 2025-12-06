@@ -1519,6 +1519,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Transcribe audio (voice memos)
+  // NOTE: Full audio transcription requires Whisper API integration
+  // Current implementation stores audio for later processing and returns a placeholder
+  app.post("/api/ai/transcribe", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const { audioDataUrl, duration } = req.body;
+      
+      if (!audioDataUrl) {
+        return res.status(400).json({ message: "audioDataUrl is required" });
+      }
+
+      // TODO: Integrate with OpenAI Whisper API for real transcription
+      // For now, return a placeholder indicating manual transcription is available
+      // The audio is stored locally and can be played back or transcribed later
+      
+      const placeholderMessage = `[Voice memo recorded - ${Math.round(duration || 0)} seconds] Audio playback available. Full transcription service will be enabled with Whisper API integration.`;
+
+      res.json({ 
+        transcription: placeholderMessage,
+        duration: duration || 0,
+        status: 'pending_integration',
+        message: 'Full transcription requires Whisper API. Audio stored for playback.'
+      });
+
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      res.status(500).json({ message: "Failed to transcribe audio" });
+    }
+  });
+
   // Parse Limitless transcript and extract knowledge
   app.post("/api/ai/parse-transcript", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
