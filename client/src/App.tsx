@@ -27,6 +27,7 @@ import About from "@/pages/about";
 import Careers from "@/pages/careers";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
+import { DallasPage, HoustonPage, KansasCityPage } from "@/pages/city-landing";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -73,6 +74,9 @@ function Router() {
       <Route path="/careers" component={Careers} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/dallas" component={DallasPage} />
+      <Route path="/houston" component={HoustonPage} />
+      <Route path="/kansas-city" component={KansasCityPage} />
       <Route component={NotFound} />
     </Switch>
   );
