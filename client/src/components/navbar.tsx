@@ -19,7 +19,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="section-dark border-b border-white/10">
+    <header className="bg-[#1A1A1A] border-b border-white/10">
       <div className="flex items-center justify-between p-4">
         <button 
           className="flex items-center cursor-pointer"
@@ -62,7 +62,7 @@ export const Footer = () => {
   const [location, navigate] = useLocation();
   
   return (
-    <footer className="fixed bottom-0 left-0 right-0 section-dark border-t border-white/10 py-3 px-6 z-10">
+    <footer className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-white/10 py-3 px-6 z-10">
       <div className="flex justify-around items-center">
         <button 
           className={`flex flex-col items-center min-w-[60px] py-1 ${location === '/dashboard' ? 'text-primary' : 'text-white/60 hover:text-white'}`}
