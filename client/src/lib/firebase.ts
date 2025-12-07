@@ -19,7 +19,7 @@ import {
 
 // Firebase configuration for WinnStorm (winnstorm-43a69)
 const firebaseConfig = {
-  apiKey: "AIzaSyDGNJhBSCJSBqLbCUk4U1FwXxyj9xC2LwQ",
+  apiKey: "AIzaSyBvS65Qg8Wx4KEmEHMil5wjgmlWGZ22qdM",
   authDomain: "winnstorm-43a69.firebaseapp.com",
   projectId: "winnstorm-43a69",
   storageBucket: "winnstorm-43a69.firebasestorage.app",
