@@ -3,10 +3,11 @@ import {
   CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase,
   InspectionSession, InsertInspectionSession, EvidenceAsset, InsertEvidenceAsset,
   LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
-  Project, InsertProject,
+  Project, InsertProject, ScheduledInspection, InsertScheduledInspection,
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
-  inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients
+  inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
+  scheduledInspections
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray } from 'drizzle-orm';
@@ -89,6 +90,14 @@ export interface IStorage {
   getInspectorProgress(userId: number): Promise<InspectorProgress | undefined>;
   createInspectorProgress(progress: InsertInspectorProgress): Promise<InspectorProgress>;
   updateInspectorProgress(userId: number, updates: Partial<InspectorProgress>): Promise<InspectorProgress | undefined>;
+  
+  // Scheduled Inspection methods
+  getScheduledInspection(id: number): Promise<ScheduledInspection | undefined>;
+  getScheduledInspectionsByInspector(inspectorId: number, startDate?: Date, endDate?: Date): Promise<ScheduledInspection[]>;
+  getScheduledInspectionsByDate(date: Date, inspectorId?: number): Promise<ScheduledInspection[]>;
+  createScheduledInspection(inspection: InsertScheduledInspection): Promise<ScheduledInspection>;
+  updateScheduledInspection(id: number, updates: Partial<ScheduledInspection>): Promise<ScheduledInspection | undefined>;
+  cancelScheduledInspection(id: number, reason: string): Promise<ScheduledInspection | undefined>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -748,6 +757,107 @@ export class DatabaseStorage implements IStorage {
       return updatedProgress || undefined;
     } catch (error) {
       console.error('Error updating inspector progress:', error);
+      return undefined;
+    }
+  }
+
+  // ============================================================================
+  // SCHEDULED INSPECTION METHODS - Multi-property scheduling
+  // ============================================================================
+
+  async getScheduledInspection(id: number): Promise<ScheduledInspection | undefined> {
+    try {
+      const [inspection] = await db.select().from(scheduledInspections).where(eq(scheduledInspections.id, id));
+      return inspection || undefined;
+    } catch (error) {
+      console.error('Error fetching scheduled inspection:', error);
+      return undefined;
+    }
+  }
+
+  async getScheduledInspectionsByInspector(
+    inspectorId: number,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<ScheduledInspection[]> {
+    try {
+      let query = db.select().from(scheduledInspections).where(eq(scheduledInspections.inspectorId, inspectorId));
+      const results = await query;
+      
+      if (startDate || endDate) {
+        return results.filter(i => {
+          const date = new Date(i.scheduledDate);
+          if (startDate && date < startDate) return false;
+          if (endDate && date > endDate) return false;
+          return true;
+        });
+      }
+      
+      return results;
+    } catch (error) {
+      console.error('Error fetching scheduled inspections by inspector:', error);
+      return [];
+    }
+  }
+
+  async getScheduledInspectionsByDate(date: Date, inspectorId?: number): Promise<ScheduledInspection[]> {
+    try {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      let results = await db.select().from(scheduledInspections);
+      
+      return results.filter(i => {
+        const inspectionDate = new Date(i.scheduledDate);
+        const matchesDate = inspectionDate >= startOfDay && inspectionDate <= endOfDay;
+        const matchesInspector = inspectorId ? i.inspectorId === inspectorId : true;
+        return matchesDate && matchesInspector;
+      });
+    } catch (error) {
+      console.error('Error fetching scheduled inspections by date:', error);
+      return [];
+    }
+  }
+
+  async createScheduledInspection(inspection: InsertScheduledInspection): Promise<ScheduledInspection> {
+    const [newInspection] = await db.insert(scheduledInspections).values(inspection).returning();
+    return newInspection;
+  }
+
+  async updateScheduledInspection(id: number, updates: Partial<ScheduledInspection>): Promise<ScheduledInspection | undefined> {
+    try {
+      const [updatedInspection] = await db
+        .update(scheduledInspections)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(scheduledInspections.id, id))
+        .returning();
+      return updatedInspection || undefined;
+    } catch (error) {
+      console.error('Error updating scheduled inspection:', error);
+      return undefined;
+    }
+  }
+
+  async cancelScheduledInspection(id: number, reason: string): Promise<ScheduledInspection | undefined> {
+    try {
+      const [cancelled] = await db
+        .update(scheduledInspections)
+        .set({
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancelReason: reason,
+          updatedAt: new Date(),
+        })
+        .where(eq(scheduledInspections.id, id))
+        .returning();
+      return cancelled || undefined;
+    } catch (error) {
+      console.error('Error cancelling scheduled inspection:', error);
       return undefined;
     }
   }

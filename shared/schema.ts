@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -1196,6 +1196,61 @@ export const insertLimitlessTranscriptSchema = createInsertSchema(limitlessTrans
   uploadedBy: true,
 });
 
+// ============================================================================
+// SCHEDULED INSPECTIONS
+// ============================================================================
+
+export interface ScheduledPropertyDetails {
+  estimatedDuration: number;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  notes?: string;
+  accessInstructions?: string;
+  contactName?: string;
+  contactPhone?: string;
+}
+
+export interface RouteOptimizationData {
+  orderIndex: number;
+  distanceFromPrevious?: number;
+  estimatedTravelTime?: number;
+  estimatedArrival?: string;
+}
+
+export const scheduledInspections = pgTable("scheduled_inspections", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  inspectorId: integer("inspector_id").references(() => users.id).notNull(),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  scheduledTime: text("scheduled_time"),
+  estimatedDuration: integer("estimated_duration").default(60),
+  status: text("status").notNull().default('scheduled'),
+  priority: text("priority").notNull().default('normal'),
+  notes: text("notes"),
+  accessInstructions: text("access_instructions"),
+  contactName: text("contact_name"),
+  contactPhone: text("contact_phone"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  routeOptimization: jsonb("route_optimization").$type<RouteOptimizationData>(),
+  reminderSent: boolean("reminder_sent").default(false),
+  completedAt: timestamp("completed_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancelReason: text("cancel_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertScheduledInspectionSchema = createInsertSchema(scheduledInspections).omit({
+  id: true,
+  routeOptimization: true,
+  reminderSent: true,
+  completedAt: true,
+  cancelledAt: true,
+  cancelReason: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type EvidenceAsset = typeof evidenceAssets.$inferSelect;
 export type InsertEvidenceAsset = z.infer<typeof insertEvidenceAssetSchema>;
@@ -1205,3 +1260,5 @@ export type InspectorProgress = typeof inspectorProgress.$inferSelect;
 export type InsertInspectorProgress = z.infer<typeof insertInspectorProgressSchema>;
 export type LimitlessTranscript = typeof limitlessTranscripts.$inferSelect;
 export type InsertLimitlessTranscript = z.infer<typeof insertLimitlessTranscriptSchema>;
+export type ScheduledInspection = typeof scheduledInspections.$inferSelect;
+export type InsertScheduledInspection = z.infer<typeof insertScheduledInspectionSchema>;

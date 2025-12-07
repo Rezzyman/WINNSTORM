@@ -46,6 +46,18 @@ The platform features a robust technical stack including a **React, TypeScript, 
 **Step Validation System:**
 - **Step Validation Service** (`client/src/lib/step-validation-service.ts`): Enforces Winn Methodology requirements per step (min photos, AI validation, required fields), provides Stormy AI feedback messages, step guidance with tips/common mistakes/best practices.
 
+**Multi-Property Scheduling:**
+- **Scheduling Service** (`client/src/lib/scheduling-service.ts`): Calendar management, route optimization with nearest-neighbor algorithm, Haversine distance calculation, and schedule generation for day/week views.
+- **Schedule Management Page** (`client/src/pages/schedule.tsx`): Mobile-optimized schedule interface with calendar and map views, inspection scheduling dialog, and today's inspections overview.
+- **Inspection Calendar Component** (`client/src/components/inspection-calendar.tsx`): Week and day view modes, time slot management, and inspection status indicators.
+- **Property Map Component** (`client/src/components/property-map.tsx`): Google Maps integration for property locations, marker clustering, route visualization, and interactive property selection.
+- **Scheduled Inspections Schema**: Database table for persisting inspection schedules with date/time, priority, contact info, and route optimization data.
+
+**AI Quality Services:**
+- **Thermal Analysis Service** (`client/src/lib/thermal-analysis-service.ts`): AI-powered thermal image analysis for moisture detection, heat loss, and thermal bridging anomalies.
+- **Evidence Quality Service** (`client/src/lib/evidence-quality-service.ts`): Client and server-side image quality checking for resolution, framing, and exposure issues.
+- **Inspection Completeness Service** (`client/src/lib/inspection-completeness-service.ts`): Tracks step completion progress, calculates overall inspection scores, and estimates report quality.
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for persistent data storage.
 - **Firebase**: Authentication service for user management and access control.

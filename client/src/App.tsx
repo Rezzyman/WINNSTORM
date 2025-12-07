@@ -29,6 +29,7 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Pricing from "@/pages/pricing";
 import { DallasPage, HoustonPage, KansasCityPage } from "@/pages/city-landing";
+import Schedule from "@/pages/schedule";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -66,6 +67,7 @@ function Router() {
       <Route path="/crm-integrations" component={CrmIntegrations} />
       <Route path="/training" component={Training} />
       <Route path="/projects" component={Projects} />
+      <Route path="/schedule" component={Schedule} />
       <Route path="/inspection/:propertyId" component={InspectionWizard} />
       <Route path="/transcripts" component={Transcripts} />
       <Route path="/docs" component={Docs} />

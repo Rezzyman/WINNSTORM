@@ -1348,6 +1348,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================================================
+  // SCHEDULING ROUTES - Multi-property scheduling and route optimization
+  // ============================================================================
+
+  // Get scheduled inspections for a date range
+  app.get("/api/schedule", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const { startDate, endDate, inspectorId } = req.query;
+      const targetInspectorId = inspectorId ? parseInt(inspectorId as string) : userId;
+      
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const inspections = await storage.getScheduledInspectionsByInspector(
+        targetInspectorId,
+        start,
+        end
+      );
+      
+      res.json(inspections);
+    } catch (error) {
+      console.error('Error fetching scheduled inspections:', error);
+      res.status(500).json({ message: "Failed to fetch scheduled inspections" });
+    }
+  });
+
+  // Get single scheduled inspection
+  app.get("/api/schedule/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid inspection ID" });
+      }
+      
+      const inspection = await storage.getScheduledInspection(id);
+      if (!inspection) {
+        return res.status(404).json({ message: "Scheduled inspection not found" });
+      }
+      
+      // Verify ownership
+      if (inspection.inspectorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(inspection);
+    } catch (error) {
+      console.error('Error fetching scheduled inspection:', error);
+      res.status(500).json({ message: "Failed to fetch scheduled inspection" });
+    }
+  });
+
+  // Create scheduled inspection
+  app.post("/api/schedule", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const { propertyId, scheduledDate, scheduledTime, estimatedDuration, priority, notes, accessInstructions, contactName, contactPhone, latitude, longitude } = req.body;
+      
+      if (!propertyId || !scheduledDate) {
+        return res.status(400).json({ message: "propertyId and scheduledDate are required" });
+      }
+      
+      const inspection = await storage.createScheduledInspection({
+        propertyId,
+        inspectorId: userId,
+        scheduledDate: new Date(scheduledDate),
+        scheduledTime,
+        estimatedDuration: estimatedDuration || 60,
+        status: 'scheduled',
+        priority: priority || 'normal',
+        notes,
+        accessInstructions,
+        contactName,
+        contactPhone,
+        latitude,
+        longitude,
+      });
+      
+      res.status(201).json(inspection);
+    } catch (error) {
+      console.error('Error creating scheduled inspection:', error);
+      res.status(500).json({ message: "Failed to create scheduled inspection" });
+    }
+  });
+
+  // Update scheduled inspection
+  app.patch("/api/schedule/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid inspection ID" });
+      }
+      
+      // Verify ownership before updating
+      const existing = await storage.getScheduledInspection(id);
+      if (!existing) {
+        return res.status(404).json({ message: "Scheduled inspection not found" });
+      }
+      if (existing.inspectorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Only allow safe fields to be updated
+      const { scheduledDate, scheduledTime, estimatedDuration, priority, notes, accessInstructions, contactName, contactPhone, status } = req.body;
+      const safeUpdates: Record<string, any> = {};
+      
+      if (scheduledDate !== undefined) {
+        const parsedDate = new Date(scheduledDate);
+        if (isNaN(parsedDate.getTime())) {
+          return res.status(400).json({ message: "Invalid scheduledDate format" });
+        }
+        safeUpdates.scheduledDate = parsedDate;
+      }
+      if (scheduledTime !== undefined) safeUpdates.scheduledTime = scheduledTime;
+      if (estimatedDuration !== undefined) safeUpdates.estimatedDuration = parseInt(estimatedDuration) || 60;
+      if (priority !== undefined && ['low', 'normal', 'high', 'urgent'].includes(priority)) safeUpdates.priority = priority;
+      if (notes !== undefined) safeUpdates.notes = notes;
+      if (accessInstructions !== undefined) safeUpdates.accessInstructions = accessInstructions;
+      if (contactName !== undefined) safeUpdates.contactName = contactName;
+      if (contactPhone !== undefined) safeUpdates.contactPhone = contactPhone;
+      if (status !== undefined && ['scheduled', 'in_progress', 'completed'].includes(status)) safeUpdates.status = status;
+      
+      const updated = await storage.updateScheduledInspection(id, safeUpdates);
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating scheduled inspection:', error);
+      res.status(500).json({ message: "Failed to update scheduled inspection" });
+    }
+  });
+
+  // Cancel scheduled inspection
+  app.post("/api/schedule/:id/cancel", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid inspection ID" });
+      }
+      
+      // Verify ownership before cancelling
+      const existing = await storage.getScheduledInspection(id);
+      if (!existing) {
+        return res.status(404).json({ message: "Scheduled inspection not found" });
+      }
+      if (existing.inspectorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { reason } = req.body;
+      if (!reason || typeof reason !== 'string' || reason.length < 3) {
+        return res.status(400).json({ message: "Cancellation reason is required (min 3 characters)" });
+      }
+      
+      const cancelled = await storage.cancelScheduledInspection(id, reason);
+      res.json(cancelled);
+    } catch (error) {
+      console.error('Error cancelling scheduled inspection:', error);
+      res.status(500).json({ message: "Failed to cancel scheduled inspection" });
+    }
+  });
+
+  // Get inspections for a specific date (for calendar views)
+  app.get("/api/schedule/date/:date", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const date = new Date(req.params.date);
+      if (isNaN(date.getTime())) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+      
+      const inspectorId = req.query.inspectorId ? parseInt(req.query.inspectorId as string) : userId;
+      const inspections = await storage.getScheduledInspectionsByDate(date, inspectorId);
+      
+      res.json(inspections);
+    } catch (error) {
+      console.error('Error fetching inspections by date:', error);
+      res.status(500).json({ message: "Failed to fetch inspections by date" });
+    }
+  });
+
+  // ============================================================================
   // MULTIMODAL AI ANALYSIS ROUTES - GPT-5.1 Vision & Coaching
   // ============================================================================
 
