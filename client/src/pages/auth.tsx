@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
 import { User } from 'firebase/auth';
@@ -23,9 +23,17 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
   const { user, login, loginWithGoogle, register } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  
+  // Handle redirect in useEffect to avoid setState during render
+  useEffect(() => {
+    if (user && localStorage.getItem(`role_${user.uid}`)) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,10 +118,16 @@ const Auth = () => {
     return <RoleSelector />;
   }
   
-  // If user is logged in with a role, redirect to dashboard
+  // If user is logged in with a role, show loading while redirecting (handled by useEffect)
   if (user && localStorage.getItem(`role_${user.uid}`)) {
-    navigate('/dashboard');
-    return null;
+    return (
+      <div className="min-h-screen section-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-white/60">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

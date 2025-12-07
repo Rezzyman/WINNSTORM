@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import {
   Square, 
   Circle, 
   Type,
-  Save,
   RotateCcw 
 } from 'lucide-react';
 
@@ -33,27 +32,48 @@ interface GoogleMapsDrawingProps {
   onSectionsChange: (sections: RoofSection[]) => void;
 }
 
-export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
+// Store map instances outside React to prevent DOM conflicts
+let globalMapInstance: any = null;
+let globalDrawingManager: any = null;
+let globalGeocoder: any = null;
+let globalOverlays: any[] = [];
+
+export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
   address,
   onAddressChange,
   roofSections,
   onSectionsChange
-}) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
+}: GoogleMapsDrawingProps) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const initializingRef = useRef(false);
-  const [map, setMap] = useState<any>(null);
-  const [drawingManager, setDrawingManager] = useState<any>(null);
-  const [geocoder, setGeocoder] = useState<any>(null);
+  const mountedRef = useRef(true);
+  const sectionCounterRef = useRef(1);
+  const roofSectionsRef = useRef<RoofSection[]>(roofSections);
+  const onSectionsChangeRef = useRef(onSectionsChange);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTool, setSelectedTool] = useState<string>('');
-  const [sectionCounter, setSectionCounter] = useState(1);
-  const [drawnOverlays, setDrawnOverlays] = useState<any[]>([]);
+  const [mapReady, setMapReady] = useState(false);
+
+  // Keep refs in sync with props
+  useEffect(() => {
+    sectionCounterRef.current = roofSections.length + 1;
+    roofSectionsRef.current = roofSections;
+  }, [roofSections]);
+  
+  useEffect(() => {
+    onSectionsChangeRef.current = onSectionsChange;
+  }, [onSectionsChange]);
 
   useEffect(() => {
+    mountedRef.current = true;
+    
     const initMap = async () => {
       // Guard against double initialization
-      if (map || initializingRef.current) {
+      if (globalMapInstance || initializingRef.current) {
+        if (globalMapInstance) {
+          setIsLoading(false);
+          setMapReady(true);
+        }
         return;
       }
       
@@ -68,8 +88,9 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
       try {
         await loader.load();
         
-        // Get container directly from ref
-        const container = mapRef.current;
+        if (!mountedRef.current) return;
+        
+        const container = mapContainerRef.current;
         if (!container) {
           setIsLoading(false);
           initializingRef.current = false;
@@ -77,7 +98,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
         }
 
         const mapInstance = new (window as any).google.maps.Map(container, {
-          center: { lat: 39.8283, lng: -98.5795 }, // Center of US
+          center: { lat: 39.8283, lng: -98.5795 },
           zoom: 4,
           mapTypeId: 'satellite',
           tilt: 0,
@@ -128,17 +149,17 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
           const overlay = event.overlay;
           const type = event.type;
           
-          // Create section data
+          const currentCounter = sectionCounterRef.current;
+          
           const newSection: RoofSection = {
             id: `section-${Date.now()}`,
-            number: sectionCounter,
+            number: currentCounter,
             type: type as 'polygon' | 'rectangle' | 'circle',
             coordinates: [],
-            label: `Section ${sectionCounter}`,
+            label: `Section ${currentCounter}`,
             notes: ''
           };
 
-          // Extract coordinates based on shape type
           if (type === 'polygon') {
             const path = overlay.getPath();
             const coords: any[] = [];
@@ -146,7 +167,6 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               coords.push(path.getAt(i));
             }
             newSection.coordinates = coords;
-            // Calculate area using Google Maps geometry library
             newSection.area = (window as any).google.maps.geometry.spherical.computeArea(path);
           } else if (type === 'rectangle') {
             const bounds = overlay.getBounds();
@@ -158,7 +178,6 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               ne,
               new (window as any).google.maps.LatLng(ne.lat(), sw.lng())
             ];
-            // Calculate rectangle area
             newSection.area = (window as any).google.maps.geometry.spherical.computeArea([
               sw,
               new (window as any).google.maps.LatLng(sw.lat(), ne.lng()),
@@ -172,7 +191,6 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
             newSection.area = Math.PI * radius * radius;
           }
 
-          // Add section number label
           const sectionLabel = new (window as any).google.maps.Marker({
             position: newSection.coordinates[0] || overlay.getCenter(),
             map: mapInstance,
@@ -192,66 +210,51 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
             }
           });
 
-          // Store overlay and label references
-          setDrawnOverlays(prev => [...prev, overlay, sectionLabel]);
+          globalOverlays.push(overlay, sectionLabel);
           
-          // Update sections
-          const updatedSections = [...roofSections, newSection];
-          onSectionsChange(updatedSections);
+          // Use refs to get current values (avoids stale closure)
+          const currentSections = roofSectionsRef.current;
+          onSectionsChangeRef.current([...currentSections, newSection]);
           
-          setSectionCounter(prev => prev + 1);
-          
-          // Reset drawing mode
           drawingManagerInstance.setDrawingMode(null);
-          setSelectedTool('');
         });
 
-        const geocoderInstance = new (window as any).google.maps.Geocoder();
+        globalMapInstance = mapInstance;
+        globalDrawingManager = drawingManagerInstance;
+        globalGeocoder = new (window as any).google.maps.Geocoder();
         
-        setMap(mapInstance);
-        setDrawingManager(drawingManagerInstance);
-        setGeocoder(geocoderInstance);
-        setIsLoading(false);
+        if (mountedRef.current) {
+          setIsLoading(false);
+          setMapReady(true);
+        }
       } catch (error) {
-        setIsLoading(false);
+        console.error('Error loading Google Maps:', error);
+        if (mountedRef.current) {
+          setIsLoading(false);
+        }
         initializingRef.current = false;
       }
     };
 
     initMap();
     
-    // Cleanup function
     return () => {
-      if (drawingManager) {
-        drawingManager.setMap(null);
-      }
-      if (drawnOverlays.length > 0) {
-        drawnOverlays.forEach(overlay => {
-          if (overlay && typeof overlay.setMap === 'function') {
-            overlay.setMap(null);
-          }
-        });
-      }
-      if (map) {
-        map.unbindAll?.();
-      }
-      initializingRef.current = false;
+      mountedRef.current = false;
     };
-  }, []);
+  }, [onSectionsChange]);
 
-  const handleAddressSearch = () => {
-    if (!geocoder || !map || !address) return;
+  const handleAddressSearch = useCallback(() => {
+    if (!globalGeocoder || !globalMapInstance || !address) return;
 
-    geocoder.geocode({ address }, (results: any, status: any) => {
+    globalGeocoder.geocode({ address }, (results: any, status: any) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
-        map.setCenter(location);
-        map.setZoom(20); // Close zoom for roof details
+        globalMapInstance.setCenter(location);
+        globalMapInstance.setZoom(20);
         
-        // Add marker for property
         new (window as any).google.maps.Marker({
           position: location,
-          map: map,
+          map: globalMapInstance,
           title: address,
           icon: {
             path: (window as any).google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -265,30 +268,28 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
         });
       }
     });
-  };
+  }, [address]);
 
-  const setDrawingMode = (mode: any) => {
-    if (!drawingManager) return;
-    drawingManager.setDrawingMode(mode);
+  const setDrawingMode = useCallback((mode: any) => {
+    if (!globalDrawingManager) return;
+    globalDrawingManager.setDrawingMode(mode);
     setSelectedTool(mode || '');
-  };
+  }, []);
 
-  const clearAllDrawings = () => {
-    drawnOverlays.forEach(overlay => {
-      if ('setMap' in overlay) {
-        (overlay as any).setMap(null);
+  const clearAllDrawings = useCallback(() => {
+    globalOverlays.forEach(overlay => {
+      if (overlay && typeof overlay.setMap === 'function') {
+        overlay.setMap(null);
       }
     });
-    setDrawnOverlays([]);
+    globalOverlays = [];
     onSectionsChange([]);
-    setSectionCounter(1);
-  };
+  }, [onSectionsChange]);
 
-  const deleteSection = (sectionId: string) => {
+  const deleteSection = useCallback((sectionId: string) => {
     const updatedSections = roofSections.filter(section => section.id !== sectionId);
     onSectionsChange(updatedSections);
-    // Note: In a full implementation, you'd also remove the corresponding overlay from the map
-  };
+  }, [roofSections, onSectionsChange]);
 
   const formatArea = (area: number): string => {
     if (area < 1000) {
@@ -298,11 +299,8 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
     }
   };
 
-  // Always render the DOM structure - show loading state within the map container
-
   return (
-    <div ref={rootRef} className="space-y-6">
-      {/* Address Search */}
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -327,7 +325,6 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
         </CardContent>
       </Card>
 
-      {/* Drawing Tools */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -341,6 +338,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               variant={selectedTool === 'polygon' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setDrawingMode((window as any).google?.maps?.drawing?.OverlayType?.POLYGON)}
+              disabled={!mapReady}
             >
               <Edit3 className="h-4 w-4 mr-1" />
               Polygon
@@ -349,6 +347,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               variant={selectedTool === 'rectangle' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setDrawingMode((window as any).google?.maps?.drawing?.OverlayType?.RECTANGLE)}
+              disabled={!mapReady}
             >
               <Square className="h-4 w-4 mr-1" />
               Rectangle
@@ -357,6 +356,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               variant={selectedTool === 'circle' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setDrawingMode((window as any).google?.maps?.drawing?.OverlayType?.CIRCLE)}
+              disabled={!mapReady}
             >
               <Circle className="h-4 w-4 mr-1" />
               Circle
@@ -365,6 +365,7 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setDrawingMode(null)}
+              disabled={!mapReady}
             >
               <Type className="h-4 w-4 mr-1" />
               Select
@@ -373,21 +374,20 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
               variant="destructive"
               size="sm"
               onClick={clearAllDrawings}
+              disabled={!mapReady}
             >
               <RotateCcw className="h-4 w-4 mr-1" />
               Clear All
             </Button>
           </div>
           
-          {/* Map Container */}
           <div 
-            ref={mapRef}
-            data-map-container="true"
+            ref={mapContainerRef}
             className="w-full h-96 rounded-lg border border-border relative"
             style={{ minHeight: '400px' }}
           >
             {isLoading && (
-              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
                   <p className="text-muted-foreground">Loading Google Maps...</p>
@@ -398,7 +398,6 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
         </CardContent>
       </Card>
 
-      {/* Section List */}
       {roofSections.length > 0 && (
         <Card>
           <CardHeader>
@@ -438,4 +437,4 @@ export const GoogleMapsDrawing: React.FC<GoogleMapsDrawingProps> = ({
       )}
     </div>
   );
-};
+});
