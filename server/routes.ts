@@ -13,6 +13,11 @@ import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest, analyzeInspectionImage, getStepCoaching, parseTranscript, ImageAnalysisRequest } from './ai-assistant';
 import { requireAuth, optionalAuth, AuthenticatedRequest } from './auth';
 import Stripe from 'stripe';
+import multer from 'multer';
+import { 
+  parseExcelFile, parseCSVFile, autoDetectColumnMapping, applyColumnMapping, 
+  validateImportRows, convertToPropertyInsert, ColumnMapping 
+} from './property-import';
 
 function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
   if (!req.user?.dbUserId) {
@@ -233,6 +238,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error(error);
       res.status(500).json({ message: "Failed to create property" });
+    }
+  });
+
+  // Property import routes
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = [
+        'text/csv',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ];
+      if (allowedMimes.includes(file.mimetype) || file.originalname.match(/\.(csv|xlsx|xls)$/i)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only CSV and Excel files are allowed'));
+      }
+    }
+  });
+
+  app.post("/api/properties/import/parse", requireAuth, upload.single('file'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const file = req.file;
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      let headers: string[];
+      let rows: Record<string, any>[];
+
+      if (file.originalname.match(/\.csv$/i)) {
+        const content = file.buffer.toString('utf-8');
+        const parsed = parseCSVFile(content);
+        headers = parsed.headers;
+        rows = parsed.rows;
+      } else {
+        const parsed = parseExcelFile(file.buffer);
+        headers = parsed.headers;
+        rows = parsed.rows;
+      }
+
+      const suggestedMapping = autoDetectColumnMapping(headers);
+
+      res.json({
+        headers,
+        rowCount: rows.length,
+        suggestedMapping,
+        preview: rows.slice(0, 5)
+      });
+    } catch (error: any) {
+      console.error('File parse error:', error);
+      res.status(500).json({ message: error.message || "Failed to parse file" });
+    }
+  });
+
+  app.post("/api/properties/import/validate", requireAuth, upload.single('file'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const file = req.file;
+      const mapping = req.body.mapping ? JSON.parse(req.body.mapping) : {};
+
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      let rows: Record<string, any>[];
+
+      if (file.originalname.match(/\.csv$/i)) {
+        const content = file.buffer.toString('utf-8');
+        rows = parseCSVFile(content).rows;
+      } else {
+        rows = parseExcelFile(file.buffer).rows;
+      }
+
+      const mappedRows = applyColumnMapping(rows, mapping as ColumnMapping);
+      const validationResults = validateImportRows(mappedRows);
+
+      res.json({
+        totalRows: validationResults.length,
+        validRows: validationResults.filter(r => r.isValid).length,
+        invalidRows: validationResults.filter(r => !r.isValid).length,
+        results: validationResults
+      });
+    } catch (error: any) {
+      console.error('Validation error:', error);
+      res.status(500).json({ message: error.message || "Failed to validate data" });
+    }
+  });
+
+  app.post("/api/properties/import/execute", requireAuth, upload.single('file'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const file = req.file;
+      const mapping = req.body.mapping ? JSON.parse(req.body.mapping) : {};
+      const projectId = req.body.projectId ? parseInt(req.body.projectId) : undefined;
+
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      let rows: Record<string, any>[];
+
+      if (file.originalname.match(/\.csv$/i)) {
+        const content = file.buffer.toString('utf-8');
+        rows = parseCSVFile(content).rows;
+      } else {
+        rows = parseExcelFile(file.buffer).rows;
+      }
+
+      const mappedRows = applyColumnMapping(rows, mapping as ColumnMapping);
+      const validationResults = validateImportRows(mappedRows);
+      
+      const importedProperties = [];
+      const errors: { row: number; message: string }[] = [];
+
+      for (const result of validationResults) {
+        if (!result.isValid) {
+          errors.push({ row: result.row, message: result.errors.join(', ') });
+          continue;
+        }
+
+        try {
+          const propertyData = convertToPropertyInsert(result.data, userId, projectId);
+          const property = await storage.createProperty({
+            name: propertyData.name,
+            address: propertyData.address,
+            overallCondition: propertyData.overallCondition,
+            userId: propertyData.userId,
+            projectId: propertyData.projectId,
+            buildingInfo: propertyData.buildingInfo as any,
+            roofSystemDetails: propertyData.roofSystemDetails as any
+          });
+          importedProperties.push(property);
+        } catch (err: any) {
+          errors.push({ row: result.row, message: err.message || 'Failed to create property' });
+        }
+      }
+
+      res.json({
+        totalRows: validationResults.length,
+        importedCount: importedProperties.length,
+        skippedCount: errors.length,
+        errors,
+        properties: importedProperties
+      });
+    } catch (error: any) {
+      console.error('Import error:', error);
+      res.status(500).json({ message: error.message || "Failed to import properties" });
     }
   });
 
@@ -646,6 +807,365 @@ Keep the tone professional and technical but accessible.`;
     } catch (error) {
       console.error('Error fetching sync logs:', error);
       res.status(500).json({ message: "Failed to fetch sync logs" });
+    }
+  });
+
+  // Team Assignment & Workload Management routes
+  app.get("/api/team/assignments", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const assignments = await storage.getAllTeamAssignments();
+      res.json(assignments);
+    } catch (error) {
+      console.error('Error fetching team assignments:', error);
+      res.status(500).json({ message: "Failed to fetch team assignments" });
+    }
+  });
+
+  app.get("/api/team/assignments/:inspectorId", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const inspectorId = parseInt(req.params.inspectorId);
+      if (isNaN(inspectorId)) {
+        return res.status(400).json({ message: "Invalid inspector ID" });
+      }
+      
+      const assignment = await storage.getTeamAssignment(inspectorId);
+      if (!assignment) {
+        return res.status(404).json({ message: "Team assignment not found" });
+      }
+      
+      res.json(assignment);
+    } catch (error) {
+      console.error('Error fetching team assignment:', error);
+      res.status(500).json({ message: "Failed to fetch team assignment" });
+    }
+  });
+
+  app.post("/api/team/assignments", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const assignment = await storage.createTeamAssignment(req.body);
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error('Error creating team assignment:', error);
+      res.status(500).json({ message: "Failed to create team assignment" });
+    }
+  });
+
+  app.put("/api/team/assignments/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid assignment ID" });
+      }
+      
+      const updated = await storage.updateTeamAssignment(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Team assignment not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating team assignment:', error);
+      res.status(500).json({ message: "Failed to update team assignment" });
+    }
+  });
+
+  app.delete("/api/team/assignments/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid assignment ID" });
+      }
+      
+      const deleted = await storage.deleteTeamAssignment(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Team assignment not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting team assignment:', error);
+      res.status(500).json({ message: "Failed to delete team assignment" });
+    }
+  });
+
+  // Workload Dashboard API
+  app.get("/api/team/workload", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      
+      const assignments = await storage.getAllTeamAssignments();
+      const workloadData = [];
+      
+      for (const assignment of assignments) {
+        const inspections = await storage.getScheduledInspectionsByInspector(
+          assignment.inspectorId, startOfWeek, endOfWeek
+        );
+        
+        const inspector = await storage.getUser(assignment.inspectorId);
+        
+        workloadData.push({
+          inspectorId: assignment.inspectorId,
+          inspectorName: inspector ? `${inspector.firstName} ${inspector.lastName}` : 'Unknown',
+          teamName: assignment.teamName,
+          region: assignment.region,
+          maxDaily: assignment.maxDailyInspections,
+          maxWeekly: assignment.maxWeeklyInspections,
+          currentWeekly: inspections.length,
+          isAvailable: assignment.isAvailable,
+          unavailableUntil: assignment.unavailableUntil,
+          specializations: assignment.specializations,
+          utilizationPercent: Math.round((inspections.length / (assignment.maxWeeklyInspections || 20)) * 100)
+        });
+      }
+      
+      res.json(workloadData);
+    } catch (error) {
+      console.error('Error fetching workload data:', error);
+      res.status(500).json({ message: "Failed to fetch workload data" });
+    }
+  });
+
+  // Damage Templates routes
+  app.get("/api/damage-templates", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const category = req.query.category as string;
+      
+      let templates;
+      if (category) {
+        templates = await storage.getDamageTemplatesByCategory(category);
+      } else {
+        templates = await storage.getAllDamageTemplates();
+      }
+      
+      res.json(templates);
+    } catch (error) {
+      console.error('Error fetching damage templates:', error);
+      res.status(500).json({ message: "Failed to fetch damage templates" });
+    }
+  });
+
+  app.get("/api/damage-templates/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const template = await storage.getDamageTemplate(id);
+      if (!template) {
+        return res.status(404).json({ message: "Damage template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error('Error fetching damage template:', error);
+      res.status(500).json({ message: "Failed to fetch damage template" });
+    }
+  });
+
+  app.post("/api/damage-templates", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const template = await storage.createDamageTemplate(req.body);
+      res.status(201).json(template);
+    } catch (error) {
+      console.error('Error creating damage template:', error);
+      res.status(500).json({ message: "Failed to create damage template" });
+    }
+  });
+
+  app.put("/api/damage-templates/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const updated = await storage.updateDamageTemplate(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Damage template not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating damage template:', error);
+      res.status(500).json({ message: "Failed to update damage template" });
+    }
+  });
+
+  app.delete("/api/damage-templates/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const deleted = await storage.deleteDamageTemplate(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Damage template not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting damage template:', error);
+      res.status(500).json({ message: "Failed to delete damage template" });
+    }
+  });
+
+  // Seed default damage templates (admin only)
+  app.post("/api/damage-templates/seed", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const existingTemplates = await storage.getAllDamageTemplates();
+      if (existingTemplates.length > 0) {
+        return res.json({ message: "Templates already seeded", count: existingTemplates.length });
+      }
+      
+      const defaultTemplates = [
+        {
+          name: "Hail Impact Damage",
+          category: "Storm Damage",
+          damageType: "hail",
+          description: "Circular or irregular indentations caused by hail impact on roofing materials. May show exposed substrate or granule loss.",
+          defaultSeverity: "warning",
+          affectedComponents: ["shingles", "metal panels", "gutters", "vents"],
+          typicalCauses: ["Hailstorm", "Severe weather"],
+          recommendations: [
+            { action: "Document all impact locations with close-up photos", priority: "immediate" as const },
+            { action: "Measure and record largest hail diameter impacts", priority: "immediate" as const },
+            { action: "Schedule full roof replacement assessment", priority: "short_term" as const, estimatedCost: "$8,000-$15,000" }
+          ],
+          inspectionNotes: "Check soft metals (vents, gutters) first as they show clearest evidence of hail size",
+          requiredEvidence: ["overview_photo", "close_up_damage", "soft_metal_impacts", "test_square"]
+        },
+        {
+          name: "Wind Uplift Damage",
+          category: "Storm Damage",
+          damageType: "wind",
+          description: "Shingles lifted, creased, or missing due to high wind events. May show exposed underlayment or decking.",
+          defaultSeverity: "critical",
+          affectedComponents: ["shingles", "ridge caps", "drip edge", "fascia"],
+          typicalCauses: ["High winds", "Tornado", "Hurricane"],
+          recommendations: [
+            { action: "Emergency tarping to prevent water intrusion", priority: "immediate" as const, estimatedCost: "$200-$500" },
+            { action: "Full roof inspection once weather permits", priority: "short_term" as const },
+            { action: "Replace damaged sections or full roof", priority: "short_term" as const, estimatedCost: "$5,000-$20,000" }
+          ],
+          inspectionNotes: "Check corners and edges first - wind damage typically starts at perimeter",
+          requiredEvidence: ["wide_angle_damage", "missing_material", "underlayment_exposure"]
+        },
+        {
+          name: "Thermal Bridging",
+          category: "Thermal Issues",
+          damageType: "thermal",
+          description: "Heat transfer through building components visible in thermal imaging. Indicates insulation gaps or structural thermal bridges.",
+          defaultSeverity: "warning",
+          affectedComponents: ["insulation", "framing", "fasteners", "penetrations"],
+          typicalCauses: ["Poor insulation", "Missing vapor barrier", "Improper installation"],
+          recommendations: [
+            { action: "Mark locations for remediation", priority: "short_term" as const },
+            { action: "Add insulation at thermal bridges", priority: "long_term" as const, estimatedCost: "$1,000-$5,000" }
+          ],
+          inspectionNotes: "Best detected during significant indoor/outdoor temperature differential (>20°F)",
+          requiredEvidence: ["thermal_image", "standard_image", "temperature_readings"]
+        },
+        {
+          name: "Moisture Intrusion",
+          category: "Water Damage",
+          damageType: "moisture",
+          description: "Water infiltration detected through thermal imaging showing cooler areas or moisture meter readings above threshold.",
+          defaultSeverity: "critical",
+          affectedComponents: ["decking", "insulation", "membrane", "flashing"],
+          typicalCauses: ["Failed sealant", "Puncture", "Flashing failure", "Clogged drains"],
+          recommendations: [
+            { action: "Core sample to assess decking condition", priority: "immediate" as const },
+            { action: "Locate and repair water entry point", priority: "immediate" as const, estimatedCost: "$500-$2,000" },
+            { action: "Replace saturated insulation and decking", priority: "short_term" as const, estimatedCost: "$3,000-$10,000" }
+          ],
+          inspectionNotes: "Use moisture meter to confirm thermal anomalies. Document moisture readings at each location.",
+          requiredEvidence: ["thermal_image", "moisture_reading", "core_sample"]
+        },
+        {
+          name: "Granule Loss",
+          category: "Material Degradation",
+          damageType: "wear",
+          description: "Surface granules missing from asphalt shingles, exposing underlying asphalt. May be age-related or impact damage.",
+          defaultSeverity: "warning",
+          affectedComponents: ["shingles"],
+          typicalCauses: ["Age", "Hail impact", "Foot traffic", "Manufacturing defect"],
+          recommendations: [
+            { action: "Check gutters and downspouts for granule accumulation", priority: "immediate" as const },
+            { action: "Document extent of granule loss", priority: "immediate" as const },
+            { action: "Plan for roof replacement within 3-5 years", priority: "long_term" as const, estimatedCost: "$8,000-$15,000" }
+          ],
+          inspectionNotes: "Distinguish between natural aging (uniform loss) and hail damage (concentrated impact patterns)",
+          requiredEvidence: ["close_up_photo", "granule_sample", "age_assessment"]
+        },
+        {
+          name: "Flashing Failure",
+          category: "Penetration Issues",
+          damageType: "flashing",
+          description: "Deteriorated, lifted, or improperly installed flashing around roof penetrations, walls, or edges.",
+          defaultSeverity: "critical",
+          affectedComponents: ["flashing", "sealant", "membrane"],
+          typicalCauses: ["Age", "Thermal cycling", "Poor installation", "Storm damage"],
+          recommendations: [
+            { action: "Apply emergency sealant if active leak", priority: "immediate" as const, estimatedCost: "$100-$300" },
+            { action: "Replace failed flashing and sealant", priority: "short_term" as const, estimatedCost: "$500-$2,000" }
+          ],
+          inspectionNotes: "Check all penetrations: vents, pipes, chimneys, HVAC units, skylights",
+          requiredEvidence: ["flashing_photo", "sealant_condition", "water_staining"]
+        }
+      ];
+      
+      const createdTemplates = [];
+      for (const template of defaultTemplates) {
+        const created = await storage.createDamageTemplate(template as any);
+        createdTemplates.push(created);
+      }
+      
+      res.status(201).json({ message: "Templates seeded", count: createdTemplates.length, templates: createdTemplates });
+    } catch (error) {
+      console.error('Error seeding damage templates:', error);
+      res.status(500).json({ message: "Failed to seed damage templates" });
     }
   });
 

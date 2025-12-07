@@ -4,10 +4,11 @@ import {
   InspectionSession, InsertInspectionSession, EvidenceAsset, InsertEvidenceAsset,
   LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
   Project, InsertProject, ScheduledInspection, InsertScheduledInspection,
+  TeamAssignment, InsertTeamAssignment, DamageTemplate, InsertDamageTemplate,
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
-  scheduledInspections
+  scheduledInspections, teamAssignments, damageTemplates
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray } from 'drizzle-orm';
@@ -98,6 +99,21 @@ export interface IStorage {
   createScheduledInspection(inspection: InsertScheduledInspection): Promise<ScheduledInspection>;
   updateScheduledInspection(id: number, updates: Partial<ScheduledInspection>): Promise<ScheduledInspection | undefined>;
   cancelScheduledInspection(id: number, reason: string): Promise<ScheduledInspection | undefined>;
+  
+  // Team Assignment methods
+  getTeamAssignment(inspectorId: number): Promise<TeamAssignment | undefined>;
+  getAllTeamAssignments(): Promise<TeamAssignment[]>;
+  createTeamAssignment(assignment: InsertTeamAssignment): Promise<TeamAssignment>;
+  updateTeamAssignment(id: number, updates: Partial<TeamAssignment>): Promise<TeamAssignment | undefined>;
+  deleteTeamAssignment(id: number): Promise<boolean>;
+  
+  // Damage Template methods
+  getDamageTemplate(id: number): Promise<DamageTemplate | undefined>;
+  getAllDamageTemplates(): Promise<DamageTemplate[]>;
+  getDamageTemplatesByCategory(category: string): Promise<DamageTemplate[]>;
+  createDamageTemplate(template: InsertDamageTemplate): Promise<DamageTemplate>;
+  updateDamageTemplate(id: number, updates: Partial<DamageTemplate>): Promise<DamageTemplate | undefined>;
+  deleteDamageTemplate(id: number): Promise<boolean>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -859,6 +875,113 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error cancelling scheduled inspection:', error);
       return undefined;
+    }
+  }
+
+  // Team Assignment methods
+  async getTeamAssignment(inspectorId: number): Promise<TeamAssignment | undefined> {
+    try {
+      const [assignment] = await db.select().from(teamAssignments).where(eq(teamAssignments.inspectorId, inspectorId));
+      return assignment || undefined;
+    } catch (error) {
+      console.error('Error fetching team assignment:', error);
+      return undefined;
+    }
+  }
+
+  async getAllTeamAssignments(): Promise<TeamAssignment[]> {
+    try {
+      return await db.select().from(teamAssignments);
+    } catch (error) {
+      console.error('Error fetching all team assignments:', error);
+      return [];
+    }
+  }
+
+  async createTeamAssignment(assignment: InsertTeamAssignment): Promise<TeamAssignment> {
+    const [newAssignment] = await db.insert(teamAssignments).values(assignment).returning();
+    return newAssignment;
+  }
+
+  async updateTeamAssignment(id: number, updates: Partial<TeamAssignment>): Promise<TeamAssignment | undefined> {
+    try {
+      const [updated] = await db
+        .update(teamAssignments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(teamAssignments.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error updating team assignment:', error);
+      return undefined;
+    }
+  }
+
+  async deleteTeamAssignment(id: number): Promise<boolean> {
+    try {
+      await db.delete(teamAssignments).where(eq(teamAssignments.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting team assignment:', error);
+      return false;
+    }
+  }
+
+  // Damage Template methods
+  async getDamageTemplate(id: number): Promise<DamageTemplate | undefined> {
+    try {
+      const [template] = await db.select().from(damageTemplates).where(eq(damageTemplates.id, id));
+      return template || undefined;
+    } catch (error) {
+      console.error('Error fetching damage template:', error);
+      return undefined;
+    }
+  }
+
+  async getAllDamageTemplates(): Promise<DamageTemplate[]> {
+    try {
+      return await db.select().from(damageTemplates).orderBy(damageTemplates.sortOrder);
+    } catch (error) {
+      console.error('Error fetching all damage templates:', error);
+      return [];
+    }
+  }
+
+  async getDamageTemplatesByCategory(category: string): Promise<DamageTemplate[]> {
+    try {
+      return await db.select().from(damageTemplates).where(eq(damageTemplates.category, category));
+    } catch (error) {
+      console.error('Error fetching damage templates by category:', error);
+      return [];
+    }
+  }
+
+  async createDamageTemplate(template: InsertDamageTemplate): Promise<DamageTemplate> {
+    const [newTemplate] = await db.insert(damageTemplates).values(template).returning();
+    return newTemplate;
+  }
+
+  async updateDamageTemplate(id: number, updates: Partial<DamageTemplate>): Promise<DamageTemplate | undefined> {
+    try {
+      const [updated] = await db
+        .update(damageTemplates)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(damageTemplates.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error updating damage template:', error);
+      return undefined;
+    }
+  }
+
+  async deleteDamageTemplate(id: number): Promise<boolean> {
+    try {
+      await db.delete(damageTemplates).where(eq(damageTemplates.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting damage template:', error);
+      return false;
     }
   }
 }

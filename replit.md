@@ -126,6 +126,49 @@ The platform features a robust technical stack including a **React, TypeScript, 
 - `DELETE /api/crm/configs/:id` - Delete CRM configuration
 - `GET /api/crm/sync/logs/:configId` - View sync history
 
+## Final Features (Phase 4)
+
+**Bulk Property Import** (`server/property-import.ts`, `client/src/components/property-import.tsx`):
+- CSV and Excel file parsing using papaparse and xlsx libraries
+- Automatic column mapping with pattern matching (detects address, name, contact fields)
+- Manual column mapping UI for custom spreadsheets
+- Data validation with row-by-row error/warning reporting
+- Batch property creation with progress tracking
+- API endpoints:
+  - `POST /api/properties/import/parse` - Parse file and detect columns
+  - `POST /api/properties/import/validate` - Validate mapped data
+  - `POST /api/properties/import/execute` - Execute bulk import
+
+**Team Assignment & Workload Management** (`shared/schema.ts`, `server/routes.ts`, `client/src/pages/team-management.tsx`):
+- Team assignments with inspector capacity limits (daily/weekly max inspections)
+- Region and specialization tracking for intelligent assignment
+- Availability management with unavailable periods
+- Workload dashboard with utilization percentage visualization
+- Color-coded utilization indicators (green/amber/red based on capacity)
+- API endpoints:
+  - `GET /api/team/assignments` - List all team assignments
+  - `GET /api/team/assignments/:inspectorId` - Get specific assignment
+  - `POST /api/team/assignments` - Create new assignment
+  - `PUT /api/team/assignments/:id` - Update assignment
+  - `DELETE /api/team/assignments/:id` - Remove assignment
+  - `GET /api/team/workload` - Get current workload data with utilization
+
+**Pre-built Damage Templates** (`shared/schema.ts`, `server/routes.ts`, `client/src/components/damage-template-selector.tsx`):
+- 6 default damage type templates: Hail Impact, Wind Uplift, Thermal Bridging, Moisture Intrusion, Granule Loss, Flashing Failure
+- Category-based organization (Storm Damage, Thermal Issues, Water Damage, Material Degradation, Penetration Issues)
+- Severity ratings (critical/warning/info) with color-coded badges
+- Affected components list for each damage type
+- Recommended actions with priority levels (immediate/short_term/long_term) and cost estimates
+- Required evidence checklist per template
+- Inspection notes with Winn Methodology tips
+- API endpoints:
+  - `GET /api/damage-templates` - List all templates (optional category filter)
+  - `GET /api/damage-templates/:id` - Get specific template
+  - `POST /api/damage-templates` - Create custom template
+  - `PUT /api/damage-templates/:id` - Update template
+  - `DELETE /api/damage-templates/:id` - Remove template
+  - `POST /api/damage-templates/seed` - Seed default templates
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for persistent data storage.
 - **Firebase**: Authentication service for user management and access control.

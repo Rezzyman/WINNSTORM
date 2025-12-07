@@ -1251,6 +1251,61 @@ export const insertScheduledInspectionSchema = createInsertSchema(scheduledInspe
   updatedAt: true,
 });
 
+// Team Assignments for workload balancing
+export const teamAssignments = pgTable("team_assignments", {
+  id: serial("id").primaryKey(),
+  inspectorId: integer("inspector_id").references(() => users.id).notNull(),
+  supervisorId: integer("supervisor_id").references(() => users.id),
+  teamName: text("team_name"),
+  region: text("region"),
+  maxDailyInspections: integer("max_daily_inspections").default(4),
+  maxWeeklyInspections: integer("max_weekly_inspections").default(20),
+  skillLevel: text("skill_level").default('standard'),
+  specializations: text("specializations").array().default([]),
+  isAvailable: boolean("is_available").default(true),
+  unavailableUntil: timestamp("unavailable_until"),
+  unavailableReason: text("unavailable_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTeamAssignmentSchema = createInsertSchema(teamAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Damage Templates for quick application during inspections
+export interface DamageTemplateRecommendation {
+  action: string;
+  priority: 'immediate' | 'short_term' | 'long_term';
+  estimatedCost?: string;
+}
+
+export const damageTemplates = pgTable("damage_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  damageType: text("damage_type").notNull(),
+  description: text("description").notNull(),
+  defaultSeverity: text("default_severity").notNull().default('warning'),
+  affectedComponents: text("affected_components").array().default([]),
+  typicalCauses: text("typical_causes").array().default([]),
+  recommendations: jsonb("recommendations").$type<DamageTemplateRecommendation[]>(),
+  inspectionNotes: text("inspection_notes"),
+  requiredEvidence: text("required_evidence").array().default([]),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDamageTemplateSchema = createInsertSchema(damageTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type EvidenceAsset = typeof evidenceAssets.$inferSelect;
 export type InsertEvidenceAsset = z.infer<typeof insertEvidenceAssetSchema>;
@@ -1262,3 +1317,7 @@ export type LimitlessTranscript = typeof limitlessTranscripts.$inferSelect;
 export type InsertLimitlessTranscript = z.infer<typeof insertLimitlessTranscriptSchema>;
 export type ScheduledInspection = typeof scheduledInspections.$inferSelect;
 export type InsertScheduledInspection = z.infer<typeof insertScheduledInspectionSchema>;
+export type TeamAssignment = typeof teamAssignments.$inferSelect;
+export type InsertTeamAssignment = z.infer<typeof insertTeamAssignmentSchema>;
+export type DamageTemplate = typeof damageTemplates.$inferSelect;
+export type InsertDamageTemplate = z.infer<typeof insertDamageTemplateSchema>;
