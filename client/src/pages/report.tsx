@@ -8,8 +8,7 @@ import {
 import { Scan, Property } from '@shared/schema';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { queryClient } from '@/lib/queryClient';
+import { apiRequestRaw, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 const Report = () => {
@@ -31,7 +30,7 @@ const Report = () => {
 
   const sendReportMutation = useMutation({
     mutationFn: async (email: string) => {
-      const res = await apiRequest('POST', `/api/reports/send/${scanId}`, { email });
+      const res = await apiRequestRaw('POST', `/api/reports/send/${scanId}`, { email });
       return await res.json();
     },
     onSuccess: () => {
@@ -48,9 +47,34 @@ const Report = () => {
 
   const downloadReportMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('GET', `/api/reports/download/${scanId}`, undefined);
-      // In a real implementation, we would handle the blob response and download
+      const res = await fetch(`/api/reports/download/${scanId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to download report');
+      }
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const disposition = res.headers.get('Content-Disposition');
+      const filename = disposition?.match(/filename="(.+)"/)?.[1] || 'WinnReport.pdf';
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
       return true;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Report downloaded',
+        description: 'Your Winn Report PDF has been downloaded successfully.',
+      });
     },
     onError: (error) => {
       toast({

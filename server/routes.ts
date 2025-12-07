@@ -325,27 +325,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid scan ID" });
       }
       
-      // Get the scan
       const scan = await storage.getScan(scanId);
       if (!scan) {
         return res.status(404).json({ message: "Scan not found" });
       }
       
-      // Get the property
+      if (scan.userId !== userId) {
+        return res.status(403).json({ message: "Access denied - you do not own this scan" });
+      }
+      
       const property = await storage.getProperty(scan.propertyId);
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
       
-      // In a real implementation, you would generate and return a PDF here
+      const { generateWinnReport, generateExecutiveSummary } = await import('./pdf-report-service');
       
-      // Instead, for the MVP, we just return success
-      res.json({
-        message: "Report downloaded successfully"
+      const executiveSummary = await generateExecutiveSummary({ property, scan });
+      
+      let thermalAnalysis = undefined;
+      if (scan.thermalImageUrl && scan.issues && scan.issues.length > 0) {
+        thermalAnalysis = {
+          overallAssessment: `Thermal analysis detected ${scan.issues.length} issue(s) during the assessment. ` +
+            `${scan.issues.filter(i => i.severity === 'critical').length > 0 ? 'Critical issues requiring immediate attention were identified.' : 'No critical issues were found.'}`,
+          anomalies: scan.issues.map(issue => ({
+            type: issue.title,
+            severity: issue.severity,
+            location: 'See thermal image',
+            description: issue.description,
+          })),
+        };
+      }
+      
+      const pdfBuffer = await generateWinnReport({
+        property,
+        scan,
+        executiveSummary,
+        thermalAnalysis,
+      });
+      
+      const sanitizedName = property.name.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `WinnReport_${sanitizedName}_${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating PDF report:', error);
+      res.status(500).json({ message: "Failed to generate report" });
+    }
+  });
+
+  // AI Executive Summary Generation
+  app.post("/api/reports/executive-summary/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+      
+      const scanId = parseInt(req.params.scanId);
+      if (isNaN(scanId)) {
+        return res.status(400).json({ message: "Invalid scan ID" });
+      }
+      
+      const scan = await storage.getScan(scanId);
+      if (!scan) {
+        return res.status(404).json({ message: "Scan not found" });
+      }
+      
+      if (scan.userId !== userId) {
+        return res.status(403).json({ message: "Access denied - you do not own this scan" });
+      }
+      
+      const property = await storage.getProperty(scan.propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
+      });
+      
+      const issuesSummary = scan.issues && scan.issues.length > 0
+        ? scan.issues.map(i => `- ${i.severity.toUpperCase()}: ${i.title} - ${i.description}`).join('\n')
+        : 'No significant issues detected.';
+      
+      const metricsSummary = scan.metrics && scan.metrics.length > 0
+        ? scan.metrics.map(m => `- ${m.name}: ${m.value}`).join('\n')
+        : 'No metrics recorded.';
+
+      const prompt = `You are a professional damage assessment consultant writing an executive summary for a thermal roof assessment report. Write a professional, concise executive summary (2-3 paragraphs) based on the following inspection data:
+
+PROPERTY INFORMATION:
+- Name: ${property.name}
+- Address: ${property.address}
+- Overall Condition: ${property.overallCondition || 'Not assessed'}
+
+SCAN DETAILS:
+- Date: ${scan.date ? new Date(scan.date).toLocaleDateString() : 'N/A'}
+- Type: ${scan.scanType || 'Thermal'}
+- Device: ${scan.deviceType || 'Professional thermal camera'}
+- Health Score: ${scan.healthScore !== null ? `${scan.healthScore}/100` : 'Not calculated'}
+
+ISSUES FOUND:
+${issuesSummary}
+
+PERFORMANCE METRICS:
+${metricsSummary}
+
+INSPECTOR NOTES:
+${scan.notes || 'No additional notes.'}
+
+Write a professional executive summary following the Winn Methodology standards. Include:
+1. An opening paragraph summarizing the inspection scope and methodology
+2. Key findings and their significance
+3. Overall assessment and recommended next steps
+
+Keep the tone professional and technical but accessible.`;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-5.1',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are Stormy, the WinnStorm AI assistant specializing in professional damage assessment reports. You follow the Winn Methodology and produce clear, actionable executive summaries.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_completion_tokens: 800,
+      });
+
+      const summary = completion.choices[0]?.message?.content || 'Unable to generate executive summary.';
+      
+      res.json({ 
+        summary,
+        generatedAt: new Date().toISOString()
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to download report" });
+      console.error('Error generating AI executive summary:', error);
+      
+      const { generateExecutiveSummary } = await import('./pdf-report-service');
+      const scan = await storage.getScan(parseInt(req.params.scanId));
+      const property = scan ? await storage.getProperty(scan.propertyId) : null;
+      
+      if (scan && property) {
+        const fallbackSummary = await generateExecutiveSummary({ property, scan });
+        return res.json({ 
+          summary: fallbackSummary,
+          generatedAt: new Date().toISOString(),
+          fallback: true
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to generate executive summary" });
     }
   });
 
