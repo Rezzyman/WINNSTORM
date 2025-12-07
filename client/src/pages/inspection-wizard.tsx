@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Header, Footer } from '@/components/navbar';
@@ -19,9 +19,13 @@ import {
   CloudLightning, Thermometer, Footprints, Grid3X3, Droplet, FlaskConical, 
   FileText, Camera, Upload, CheckCircle2, Circle, Lock, AlertTriangle,
   ChevronLeft, ChevronRight, HelpCircle, Loader2, X, Eye, Brain, 
-  MessageCircle, Sparkles, BookOpen
+  MessageCircle, Sparkles, BookOpen, Mic, Image, Target, BarChart3
 } from 'lucide-react';
 import { StormySidekick } from '@/components/stormy-sidekick';
+import { validateStepCompletion, getStepRequirements, getStepGuidance, ValidationResult } from '@/lib/step-validation-service';
+import { inspectionCompletenessService, InspectionCompletenessResult } from '@/lib/inspection-completeness-service';
+import { cameraService, CapturedPhoto } from '@/lib/camera-service';
+import { voiceMemoService, VoiceMemo } from '@/lib/voice-memo-service';
 
 const STEP_CONFIG: Record<WinnMethodologyStep, {
   title: string;
@@ -132,6 +136,13 @@ export default function InspectionWizard() {
   const [selectedEvidence, setSelectedEvidence] = useState<EvidenceAsset | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  
+  const [showCaptureDialog, setShowCaptureDialog] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [stepValidation, setStepValidation] = useState<ValidationResult | null>(null);
+  const [completenessData, setCompletenessData] = useState<InspectionCompletenessResult | null>(null);
 
   const { data: sessionData, isLoading, error, refetch } = useQuery<SessionResponse>({
     queryKey: ['/api/inspection/session/active', propertyId],
@@ -228,6 +239,140 @@ export default function InspectionWizard() {
       });
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentStep || !sessionData) return;
+    
+    const evidence = currentEvidence.map(e => ({
+      id: e.id,
+      type: e.assetType,
+      url: e.fileUrl || undefined,
+      aiAnalysis: e.aiAnalysis ? {
+        isValid: e.aiAnalysis.isValid,
+        confidence: e.aiAnalysis.confidence,
+      } : undefined,
+    }));
+    
+    const validation = validateStepCompletion(currentStep, evidence, {});
+    setStepValidation(validation);
+  }, [currentStep, currentEvidence, sessionData]);
+
+  const handleCapturePhoto = async () => {
+    setIsCapturing(true);
+    try {
+      const photo = await cameraService.capturePhoto({
+        quality: 90,
+        includeLocation: true,
+        source: 'camera',
+      });
+
+      if (photo && sessionData?.session.id) {
+        const formData = new FormData();
+        const blob = await (await fetch(photo.dataUrl)).blob();
+        formData.append('file', blob, `photo_${Date.now()}.jpg`);
+        formData.append('sessionId', sessionData.session.id.toString());
+        formData.append('step', currentStep);
+        formData.append('assetType', 'photo');
+        formData.append('latitude', photo.latitude?.toString() || '');
+        formData.append('longitude', photo.longitude?.toString() || '');
+
+        const response = await fetch('/api/inspection/evidence/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          refetch();
+          toast({
+            title: "Photo captured!",
+            description: "Evidence added to this step",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to capture photo:', error);
+      toast({
+        title: "Capture failed",
+        description: "Could not capture photo",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const handleImportThermal = async () => {
+    setIsCapturing(true);
+    try {
+      const photo = await cameraService.importThermalImage();
+
+      if (photo && sessionData?.session.id) {
+        const formData = new FormData();
+        const blob = await (await fetch(photo.dataUrl)).blob();
+        formData.append('file', blob, `thermal_${Date.now()}.jpg`);
+        formData.append('sessionId', sessionData.session.id.toString());
+        formData.append('step', currentStep);
+        formData.append('assetType', 'thermal');
+        formData.append('latitude', photo.latitude?.toString() || '');
+        formData.append('longitude', photo.longitude?.toString() || '');
+
+        const response = await fetch('/api/inspection/evidence/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          refetch();
+          toast({
+            title: "Thermal image imported!",
+            description: "Evidence added to this step",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to import thermal:', error);
+      toast({
+        title: "Import failed",
+        description: "Could not import thermal image",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const handleStartVoiceRecording = async () => {
+    const started = await voiceMemoService.startRecording();
+    if (started) {
+      setIsRecordingVoice(true);
+      const interval = setInterval(() => {
+        setRecordingDuration(voiceMemoService.getRecordingDuration());
+      }, 100);
+      (window as any).__voiceRecordingInterval = interval;
+    }
+  };
+
+  const handleStopVoiceRecording = async () => {
+    if ((window as any).__voiceRecordingInterval) {
+      clearInterval((window as any).__voiceRecordingInterval);
+    }
+    setIsRecordingVoice(false);
+    setRecordingDuration(0);
+
+    const memo = await voiceMemoService.stopRecording();
+    if (memo) {
+      const result = await voiceMemoService.transcribeAudio(memo, stepConfig.title);
+      
+      if (result.transcription) {
+        toast({
+          title: "Voice memo recorded",
+          description: result.status === 'success' ? 'Transcribed and saved' : 'Saved for playback',
+        });
+      }
     }
   };
 
@@ -464,17 +609,69 @@ export default function InspectionWizard() {
                 </div>
               )}
 
-              <div className="flex gap-3">
+              {stepValidation && !stepValidation.canAdvance && stepValidation.blockers.length > 0 && (
+                <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTitle className="text-amber-500">Requirements</AlertTitle>
+                  <AlertDescription className="text-sm">
+                    {stepValidation.blockers.map((b, i) => (
+                      <p key={i} className="text-muted-foreground">{b.message}</p>
+                    ))}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 <Button 
                   variant="outline" 
-                  className="flex-1 h-14 touch-target"
-                  onClick={() => navigate(`/upload?propertyId=${propertyId}&step=${currentStep}`)}
-                  data-testid="button-capture-evidence"
+                  className="h-16 touch-target flex-col gap-1"
+                  onClick={handleCapturePhoto}
+                  disabled={isCapturing}
+                  data-testid="button-capture-photo"
                 >
-                  <Camera className="h-5 w-5 mr-2" />
-                  Capture Evidence
+                  {isCapturing ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Camera className="h-5 w-5" />
+                  )}
+                  <span className="text-xs">Photo</span>
                 </Button>
                 
+                <Button 
+                  variant="outline" 
+                  className="h-16 touch-target flex-col gap-1"
+                  onClick={handleImportThermal}
+                  disabled={isCapturing}
+                  data-testid="button-import-thermal"
+                >
+                  <Thermometer className="h-5 w-5 text-red-500" />
+                  <span className="text-xs">Thermal</span>
+                </Button>
+                
+                <Button 
+                  variant={isRecordingVoice ? "destructive" : "outline"}
+                  className={`h-16 touch-target flex-col gap-1 ${isRecordingVoice ? 'animate-pulse' : ''}`}
+                  onClick={isRecordingVoice ? handleStopVoiceRecording : handleStartVoiceRecording}
+                  data-testid="button-voice-memo"
+                >
+                  <Mic className={`h-5 w-5 ${isRecordingVoice ? 'text-white' : ''}`} />
+                  <span className="text-xs">
+                    {isRecordingVoice ? `${Math.floor(recordingDuration)}s` : 'Voice'}
+                  </span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="h-16 touch-target flex-col gap-1"
+                  onClick={() => navigate(`/upload?propertyId=${propertyId}&step=${currentStep}`)}
+                  data-testid="button-upload-files"
+                >
+                  <Upload className="h-5 w-5" />
+                  <span className="text-xs">Upload</span>
+                </Button>
+              </div>
+              
+              <div className="flex gap-3">
                 {currentEvidence.length > 0 && !currentEvidence.some(e => e.aiAnalysis) && (
                   <Button 
                     className="flex-1 h-14 touch-target bg-gradient-to-r from-primary to-cyan-500"

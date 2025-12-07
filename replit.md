@@ -40,8 +40,14 @@ The platform features a robust technical stack including a **React, TypeScript, 
 
 **Evidence Capture Services:**
 - **Camera Service** (`client/src/lib/camera-service.ts`): High-resolution photo capture via Capacitor Camera with GPS location tagging, supports gallery import and thermal image import from FLIR/Seek devices.
-- **Voice Memo Service** (`client/src/lib/voice-memo-service.ts`): Audio recording with automatic location tagging, playback support, and transcription API integration (pending Whisper API).
+- **Voice Memo Service** (`client/src/lib/voice-memo-service.ts`): Audio recording with automatic location tagging, playback support, and Whisper API transcription integration.
+- **Audio Transcription Service** (`server/audio-transcription.ts`): Real Whisper API integration for voice memo transcription with automatic summarization via GPT-5.1.
 - **Evidence Capture Component** (`client/src/components/evidence-capture.tsx`): Unified UI for photos, thermal images, and voice memos with step-aware storage.
+
+**Limitless Pendant Integration:**
+- **Limitless Client** (`server/limitless-client.ts`): API client for Limitless Pendant device with lifelog fetching, audio download, and chat retrieval.
+- **Limitless Sync Routes**: API endpoints for checking connection status (`/api/limitless/status`), fetching recordings (`/api/limitless/recordings`), and importing recordings as transcripts (`/api/limitless/import/:id`).
+- **Transcript Management** (`client/src/pages/transcripts.tsx`): UI for uploading, processing, reviewing, and approving knowledge from Eric Winn's field recordings.
 
 **Step Validation System:**
 - **Step Validation Service** (`client/src/lib/step-validation-service.ts`): Enforces Winn Methodology requirements per step (min photos, AI validation, required fields), provides Stormy AI feedback messages, step guidance with tips/common mistakes/best practices.

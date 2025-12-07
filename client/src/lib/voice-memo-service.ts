@@ -138,7 +138,11 @@ class VoiceMemoService {
     return (Date.now() - this.recordingStartTime) / 1000;
   }
 
-  async transcribeAudio(voiceMemo: VoiceMemo): Promise<string> {
+  async transcribeAudio(voiceMemo: VoiceMemo, step?: string): Promise<{
+    transcription: string;
+    rawTranscription?: string;
+    status: 'success' | 'fallback' | 'error';
+  }> {
     try {
       const response = await fetch('/api/ai/transcribe', {
         method: 'POST',
@@ -147,6 +151,7 @@ class VoiceMemoService {
         body: JSON.stringify({
           audioDataUrl: voiceMemo.dataUrl,
           duration: voiceMemo.duration,
+          step,
         }),
       });
 
@@ -155,10 +160,17 @@ class VoiceMemoService {
       }
 
       const result = await response.json();
-      return result.transcription || '';
+      return {
+        transcription: result.transcription || '',
+        rawTranscription: result.rawTranscription,
+        status: result.status || 'error',
+      };
     } catch (error) {
       console.error('Failed to transcribe audio:', error);
-      return '';
+      return {
+        transcription: '',
+        status: 'error',
+      };
     }
   }
 

@@ -1713,31 +1713,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Transcribe audio (voice memos)
-  // NOTE: Full audio transcription requires Whisper API integration
-  // Current implementation stores audio for later processing and returns a placeholder
+  // Transcribe audio (voice memos) using Whisper API
   app.post("/api/ai/transcribe", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = getAuthenticatedUserId(req, res);
       if (!userId) return;
       
-      const { audioDataUrl, duration } = req.body;
+      const { audioDataUrl, duration, step } = req.body;
       
       if (!audioDataUrl) {
         return res.status(400).json({ message: "audioDataUrl is required" });
       }
 
-      // TODO: Integrate with OpenAI Whisper API for real transcription
-      // For now, return a placeholder indicating manual transcription is available
-      // The audio is stored locally and can be played back or transcribed later
+      const { transcribeAudio, summarizeVoiceMemo } = await import('./audio-transcription');
       
-      const placeholderMessage = `[Voice memo recorded - ${Math.round(duration || 0)} seconds] Audio playback available. Full transcription service will be enabled with Whisper API integration.`;
+      const result = await transcribeAudio(audioDataUrl, duration || 0);
+      
+      let finalTranscription = result.transcription;
+      if (result.status === 'success' && result.transcription) {
+        finalTranscription = await summarizeVoiceMemo(result.transcription, step);
+      }
 
       res.json({ 
-        transcription: placeholderMessage,
-        duration: duration || 0,
-        status: 'pending_integration',
-        message: 'Full transcription requires Whisper API. Audio stored for playback.'
+        transcription: finalTranscription,
+        rawTranscription: result.transcription,
+        duration: result.duration,
+        status: result.status,
+        language: result.language,
+        segments: result.segments,
       });
 
     } catch (error) {
@@ -1850,6 +1853,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating transcript:', error);
       res.status(500).json({ message: "Failed to update transcript" });
+    }
+  });
+
+  // ============================================================================
+  // LIMITLESS PENDANT SYNC ROUTES
+  // ============================================================================
+
+  // Check Limitless connection status
+  app.get("/api/limitless/status", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const { getLimitlessClient } = await import('./limitless-client');
+      const client = getLimitlessClient();
+      
+      if (!client) {
+        return res.json({ 
+          connected: false, 
+          message: 'Limitless API key not configured. Add LIMITLESS_API_KEY to secrets.'
+        });
+      }
+
+      const isConnected = await client.testConnection();
+      res.json({ 
+        connected: isConnected,
+        message: isConnected ? 'Connected to Limitless Pendant' : 'Connection test failed'
+      });
+    } catch (error) {
+      console.error('Error checking Limitless status:', error);
+      res.status(500).json({ message: "Failed to check Limitless status" });
+    }
+  });
+
+  // Fetch recent recordings from Limitless Pendant
+  app.get("/api/limitless/recordings", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const { getLimitlessClient, formatLifelogAsTranscript, extractDuration } = await import('./limitless-client');
+      const client = getLimitlessClient();
+      
+      if (!client) {
+        return res.status(400).json({ message: 'Limitless API key not configured' });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 10;
+      const dateFrom = req.query.dateFrom as string;
+      const dateTo = req.query.dateTo as string;
+
+      const response = await client.getLifelogs({ 
+        limit, 
+        dateFrom, 
+        dateTo,
+        timezone: 'America/Chicago' 
+      });
+
+      const recordings = response.lifelogs.map(lifelog => ({
+        id: lifelog.id,
+        title: lifelog.title || `Recording ${lifelog.startTime}`,
+        startTime: lifelog.startTime,
+        endTime: lifelog.endTime,
+        duration: extractDuration(lifelog),
+        transcript: formatLifelogAsTranscript(lifelog),
+        summary: lifelog.summary,
+        actionItems: lifelog.actionItems || [],
+      }));
+
+      res.json({ recordings, total: response.total });
+    } catch (error) {
+      console.error('Error fetching Limitless recordings:', error);
+      res.status(500).json({ message: "Failed to fetch recordings from Limitless" });
+    }
+  });
+
+  // Import a Limitless recording as a transcript
+  app.post("/api/limitless/import/:recordingId", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const { getLimitlessClient, formatLifelogAsTranscript, extractDuration } = await import('./limitless-client');
+      const client = getLimitlessClient();
+      
+      if (!client) {
+        return res.status(400).json({ message: 'Limitless API key not configured' });
+      }
+
+      const recordingId = req.params.recordingId;
+      
+      const existingTranscripts = await storage.getAllLimitlessTranscripts();
+      const alreadyImported = existingTranscripts.find(t => 
+        t.uploadedBy === userId && 
+        (t as any).externalId === recordingId
+      );
+      
+      if (alreadyImported) {
+        return res.status(409).json({ 
+          message: 'Recording already imported',
+          transcriptId: alreadyImported.id 
+        });
+      }
+
+      const lifelog = await client.getLifelogById(recordingId);
+
+      const transcript = await storage.createLimitlessTranscript({
+        title: lifelog.title || `Recording ${lifelog.startTime}`,
+        rawTranscript: formatLifelogAsTranscript(lifelog),
+        duration: extractDuration(lifelog),
+        recordingDate: new Date(lifelog.startTime),
+        uploadedBy: userId,
+      });
+
+      res.status(201).json(transcript);
+    } catch (error) {
+      console.error('Error importing Limitless recording:', error);
+      res.status(500).json({ message: "Failed to import recording" });
     }
   });
 

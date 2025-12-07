@@ -434,7 +434,7 @@ function VoiceMemoCard({ memo, onDelete }: VoiceMemoCardProps) {
     setIsTranscribing(true);
     try {
       const result = await voiceMemoService.transcribeAudio(memo);
-      setTranscription(result);
+      setTranscription(result.transcription);
     } catch (error) {
       console.error('Transcription failed:', error);
     } finally {
