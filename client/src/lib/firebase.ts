@@ -17,20 +17,21 @@ import {
   listAll
 } from "firebase/storage";
 
-// Firebase configuration
+// Firebase configuration for WinnStorm (winnstorm-43a69)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-key",
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebasestorage.app`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "demo-app-id",
+  apiKey: "AIzaSyDGNJhBSCJSBqLbCUk4U1FwXxyj9xC2LwQ",
+  authDomain: "winnstorm-43a69.firebaseapp.com",
+  projectId: "winnstorm-43a69",
+  storageBucket: "winnstorm-43a69.firebasestorage.app",
+  messagingSenderId: "14405529678",
+  appId: "1:14405529678:web:2482fbf802c053211d931f",
+  measurementId: "G-34LYPC1JP4"
 };
 
 // Debug: Log Firebase config (without sensitive values)
 console.log("Firebase config loaded:", {
   projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
-  hasApiKey: !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "demo-key"
+  authDomain: firebaseConfig.authDomain
 });
 
 // Initialize Firebase
