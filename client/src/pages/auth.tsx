@@ -15,12 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Flame } from 'lucide-react';
 import { SEO } from '@/components/seo';
 
+const DEMO_EMAIL = 'demo@winnstorm.com';
+const DEMO_PASSWORD = 'DemoTest123!';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { user, login, loginWithGoogle } = useAuth();
+  const { user, login, loginWithGoogle, register } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   
@@ -61,6 +64,40 @@ const Auth = () => {
       toast({
         title: "Google login failed",
         description: error.message || "There was an error with Google login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    try {
+      setIsLoading(true);
+      // Try to login first, if that fails, register then login
+      try {
+        await login(DEMO_EMAIL, DEMO_PASSWORD);
+        toast({
+          title: "Demo Login Successful",
+          description: "Welcome to WinnStorm! You're logged in as a demo user.",
+        });
+      } catch (loginError: any) {
+        // If login fails, try to register the demo account
+        if (loginError.code === 'auth/user-not-found' || loginError.code === 'auth/invalid-credential') {
+          await register(DEMO_EMAIL, DEMO_PASSWORD);
+          toast({
+            title: "Demo Account Created",
+            description: "Your demo account has been created and you're now logged in.",
+          });
+        } else {
+          throw loginError;
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Demo login failed",
+        description: error.message || "There was an error with demo login",
         variant: "destructive",
       });
     } finally {
@@ -191,6 +228,33 @@ const Auth = () => {
               </svg>
               Sign in with Google
             </Button>
+          </div>
+        </div>
+
+        {/* Demo Login */}
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/20"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-[#1A1A1A] text-white/60">Try it out</span>
+            </div>
+          </div>
+          <div className="mt-6">
+            <Button
+              type="button"
+              className="w-full inline-flex justify-center py-6 px-4 rounded-none bg-gradient-to-r from-[#FF6B00] to-amber-500 text-sm font-heading uppercase tracking-wide text-white hover:opacity-90 transition-opacity"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              data-testid="button-demo-login"
+            >
+              <Flame className="w-5 h-5 mr-2" />
+              Demo Login (No Sign Up Required)
+            </Button>
+            <p className="text-center text-xs text-white/40 mt-2">
+              Email: demo@winnstorm.com
+            </p>
           </div>
         </div>
       </div>
