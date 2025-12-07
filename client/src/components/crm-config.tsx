@@ -198,10 +198,10 @@ export const CrmConfigManager: React.FC = () => {
   };
 
   const getDefaultBaseUrl = (type: string) => {
-    const defaults = {
+    const defaults: Record<string, string> = {
       'jobnimbus': 'https://api.jobnimbus.com/api1',
       'gohighlevel': 'https://rest.gohighlevel.com/v1',
-      'salesforce': 'https://your-domain.my.salesforce.com/services/data/v54.0',
+      'salesforce': 'https://your-domain.my.salesforce.com',
       'hubspot': 'https://api.hubapi.com',
       'pipedrive': 'https://api.pipedrive.com/v1'
     };

@@ -89,6 +89,43 @@ The platform features a robust technical stack including a **React, TypeScript, 
 - **Evidence Quality Service** (`client/src/lib/evidence-quality-service.ts`): Client and server-side image quality checking for resolution, framing, and exposure issues.
 - **Inspection Completeness Service** (`client/src/lib/inspection-completeness-service.ts`): Tracks step completion progress, calculates overall inspection scores, and estimates report quality.
 
+## CRM Integrations (Phase 3)
+
+**CRM Integration Service** (`server/crm-integrations.ts`):
+- Unified interface for multiple CRM platforms with contact and job/opportunity sync
+- Automatic document upload for Winn Reports to CRM platforms
+- Per-user CRM configuration management with secure API key storage
+
+**Supported CRM Platforms:**
+- **JobNimbus**: Construction job management CRM with contacts, jobs, and file uploads
+- **GoHighLevel**: All-in-one CRM with contacts and opportunities
+- **Salesforce**: Enterprise CRM with Contact, Opportunity, and ContentVersion objects
+  - Stage mapping to Salesforce opportunity stages (Prospecting, Qualification, etc.)
+  - OpportunityContactRole linking for primary contacts
+  - ContentVersion API for PDF report uploads
+- **HubSpot**: Inbound marketing & sales CRM with contacts and deals
+  - CRM v3/v4 API integration for contacts and deals
+  - Association API for linking deals to contacts
+  - Files API for report attachment with engagement notes
+- **Pipedrive**: Sales-focused CRM with persons and deals
+  - API token authentication
+  - Notes API for adding inspection details to deals
+  - Files API for document attachments
+
+**CRM Configuration UI** (`client/src/components/crm-config.tsx`):
+- Multi-CRM configuration management interface
+- Automatic base URL population for each CRM type
+- API key and webhook URL configuration
+- Custom fields support with JSON input
+- Sync history and activity logs
+
+**API Endpoints:**
+- `GET /api/crm/configs` - List user's CRM configurations
+- `POST /api/crm/configs` - Create new CRM configuration
+- `PUT /api/crm/configs/:id` - Update CRM configuration
+- `DELETE /api/crm/configs/:id` - Delete CRM configuration
+- `GET /api/crm/sync/logs/:configId` - View sync history
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for persistent data storage.
 - **Firebase**: Authentication service for user management and access control.
