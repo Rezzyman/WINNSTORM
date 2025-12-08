@@ -17,15 +17,13 @@ import {
   listAll
 } from "firebase/storage";
 
-// Firebase configuration for WinnStorm (winnstorm-43a69)
+// Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBvS65Qg8Wx4KEmEHMil5wjgmlWGZ22qdM",
-  authDomain: "winnstorm-43a69.firebaseapp.com",
-  projectId: "winnstorm-43a69",
-  storageBucket: "winnstorm-43a69.firebasestorage.app",
-  messagingSenderId: "14405529678",
-  appId: "1:14405529678:web:2482fbf802c053211d931f",
-  measurementId: "G-34LYPC1JP4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Debug: Log Firebase config (without sensitive values)

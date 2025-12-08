@@ -29,6 +29,7 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Pricing from "@/pages/pricing";
 import { DallasPage, HoustonPage, KansasCityPage } from "@/pages/city-landing";
+import { ThermalInspectionPage, HailDamageAssessmentPage, StormDamageConsultingPage } from "@/pages/service-landing";
 import Schedule from "@/pages/schedule";
 import TeamManagement from "@/pages/team-management";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -83,6 +84,9 @@ function Router() {
       <Route path="/dallas" component={DallasPage} />
       <Route path="/houston" component={HoustonPage} />
       <Route path="/kansas-city" component={KansasCityPage} />
+      <Route path="/services/thermal-inspection" component={ThermalInspectionPage} />
+      <Route path="/services/hail-damage-assessment" component={HailDamageAssessmentPage} />
+      <Route path="/services/storm-damage-consulting" component={StormDamageConsultingPage} />
       <Route component={NotFound} />
     </Switch>
   );
