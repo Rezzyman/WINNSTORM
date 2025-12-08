@@ -138,4 +138,36 @@
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
+  
+  <!-- Blog -->
+  <url>
+    <loc>https://winnstorm.com/blog</loc>
+    <lastmod>2025-12-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://winnstorm.com/blog/what-is-thermal-imaging-inspection</loc>
+    <lastmod>2025-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://winnstorm.com/blog/hail-damage-roof-signs</loc>
+    <lastmod>2025-12-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://winnstorm.com/blog/storm-damage-insurance-claim-timeline</loc>
+    <lastmod>2025-12-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://winnstorm.com/blog/winn-methodology-explained</loc>
+    <lastmod>2025-12-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

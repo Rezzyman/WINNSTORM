@@ -30,6 +30,7 @@ import Terms from "@/pages/terms";
 import Pricing from "@/pages/pricing";
 import { DallasPage, HoustonPage, KansasCityPage } from "@/pages/city-landing";
 import { ThermalInspectionPage, HailDamageAssessmentPage, StormDamageConsultingPage } from "@/pages/service-landing";
+import { BlogIndex, BlogPost } from "@/pages/blog";
 import Schedule from "@/pages/schedule";
 import TeamManagement from "@/pages/team-management";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -87,6 +88,8 @@ function Router() {
       <Route path="/services/thermal-inspection" component={ThermalInspectionPage} />
       <Route path="/services/hail-damage-assessment" component={HailDamageAssessmentPage} />
       <Route path="/services/storm-damage-consulting" component={StormDamageConsultingPage} />
+      <Route path="/blog" component={BlogIndex} />
+      <Route path="/blog/:slug">{(params) => <BlogPost slug={params.slug} />}</Route>
       <Route component={NotFound} />
     </Switch>
   );

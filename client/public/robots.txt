@@ -3,8 +3,25 @@
 
 User-agent: *
 Allow: /
+
+# Public pages
 Allow: /auth
 Allow: /subscribe/
+Allow: /pricing
+Allow: /methodology
+Allow: /about
+Allow: /careers
+Allow: /blog
+Allow: /blog/
+Allow: /services/
+Allow: /dallas
+Allow: /houston
+Allow: /kansas-city
+Allow: /docs
+Allow: /api-docs
+Allow: /support
+Allow: /privacy
+Allow: /terms
 
 # Disallow authenticated/private pages
 Disallow: /dashboard
@@ -20,6 +37,8 @@ Disallow: /projects
 Disallow: /inspection/
 Disallow: /transcripts
 Disallow: /subscription-success
+Disallow: /schedule
+Disallow: /team
 Disallow: /api/
 
 # Crawl delay for good citizenship

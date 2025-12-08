@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -241,8 +241,16 @@ const Landing = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Features</a>
+              <div className="relative group">
+                <span className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors cursor-pointer">Services</span>
+                <div className="absolute top-full left-0 mt-2 w-64 bg-[#1A1A1A] border border-white/20 rounded-none shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <Link href="/services/thermal-inspection" className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 text-sm">Thermal Inspection</Link>
+                  <Link href="/services/hail-damage-assessment" className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 text-sm">Hail Damage Assessment</Link>
+                  <Link href="/services/storm-damage-consulting" className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 text-sm">Storm Damage Consulting</Link>
+                </div>
+              </div>
               <a href="#pricing" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Pricing</a>
-              <a href="#testimonials" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Testimonials</a>
+              <Link href="/blog" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Blog</Link>
               <a href="#contact" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Contact</a>
               <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
               <Button className="btn-primary" onClick={() => navigate('/subscribe/professional')}>
@@ -266,8 +274,11 @@ const Landing = () => {
             <div className="md:hidden mt-4 pb-4 border-t border-white/20">
               <div className="flex flex-col space-y-4 pt-4">
                 <a href="#features" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Features</a>
+                <Link href="/services/thermal-inspection" className="text-white/80 hover:text-white text-sm pl-4">→ Thermal Inspection</Link>
+                <Link href="/services/hail-damage-assessment" className="text-white/80 hover:text-white text-sm pl-4">→ Hail Damage Assessment</Link>
+                <Link href="/services/storm-damage-consulting" className="text-white/80 hover:text-white text-sm pl-4">→ Storm Damage Consulting</Link>
                 <a href="#pricing" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Pricing</a>
-                <a href="#testimonials" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Testimonials</a>
+                <Link href="/blog" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Blog</Link>
                 <a href="#contact" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Contact</a>
                 <div className="flex flex-col space-y-2 pt-4">
                   <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
