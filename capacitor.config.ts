@@ -5,10 +5,8 @@ const config: CapacitorConfig = {
   appName: 'WinnStorm',
   webDir: 'dist/public',
   server: {
-    // For production, set this to your deployed API URL
-    // url: 'https://your-winnstorm-domain.replit.app',
-    // For development, use localhost
-    cleartext: true,
+    url: 'https://winnstorm.com',
+    cleartext: false,
     androidScheme: 'https'
   },
   plugins: {
