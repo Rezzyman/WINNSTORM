@@ -3037,5 +3037,107 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
+  // ==========================================
+  // STORMY VOICE ROUTES - Hands-free Voice Chat
+  // ==========================================
+
+  const voiceService = await import('./voice-service');
+
+  // Text-to-speech for Stormy responses
+  app.post("/api/stormy/voice/speak", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { text } = req.body;
+
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      const audioBuffer = await voiceService.speakStormyResponse(text);
+
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length.toString(),
+      });
+      res.send(audioBuffer);
+    } catch (error: any) {
+      console.error('Error generating speech:', error);
+      res.status(500).json({ message: error.message || "Failed to generate speech" });
+    }
+  });
+
+  // Speech-to-text for voice input
+  app.post("/api/stormy/voice/transcribe", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.body || !Buffer.isBuffer(req.body)) {
+        return res.status(400).json({ message: "Audio data is required" });
+      }
+
+      const result = await voiceService.speechToText(req.body);
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error transcribing audio:', error);
+      res.status(500).json({ message: error.message || "Failed to transcribe audio" });
+    }
+  });
+
+  // Full voice conversation - transcribe, process with Stormy, and return audio response
+  app.post("/api/stormy/voice/chat", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const contentType = req.headers['content-type'] || '';
+      
+      if (contentType.includes('multipart/form-data')) {
+        return res.status(400).json({ 
+          message: "Use application/octet-stream for audio data with query params for metadata" 
+        });
+      }
+
+      const conversationId = req.query.conversationId ? parseInt(req.query.conversationId as string) : undefined;
+      const imageUrl = req.query.imageUrl as string | undefined;
+
+      if (!req.body || req.body.length === 0) {
+        return res.status(400).json({ message: "Audio data is required" });
+      }
+
+      const audioBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+
+      const result = await voiceService.processVoiceMessage(
+        audioBuffer,
+        userId,
+        conversationId,
+        imageUrl
+      );
+
+      res.json({
+        transcription: result.transcription,
+        response: result.response,
+        audio: result.audioBuffer.toString('base64'),
+      });
+    } catch (error: any) {
+      console.error('Error processing voice chat:', error);
+      res.status(500).json({ message: error.message || "Failed to process voice chat" });
+    }
+  });
+
+  // Get Stormy's greeting audio
+  app.get("/api/stormy/voice/greeting", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const audioBuffer = await voiceService.generateStormyGreeting();
+
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length.toString(),
+      });
+      res.send(audioBuffer);
+    } catch (error: any) {
+      console.error('Error generating greeting:', error);
+      res.status(500).json({ message: error.message || "Failed to generate greeting" });
+    }
+  });
+
   return httpServer;
 }
