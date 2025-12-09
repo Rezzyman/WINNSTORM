@@ -40,10 +40,26 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **Team Assignment & Workload Management**: Assigning inspectors, tracking capacity, and workload visualization.
 - **Pre-built Damage Templates**: Categorized damage templates with severity ratings, affected components, recommended actions, and required evidence checklists.
 
+## Recent Changes (December 2025)
+- **Voice Chat System**: Full voice interaction with Stormy AI using OpenAI Whisper (STT) and TTS
+- **Camera Integration**: Live camera preview with "What am I looking at?" visual queries
+- **Clients Page**: Dedicated client management page at /clients
+- **Mobile App Deployment**: Comprehensive documentation at docs/MOBILE_APP_DEPLOYMENT.md
+- **iOS Permissions**: Camera, Photo Library, Microphone, Speech Recognition, Location (When In Use)
+- **Android Permissions**: Camera, Storage, Audio Recording, Location
+
+## Mobile App Deployment
+See `docs/MOBILE_APP_DEPLOYMENT.md` for complete instructions on:
+- Building for iOS App Store (Xcode, TestFlight, App Store Connect)
+- Building for Google Play Store (Android Studio, signing, Play Console)
+- Required screenshots, descriptions, and privacy policy requirements
+- Version management and update procedures
+
 ## External Dependencies
 - **PostgreSQL**: Primary database.
-- **Firebase**: Authentication service.
-- **Replit AI Integrations (GPT-5.1)**: AI assistant and analysis.
+- **Firebase**: Authentication service (project: winnstorm-43a69).
+- **OpenAI GPT-5**: AI assistant (Stormy) for inspection guidance and analysis.
+- **OpenAI Whisper/TTS**: Voice transcription and speech synthesis.
 - **Capacitor**: Native mobile application development.
 - **Capacitor Plugins**: Camera, Filesystem, Geolocation, Preferences, SQLite.
 - **Stripe**: Subscription payment processing.

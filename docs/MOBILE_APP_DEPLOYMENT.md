@@ -66,14 +66,30 @@ This opens the project in Xcode.
 4. Set **Bundle Identifier**: `com.winnstorm.inspector`
 5. Enable **Automatically manage signing**
 
-### 2.3 Add Required Capabilities
+### 2.3 Required Permissions (Already Configured)
 
-Click **+ Capability** and add:
+The following permissions are already configured in `Info.plist`:
+
+| Permission | Purpose |
+|------------|---------|
+| Camera | Capture inspection photos and thermal images |
+| Photo Library | Save and retrieve inspection photos |
+| Microphone | Voice commands with Stormy AI and field notes |
+| Speech Recognition | Hands-free voice commands during assessments |
+| Location (When In Use) | GPS-tag photos and route optimization |
+
+**App Store Review Tips:**
+- When asked about encryption, WinnStorm uses standard HTTPS only (ITSAppUsesNonExemptEncryption is set to NO)
+- Be prepared to explain the microphone usage for voice AI assistant feature
+- Location is used only while the app is active for photo tagging
+
+### 2.4 Optional Capabilities
+
+Click **+ Capability** to add if needed:
 - **Push Notifications** (for future updates)
-- **Background Modes** (Audio, Location updates already configured)
 - **Associated Domains** (for deep linking)
 
-### 2.4 Configure App Icons
+### 2.5 Configure App Icons
 
 Create app icons in these sizes and add to `ios/App/App/Assets.xcassets/AppIcon.appiconset/`:
 
@@ -89,11 +105,11 @@ Create app icons in these sizes and add to `ios/App/App/Assets.xcassets/AppIcon.
 
 **Tip**: Use a tool like https://appicon.co to generate all sizes from a 1024x1024 source.
 
-### 2.5 Create Launch Screen
+### 2.6 Create Launch Screen
 
 The launch screen is configured in `ios/App/App/Base.lproj/LaunchScreen.storyboard`. Customize with WinnStorm branding.
 
-### 2.6 Build for Release
+### 2.7 Build for Release
 
 1. Select **Product > Archive**
 2. When complete, the **Organizer** window opens
@@ -101,7 +117,7 @@ The launch screen is configured in `ios/App/App/Base.lproj/LaunchScreen.storyboa
 4. Choose **App Store Connect**
 5. Follow the prompts to upload
 
-### 2.7 App Store Connect Setup
+### 2.8 App Store Connect Setup
 
 1. Go to https://appstoreconnect.apple.com
 2. Create a new app with:
@@ -137,7 +153,28 @@ npx cap open android
 
 This opens the project in Android Studio.
 
-### 3.2 Update Version Information
+### 3.2 Required Permissions (Already Configured)
+
+The following permissions are already configured in `AndroidManifest.xml`:
+
+| Permission | Purpose |
+|------------|---------|
+| INTERNET | API communication |
+| CAMERA | Capture inspection photos |
+| READ_MEDIA_IMAGES | Access saved photos (API 33+) |
+| READ/WRITE_EXTERNAL_STORAGE | Photo storage (API ≤32) |
+| RECORD_AUDIO | Voice commands with Stormy AI |
+| ACCESS_FINE_LOCATION | GPS-tag photos |
+| ACCESS_COARSE_LOCATION | Approximate location backup |
+
+All hardware features (camera, microphone, location) are marked as `required="false"` so the app can install on devices without these features.
+
+**Play Console Review Tips:**
+- In the Data Safety section, declare location and microphone as "collected"
+- Explain these are used for inspection documentation, not tracking
+- Audio is processed by OpenAI for voice commands only
+
+### 3.3 Update Version Information
 
 Edit `android/app/build.gradle`:
 
@@ -149,7 +186,7 @@ defaultConfig {
 }
 ```
 
-### 3.3 Configure App Icons
+### 3.4 Configure App Icons
 
 Add app icons to `android/app/src/main/res/`:
 
@@ -163,7 +200,7 @@ Add app icons to `android/app/src/main/res/`:
 
 Create both `ic_launcher.png` and `ic_launcher_round.png` for each size.
 
-### 3.4 Create Signing Key
+### 3.5 Create Signing Key
 
 ```bash
 keytool -genkey -v -keystore winnstorm-release.keystore \
@@ -172,7 +209,7 @@ keytool -genkey -v -keystore winnstorm-release.keystore \
 
 **IMPORTANT**: Store this keystore securely. You'll need it for all future updates.
 
-### 3.5 Configure Signing in build.gradle
+### 3.6 Configure Signing in build.gradle
 
 Add to `android/app/build.gradle`:
 
@@ -196,7 +233,7 @@ android {
 }
 ```
 
-### 3.6 Build Release APK/AAB
+### 3.7 Build Release APK/AAB
 
 ```bash
 # Build Android App Bundle (preferred for Play Store)
@@ -206,7 +243,7 @@ cd android
 # Output: android/app/build/outputs/bundle/release/app-release.aab
 ```
 
-### 3.7 Google Play Console Setup
+### 3.8 Google Play Console Setup
 
 1. Go to https://play.google.com/console
 2. Create a new app:
