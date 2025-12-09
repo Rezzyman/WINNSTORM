@@ -1,12 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useVoiceChat, VoiceChatState } from '@/hooks/use-voice-chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +29,12 @@ import {
   Maximize2,
   Minimize2,
   Mic,
-  Thermometer
+  MicOff,
+  Volume2,
+  VolumeX,
+  Thermometer,
+  Eye,
+  Square
 } from 'lucide-react';
 import type { AIConversation, AIMessage } from '@shared/schema';
 
@@ -60,8 +68,28 @@ export function StormyChat({
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<MessageAttachment[]>([]);
   const [conversationId, setConversationId] = useState<number | null>(null);
+  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [cameraMode, setCameraMode] = useState(false);
+  const [liveImageUrl, setLiveImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const handleVoiceResponse = useCallback((text: string) => {
+    queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations'] });
+    if (conversationId) {
+      queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations', conversationId] });
+    }
+  }, [conversationId]);
+
+  const voiceChat = useVoiceChat({
+    conversationId: conversationId || undefined,
+    onResponse: handleVoiceResponse,
+  });
 
   const { data: conversations, isLoading: loadingConversations } = useQuery<AIConversation[]>({
     queryKey: ['/api/stormy/conversations'],
@@ -168,6 +196,96 @@ export function StormyChat({
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  const startCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setCameraMode(true);
+    } catch (err) {
+      console.error('Failed to start camera:', err);
+    }
+  }, []);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setCameraMode(false);
+    setLiveImageUrl(null);
+  }, []);
+
+  const captureFrame = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) return null;
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    setLiveImageUrl(dataUrl);
+    return dataUrl;
+  }, []);
+
+  const handleVoiceRecord = useCallback(async () => {
+    if (voiceChat.isRecording) {
+      const imageUrl = cameraMode ? captureFrame() : undefined;
+      await voiceChat.sendVoiceMessage(imageUrl || undefined);
+    } else {
+      voiceChat.startRecording();
+    }
+  }, [voiceChat, cameraMode, captureFrame]);
+
+  const handleSpeakLastResponse = useCallback(async () => {
+    const lastMessage = conversationData?.messages?.filter(m => m.role === 'assistant').pop();
+    if (lastMessage) {
+      await voiceChat.speakText(lastMessage.content);
+    }
+  }, [conversationData?.messages, voiceChat]);
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  useEffect(() => {
+    if (autoSpeak && voiceChat.response && voiceChat.state === 'idle') {
+    }
+  }, [autoSpeak, voiceChat.response, voiceChat.state]);
+
+  const getVoiceStatusText = () => {
+    switch (voiceChat.state) {
+      case 'recording': return 'Listening...';
+      case 'processing': return 'Thinking...';
+      case 'speaking': return 'Speaking...';
+      default: return voiceModeEnabled ? 'Tap mic to speak' : '';
+    }
+  };
+
+  const getVoiceStatusColor = () => {
+    switch (voiceChat.state) {
+      case 'recording': return 'text-red-500';
+      case 'processing': return 'text-yellow-500';
+      case 'speaking': return 'text-green-500';
+      default: return 'text-muted-foreground';
+    }
+  };
+
   const renderMessage = (msg: ConversationMessage) => {
     const isUser = msg.role === 'user';
 
@@ -266,6 +384,48 @@ export function StormyChat({
         </div>
       </ScrollArea>
 
+      {cameraMode && (
+        <div className="px-4 py-2 border-t bg-black/5">
+          <div className="relative rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-32 object-cover"
+              data-testid="stormy-camera-preview"
+            />
+            <canvas ref={canvasRef} className="hidden" />
+            {liveImageUrl && (
+              <div className="absolute top-2 right-2">
+                <Badge className="bg-green-500">Captured</Badge>
+              </div>
+            )}
+            <div className="absolute bottom-2 left-2 right-2 flex justify-between">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={captureFrame}
+                data-testid="button-capture-frame"
+              >
+                <Camera className="h-3 w-3 mr-1" /> Capture
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={stopCamera}
+                data-testid="button-stop-camera"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Ask "What am I looking at?" while recording
+          </p>
+        </div>
+      )}
+
       {attachments.length > 0 && (
         <div className="px-4 py-2 border-t">
           <div className="flex flex-wrap gap-2">
@@ -293,7 +453,80 @@ export function StormyChat({
         </div>
       )}
 
+      {voiceModeEnabled && voiceChat.state !== 'idle' && (
+        <div className="px-4 py-2 border-t bg-muted/50">
+          <div className="flex items-center justify-center gap-2">
+            {voiceChat.state === 'recording' && (
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 bg-red-500 rounded-full animate-pulse" />
+                <span className={`text-sm font-medium ${getVoiceStatusColor()}`}>
+                  {getVoiceStatusText()}
+                </span>
+              </span>
+            )}
+            {voiceChat.state === 'processing' && (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
+                <span className={`text-sm font-medium ${getVoiceStatusColor()}`}>
+                  {getVoiceStatusText()}
+                </span>
+              </span>
+            )}
+            {voiceChat.state === 'speaking' && (
+              <span className="flex items-center gap-2">
+                <Volume2 className="h-4 w-4 text-green-500 animate-pulse" />
+                <span className={`text-sm font-medium ${getVoiceStatusColor()}`}>
+                  {getVoiceStatusText()}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={voiceChat.stopSpeaking}
+                  data-testid="button-stop-speaking"
+                >
+                  <Square className="h-3 w-3" />
+                </Button>
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="p-4 border-t">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="voice-mode"
+              checked={voiceModeEnabled}
+              onCheckedChange={setVoiceModeEnabled}
+              data-testid="switch-voice-mode"
+            />
+            <Label htmlFor="voice-mode" className="text-xs">Voice</Label>
+          </div>
+          {voiceModeEnabled && (
+            <>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="auto-speak"
+                  checked={autoSpeak}
+                  onCheckedChange={setAutoSpeak}
+                  data-testid="switch-auto-speak"
+                />
+                <Label htmlFor="auto-speak" className="text-xs">Auto-speak</Label>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={cameraMode ? stopCamera : startCamera}
+                data-testid="button-toggle-camera"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                {cameraMode ? 'Stop' : 'Camera'}
+              </Button>
+            </>
+          )}
+        </div>
+
         <div className="flex gap-2">
           <input
             ref={fileInputRef}
@@ -304,35 +537,71 @@ export function StormyChat({
             onChange={handleFileSelect}
             data-testid="stormy-file-input"
           />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={sendMessageMutation.isPending}
-            data-testid="button-attach-image"
-          >
-            <Camera className="h-4 w-4" />
-          </Button>
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask Stormy anything..."
-            disabled={sendMessageMutation.isPending}
-            className="flex-1"
-            data-testid="input-stormy-message"
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={(!message.trim() && attachments.length === 0) || sendMessageMutation.isPending}
-            data-testid="button-send-message"
-          >
-            {sendMessageMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
+          
+          {!voiceModeEnabled ? (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sendMessageMutation.isPending}
+                data-testid="button-attach-image"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask Stormy anything..."
+                disabled={sendMessageMutation.isPending}
+                className="flex-1"
+                data-testid="input-stormy-message"
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={(!message.trim() && attachments.length === 0) || sendMessageMutation.isPending}
+                data-testid="button-send-message"
+              >
+                {sendMessageMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center gap-4">
+              <Button
+                variant={voiceChat.isRecording ? "destructive" : "default"}
+                size="lg"
+                className={`h-14 w-14 rounded-full ${voiceChat.isRecording ? 'animate-pulse' : ''}`}
+                onClick={handleVoiceRecord}
+                disabled={voiceChat.isProcessing || voiceChat.isSpeaking}
+                data-testid="button-voice-record"
+              >
+                {voiceChat.isRecording ? (
+                  <MicOff className="h-6 w-6" />
+                ) : voiceChat.isProcessing ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <Mic className="h-6 w-6" />
+                )}
+              </Button>
+              
+              {conversationData?.messages?.some(m => m.role === 'assistant') && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleSpeakLastResponse}
+                  disabled={voiceChat.isSpeaking || voiceChat.isProcessing}
+                  data-testid="button-speak-last"
+                >
+                  <Volume2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
