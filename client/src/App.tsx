@@ -33,6 +33,7 @@ import { ThermalInspectionPage, HailDamageAssessmentPage, StormDamageConsultingP
 import { BlogIndex, BlogPost } from "@/pages/blog";
 import Schedule from "@/pages/schedule";
 import TeamManagement from "@/pages/team-management";
+import Clients from "@/pages/clients";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/schedule" component={Schedule} />
       <Route path="/team" component={TeamManagement} />
+      <Route path="/clients" component={Clients} />
       <Route path="/inspection/:propertyId" component={InspectionWizard} />
       <Route path="/transcripts" component={Transcripts} />
       <Route path="/docs" component={Docs} />

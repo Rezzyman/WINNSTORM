@@ -51,5 +51,13 @@
         <string>WinnStorm needs photo library access to save and retrieve inspection photos.</string>
         <key>NSPhotoLibraryAddUsageDescription</key>
         <string>WinnStorm needs permission to save inspection photos to your photo library.</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>WinnStorm needs microphone access for voice commands with Stormy AI and recording field notes during inspections.</string>
+        <key>NSSpeechRecognitionUsageDescription</key>
+        <string>WinnStorm uses speech recognition for hands-free voice commands during damage assessments.</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>WinnStorm needs your location to tag inspection photos with GPS coordinates and optimize route planning.</string>
+        <key>ITSAppUsesNonExemptEncryption</key>
+        <false/>
 </dict>
 </plist>
