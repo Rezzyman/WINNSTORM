@@ -1321,3 +1321,96 @@ export type TeamAssignment = typeof teamAssignments.$inferSelect;
 export type InsertTeamAssignment = z.infer<typeof insertTeamAssignmentSchema>;
 export type DamageTemplate = typeof damageTemplates.$inferSelect;
 export type InsertDamageTemplate = z.infer<typeof insertDamageTemplateSchema>;
+
+// AI Conversations - Stormy chat sessions with per-user memory
+export interface AIMessageAttachment {
+  type: 'image' | 'thermal' | 'document';
+  assetId?: number;
+  url?: string;
+  mimeType?: string;
+  filename?: string;
+}
+
+export interface AIMemoryPreferences {
+  communicationStyle?: 'technical' | 'simplified' | 'detailed';
+  focusAreas?: string[];
+  propertyProfiles?: Record<string, any>;
+  inspectionHistory?: Array<{
+    inspectionId: number;
+    date: string;
+    summary: string;
+  }>;
+  userPreferences?: Record<string, any>;
+}
+
+export const aiConversations = pgTable("ai_conversations", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  title: text("title"),
+  relatedPropertyId: integer("related_property_id").references(() => properties.id),
+  relatedInspectionId: integer("related_inspection_id").references(() => inspectionSessions.id),
+  contextType: text("context_type").default('general'),
+  status: text("status").notNull().default('active'),
+  messageCount: integer("message_count").default(0),
+  lastMessageAt: timestamp("last_message_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAIConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  messageCount: true,
+  lastMessageAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const aiMessages = pgTable("ai_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").references(() => aiConversations.id).notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  model: text("model"),
+  attachments: jsonb("attachments").$type<AIMessageAttachment[]>(),
+  tokenCount: integer("token_count"),
+  processingTime: integer("processing_time"),
+  metadata: jsonb("metadata").$type<Record<string, any>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAIMessageSchema = createInsertSchema(aiMessages).omit({
+  id: true,
+  tokenCount: true,
+  processingTime: true,
+  createdAt: true,
+});
+
+export const aiMemory = pgTable("ai_memory", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  scope: text("scope").notNull().default('global'),
+  sourceConversationId: integer("source_conversation_id").references(() => aiConversations.id),
+  summary: text("summary"),
+  keywords: text("keywords").array().default([]),
+  preferences: jsonb("preferences").$type<AIMemoryPreferences>(),
+  contextSnapshot: text("context_snapshot"),
+  tokenEstimate: integer("token_estimate"),
+  lastRefreshedAt: timestamp("last_refreshed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAIMemorySchema = createInsertSchema(aiMemory).omit({
+  id: true,
+  tokenEstimate: true,
+  lastRefreshedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type AIConversation = typeof aiConversations.$inferSelect;
+export type InsertAIConversation = z.infer<typeof insertAIConversationSchema>;
+export type AIMessage = typeof aiMessages.$inferSelect;
+export type InsertAIMessage = z.infer<typeof insertAIMessageSchema>;
+export type AIMemory = typeof aiMemory.$inferSelect;
+export type InsertAIMemory = z.infer<typeof insertAIMemorySchema>;

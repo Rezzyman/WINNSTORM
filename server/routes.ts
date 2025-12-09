@@ -2882,5 +2882,160 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
+  // ==========================================
+  // STORMY AI ROUTES - Multi-modal AI Assistant
+  // ==========================================
+  
+  const stormyService = await import('./stormy-ai-service');
+
+  // Get user's conversations
+  app.get("/api/stormy/conversations", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const conversations = await stormyService.getUserConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  // Get specific conversation with messages
+  app.get("/api/stormy/conversations/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const messages = await stormyService.getConversationHistory(conversationId);
+      const conversation = await storage.getAIConversation(conversationId);
+      
+      res.json({
+        conversation,
+        messages
+      });
+    } catch (error) {
+      console.error('Error fetching conversation:', error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
+    }
+  });
+
+  // Send message to Stormy
+  app.post("/api/stormy/message", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { message, conversationId, attachments, propertyId, inspectionId, contextType } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const result = await stormyService.sendMessage({
+        userId,
+        message,
+        conversationId,
+        attachments,
+        propertyId,
+        inspectionId,
+        contextType
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error sending message to Stormy:', error);
+      res.status(500).json({ message: error.message || "Failed to get response from Stormy" });
+    }
+  });
+
+  // Analyze image directly
+  app.post("/api/stormy/analyze-image", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { imageUrl, imageType, additionalContext } = req.body;
+
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+
+      const result = await stormyService.analyzeImage(
+        userId,
+        imageUrl,
+        imageType || 'general',
+        additionalContext
+      );
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error analyzing image:', error);
+      res.status(500).json({ message: error.message || "Failed to analyze image" });
+    }
+  });
+
+  // Get or create conversation for context
+  app.post("/api/stormy/conversations", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { propertyId, inspectionId, contextType } = req.body;
+      
+      const conversation = await stormyService.getOrCreateConversation(
+        userId,
+        propertyId,
+        inspectionId,
+        contextType || 'general'
+      );
+
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  // Get user's AI memory/preferences
+  app.get("/api/stormy/memory", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const memory = await stormyService.getUserMemory(userId);
+      res.json(memory || { preferences: {} });
+    } catch (error) {
+      console.error('Error fetching memory:', error);
+      res.status(500).json({ message: "Failed to fetch memory" });
+    }
+  });
+
+  // Update user's AI preferences
+  app.patch("/api/stormy/memory", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { preferences, summary } = req.body;
+      const memory = await stormyService.updateUserMemory(userId, preferences || {}, summary);
+      res.json(memory);
+    } catch (error) {
+      console.error('Error updating memory:', error);
+      res.status(500).json({ message: "Failed to update memory" });
+    }
+  });
+
   return httpServer;
 }

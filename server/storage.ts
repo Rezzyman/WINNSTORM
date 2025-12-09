@@ -5,10 +5,11 @@ import {
   LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
   Project, InsertProject, ScheduledInspection, InsertScheduledInspection,
   TeamAssignment, InsertTeamAssignment, DamageTemplate, InsertDamageTemplate,
+  AIConversation, InsertAIConversation, AIMessage, InsertAIMessage, AIMemory, InsertAIMemory,
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
-  scheduledInspections, teamAssignments, damageTemplates
+  scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray } from 'drizzle-orm';
@@ -114,6 +115,23 @@ export interface IStorage {
   createDamageTemplate(template: InsertDamageTemplate): Promise<DamageTemplate>;
   updateDamageTemplate(id: number, updates: Partial<DamageTemplate>): Promise<DamageTemplate | undefined>;
   deleteDamageTemplate(id: number): Promise<boolean>;
+  
+  // AI Conversation methods (Stormy)
+  getAIConversation(id: number): Promise<AIConversation | undefined>;
+  getAIConversationsByUser(userId: string): Promise<AIConversation[]>;
+  createAIConversation(conversation: InsertAIConversation): Promise<AIConversation>;
+  updateAIConversation(id: number, updates: Partial<AIConversation>): Promise<AIConversation | undefined>;
+  
+  // AI Message methods
+  getAIMessage(id: number): Promise<AIMessage | undefined>;
+  getAIMessagesByConversation(conversationId: number): Promise<AIMessage[]>;
+  createAIMessage(message: InsertAIMessage): Promise<AIMessage>;
+  
+  // AI Memory methods
+  getAIMemory(id: number): Promise<AIMemory | undefined>;
+  getAIMemoryByUser(userId: string): Promise<AIMemory[]>;
+  createAIMemory(memory: InsertAIMemory): Promise<AIMemory>;
+  updateAIMemory(id: number, updates: Partial<AIMemory>): Promise<AIMemory>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -983,6 +1001,104 @@ export class DatabaseStorage implements IStorage {
       console.error('Error deleting damage template:', error);
       return false;
     }
+  }
+
+  // AI Conversation methods (Stormy)
+  async getAIConversation(id: number): Promise<AIConversation | undefined> {
+    try {
+      const [conversation] = await db.select().from(aiConversations).where(eq(aiConversations.id, id));
+      return conversation || undefined;
+    } catch (error) {
+      console.error('Error fetching AI conversation:', error);
+      return undefined;
+    }
+  }
+
+  async getAIConversationsByUser(userId: string): Promise<AIConversation[]> {
+    try {
+      return await db.select().from(aiConversations).where(eq(aiConversations.userId, userId));
+    } catch (error) {
+      console.error('Error fetching AI conversations by user:', error);
+      return [];
+    }
+  }
+
+  async createAIConversation(conversation: InsertAIConversation): Promise<AIConversation> {
+    const [newConversation] = await db.insert(aiConversations).values(conversation).returning();
+    return newConversation;
+  }
+
+  async updateAIConversation(id: number, updates: Partial<AIConversation>): Promise<AIConversation | undefined> {
+    try {
+      const [updated] = await db
+        .update(aiConversations)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(aiConversations.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error updating AI conversation:', error);
+      return undefined;
+    }
+  }
+
+  // AI Message methods
+  async getAIMessage(id: number): Promise<AIMessage | undefined> {
+    try {
+      const [message] = await db.select().from(aiMessages).where(eq(aiMessages.id, id));
+      return message || undefined;
+    } catch (error) {
+      console.error('Error fetching AI message:', error);
+      return undefined;
+    }
+  }
+
+  async getAIMessagesByConversation(conversationId: number): Promise<AIMessage[]> {
+    try {
+      return await db.select().from(aiMessages).where(eq(aiMessages.conversationId, conversationId));
+    } catch (error) {
+      console.error('Error fetching AI messages by conversation:', error);
+      return [];
+    }
+  }
+
+  async createAIMessage(message: InsertAIMessage): Promise<AIMessage> {
+    const [newMessage] = await db.insert(aiMessages).values(message).returning();
+    return newMessage;
+  }
+
+  // AI Memory methods
+  async getAIMemory(id: number): Promise<AIMemory | undefined> {
+    try {
+      const [memory] = await db.select().from(aiMemory).where(eq(aiMemory.id, id));
+      return memory || undefined;
+    } catch (error) {
+      console.error('Error fetching AI memory:', error);
+      return undefined;
+    }
+  }
+
+  async getAIMemoryByUser(userId: string): Promise<AIMemory[]> {
+    try {
+      return await db.select().from(aiMemory).where(eq(aiMemory.userId, userId));
+    } catch (error) {
+      console.error('Error fetching AI memory by user:', error);
+      return [];
+    }
+  }
+
+  async createAIMemory(memory: InsertAIMemory): Promise<AIMemory> {
+    const [newMemory] = await db.insert(aiMemory).values(memory).returning();
+    return newMemory;
+  }
+
+  async updateAIMemory(id: number, updates: Partial<AIMemory>): Promise<AIMemory> {
+    const [updated] = await db
+      .update(aiMemory)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(aiMemory.id, id))
+      .returning();
+    return updated;
   }
 }
 
