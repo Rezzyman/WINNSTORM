@@ -8,7 +8,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Property, Project, DamageAssessment } from '@shared/schema';
-import { Cloud, FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
+import { FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
+import { StormyChat } from '@/components/stormy-chat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO, breadcrumbSchema } from '@/components/seo';
 import winnstormLogo from '@assets/logo-dark_1765042579232.png';
@@ -352,6 +353,9 @@ const Dashboard = () => {
           userEmail={user.email || ''}
         />
       )}
+
+      {/* Stormy AI Assistant */}
+      {user && <StormyChat contextType="general" />}
     </div>
   );
 };
