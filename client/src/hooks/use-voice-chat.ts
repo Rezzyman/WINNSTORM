@@ -95,68 +95,6 @@ export function useVoiceChat(options: VoiceChatOptions = {}) {
     });
   }, []);
 
-  const sendVoiceMessage = useCallback(async (imageUrl?: string) => {
-    setState('processing');
-
-    const audioBlob = await stopRecording();
-    if (!audioBlob || audioBlob.size < 1000) {
-      setState('idle');
-      setError('Recording too short. Please try again.');
-      return null;
-    }
-
-    try {
-      const authHeaders = await getAuthHeaders();
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      
-      let url = '/api/stormy/voice/chat';
-      const params = new URLSearchParams();
-      if (options.conversationId) {
-        params.append('conversationId', options.conversationId.toString());
-      }
-      if (imageUrl) {
-        params.append('imageUrl', imageUrl);
-      }
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          ...authHeaders,
-          'Content-Type': 'application/octet-stream',
-        },
-        credentials: 'include',
-        body: arrayBuffer,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || 'Failed to process voice message');
-      }
-
-      const result = await response.json();
-      
-      setTranscription(result.transcription);
-      setResponse(result.response);
-      options.onTranscription?.(result.transcription);
-      options.onResponse?.(result.response);
-
-      if (result.audio) {
-        await playAudioResponse(result.audio);
-      }
-
-      return result;
-    } catch (err: any) {
-      console.error('Error sending voice message:', err);
-      setState('error');
-      setError(err.message || 'Failed to process voice message');
-      options.onError?.(err.message);
-      return null;
-    }
-  }, [options, stopRecording]);
-
   const playAudioResponse = useCallback(async (base64Audio: string) => {
     setState('speaking');
     
@@ -245,6 +183,65 @@ export function useVoiceChat(options: VoiceChatOptions = {}) {
       setError(err.message);
     }
   }, []);
+
+  const sendVoiceMessage = useCallback(async (imageUrl?: string, autoSpeak: boolean = true) => {
+    setState('processing');
+
+    const audioBlob = await stopRecording();
+    if (!audioBlob || audioBlob.size < 1000) {
+      setState('idle');
+      setError('Recording too short. Please try again.');
+      return null;
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      if (options.conversationId) {
+        formData.append('conversationId', options.conversationId.toString());
+      }
+      if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
+
+      const response = await fetch('/api/stormy/voice/chat', {
+        method: 'POST',
+        headers: authHeaders,
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || 'Failed to process voice message');
+      }
+
+      const result = await response.json();
+      
+      setTranscription(result.transcription);
+      setResponse(result.response);
+      options.onTranscription?.(result.transcription);
+      options.onResponse?.(result.response);
+
+      if (result.audio && autoSpeak) {
+        await playAudioResponse(result.audio);
+      } else if (autoSpeak && result.response) {
+        await speakText(result.response);
+      } else {
+        setState('idle');
+      }
+
+      return result;
+    } catch (err: any) {
+      console.error('Error sending voice message:', err);
+      setState('error');
+      setError(err.message || 'Failed to process voice message');
+      options.onError?.(err.message);
+      return null;
+    }
+  }, [options, stopRecording, playAudioResponse, speakText]);
 
   const cancelRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {

@@ -3081,7 +3081,9 @@ Keep the tone professional and technical but accessible.`;
   });
 
   // Full voice conversation - transcribe, process with Stormy, and return audio response
-  app.post("/api/stormy/voice/chat", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const voiceUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
+  
+  app.post("/api/stormy/voice/chat", requireAuth, voiceUpload.single('audio'), async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user?.uid;
       if (!userId) {
@@ -3089,21 +3091,26 @@ Keep the tone professional and technical but accessible.`;
       }
 
       const contentType = req.headers['content-type'] || '';
+      let audioBuffer: Buffer;
+      let conversationId: number | undefined;
+      let imageUrl: string | undefined;
       
       if (contentType.includes('multipart/form-data')) {
-        return res.status(400).json({ 
-          message: "Use application/octet-stream for audio data with query params for metadata" 
-        });
+        if (!req.file) {
+          return res.status(400).json({ message: "Audio file is required" });
+        }
+        audioBuffer = req.file.buffer;
+        conversationId = req.body.conversationId ? parseInt(req.body.conversationId) : undefined;
+        imageUrl = req.body.imageUrl;
+      } else {
+        conversationId = req.query.conversationId ? parseInt(req.query.conversationId as string) : undefined;
+        imageUrl = req.query.imageUrl as string | undefined;
+
+        if (!req.body || req.body.length === 0) {
+          return res.status(400).json({ message: "Audio data is required" });
+        }
+        audioBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
       }
-
-      const conversationId = req.query.conversationId ? parseInt(req.query.conversationId as string) : undefined;
-      const imageUrl = req.query.imageUrl as string | undefined;
-
-      if (!req.body || req.body.length === 0) {
-        return res.status(400).json({ message: "Audio data is required" });
-      }
-
-      const audioBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
 
       const result = await voiceService.processVoiceMessage(
         audioBuffer,
@@ -3115,7 +3122,7 @@ Keep the tone professional and technical but accessible.`;
       res.json({
         transcription: result.transcription,
         response: result.response,
-        audio: result.audioBuffer.toString('base64'),
+        audio: result.audioBuffer ? result.audioBuffer.toString('base64') : null,
       });
     } catch (error: any) {
       console.error('Error processing voice chat:', error);

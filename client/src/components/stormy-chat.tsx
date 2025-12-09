@@ -243,12 +243,18 @@ export function StormyChat({
 
   const handleVoiceRecord = useCallback(async () => {
     if (voiceChat.isRecording) {
-      const imageUrl = cameraMode ? captureFrame() : undefined;
-      await voiceChat.sendVoiceMessage(imageUrl || undefined);
+      let imageUrl: string | undefined;
+      if (cameraMode) {
+        const captured = captureFrame();
+        if (captured) {
+          imageUrl = captured;
+        }
+      }
+      await voiceChat.sendVoiceMessage(imageUrl, autoSpeak);
     } else {
       voiceChat.startRecording();
     }
-  }, [voiceChat, cameraMode, captureFrame]);
+  }, [voiceChat, cameraMode, captureFrame, autoSpeak]);
 
   const handleSpeakLastResponse = useCallback(async () => {
     const lastMessage = conversationData?.messages?.filter(m => m.role === 'assistant').pop();
@@ -263,10 +269,6 @@ export function StormyChat({
     };
   }, [stopCamera]);
 
-  useEffect(() => {
-    if (autoSpeak && voiceChat.response && voiceChat.state === 'idle') {
-    }
-  }, [autoSpeak, voiceChat.response, voiceChat.state]);
 
   const getVoiceStatusText = () => {
     switch (voiceChat.state) {
