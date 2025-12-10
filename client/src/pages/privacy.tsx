@@ -103,11 +103,11 @@ const Privacy = () => {
             <p>We implement industry-standard security measures to protect your information:</p>
             <ul>
               <li>All data is encrypted in transit (TLS 1.3) and at rest (AES-256)</li>
-              <li>SOC 2 Type II certified infrastructure</li>
-              <li>ISO 27001 certified security practices</li>
-              <li>Regular security audits and penetration testing</li>
-              <li>Access controls and authentication requirements</li>
-              <li>Secure data centers with physical security measures</li>
+              <li>Firebase Authentication with secure session management</li>
+              <li>Role-based access controls and authentication requirements</li>
+              <li>Secure payment processing through PCI-compliant Stripe</li>
+              <li>Regular security reviews and monitoring</li>
+              <li>Cloud infrastructure with built-in security protections</li>
             </ul>
 
             <h2>5. Data Retention</h2>

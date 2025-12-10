@@ -915,11 +915,11 @@ const Landing = () => {
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
                 <Shield className="h-3 w-3 mr-1 text-primary" />
-                SOC 2 Compliant
+                256-bit Encryption
               </Badge>
               <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
                 <Award className="h-3 w-3 mr-1 text-primary" />
-                ISO 27001 Certified
+                Enterprise Security
               </Badge>
             </div>
           </div>

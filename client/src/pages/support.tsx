@@ -82,7 +82,7 @@ const Support = () => {
     },
     {
       question: "Is my data secure?",
-      answer: "Absolutely. WinnStorm is SOC 2 compliant and ISO 27001 certified. All data is encrypted in transit and at rest. We never share your inspection data with third parties."
+      answer: "Absolutely. WinnStorm uses enterprise-grade security including 256-bit encryption for all data in transit and at rest, secure Firebase authentication, and PCI-compliant payment processing through Stripe. We never share your inspection data with third parties."
     }
   ];
 
