@@ -18,6 +18,7 @@ import {
   parseExcelFile, parseCSVFile, autoDetectColumnMapping, applyColumnMapping, 
   validateImportRows, convertToPropertyInsert, ColumnMapping 
 } from './property-import';
+import innovationRoutes from './innovation-routes';
 
 function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
   if (!req.user?.dbUserId) {
@@ -84,6 +85,9 @@ const STEP_REQUIREMENTS: Record<WinnMethodologyStep, StepRequirements> = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+
+  // Innovation Framework Routes - Enterprise Features
+  app.use('/api/innovation', innovationRoutes);
 
   // Authentication routes
   // Note: Most authentication is handled via Firebase on the client-side

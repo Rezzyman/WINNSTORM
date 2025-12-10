@@ -41,6 +41,7 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **Pre-built Damage Templates**: Categorized damage templates with severity ratings, affected components, recommended actions, and required evidence checklists.
 
 ## Recent Changes (December 2025)
+- **Innovation Hub**: Unified dashboard at /innovation for managing all enterprise features
 - **Voice Chat System**: Full voice interaction with Stormy AI using OpenAI Whisper (STT) and TTS
 - **Camera Integration**: Live camera preview with "What am I looking at?" visual queries
 - **Clients Page**: Dedicated client management page at /clients
@@ -48,12 +49,89 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **iOS Permissions**: Camera, Photo Library, Microphone, Speech Recognition, Location (When In Use)
 - **Android Permissions**: Camera, Storage, Audio Recording, Location
 
+## Innovation Frameworks (Enterprise Features)
+
+WinnStorm includes 7 cutting-edge innovation frameworks accessible via `/innovation`:
+
+### 1. Predictive Claim Outcome Engine
+AI-powered claim success prediction using historical data and insurer patterns.
+- **Tables**: `claim_outcomes`, `claim_predictions`, `insurer_patterns`
+- **API Routes**: `/api/innovation/claims/*`
+- **Features**: GPT-powered predictions, confidence scoring, insurer behavior analysis
+- **Status**: Preview (Enterprise tier)
+
+### 2. Stormy Field Co-Pilot
+Real-time AI guidance during inspections with wearable integration.
+- **Tables**: `field_copilot_sessions`, `copilot_guidance_events`, `wearable_devices`
+- **API Routes**: `/api/innovation/copilot/*`
+- **Features**: Hands-free guidance, Limitless Pendant support, smart glasses integration
+- **Status**: Preview (Professional tier)
+
+### 3. Smart Sensor Network (IoT)
+Property monitoring sensors for moisture, impact, and environmental tracking.
+- **Tables**: `iot_devices`, `sensor_readings`, `sensor_alerts`
+- **API Routes**: `/api/innovation/iot/*`
+- **Features**: Alert thresholds, automatic claim triggers, real-time monitoring
+- **Status**: Coming Soon (Enterprise tier)
+
+### 4. Drone Integration
+Autonomous drone flights with thermal mapping and 3D modeling.
+- **Tables**: `drone_pilots`, `drone_assets`, `flight_sessions`
+- **API Routes**: `/api/innovation/drones/*`
+- **Features**: Flight planning, thermal map storage, 3D model references, DJI/Skydio SDK stubs
+- **Status**: Preview (Professional tier)
+
+### 5. Insurance Carrier Console
+White-label portal for insurance companies to receive structured claims.
+- **Tables**: `carrier_accounts`, `carrier_users`, `carrier_claim_submissions`
+- **API Routes**: `/api/innovation/carriers/*`
+- **Features**: API key management, adjudication workflows, AI-generated summaries
+- **Status**: Preview (Enterprise tier)
+
+### 6. Contractor Marketplace
+Matching verified contractors with property owners for repairs.
+- **Tables**: `contractor_profiles`, `repair_jobs`, `contractor_bids`, `referral_fees`
+- **API Routes**: `/api/innovation/contractors/*`
+- **Features**: Bidding system, job matching, credential verification, referral tracking
+- **Status**: Coming Soon (Professional tier)
+
+### 7. Regional Risk Intelligence
+Anonymized data product for insurers and reinsurers.
+- **Tables**: `risk_regions`, `risk_assessments`, `risk_data_exports`
+- **API Routes**: `/api/innovation/risk/*`
+- **Features**: Geographic risk scoring, trend analysis, data export for carriers
+- **Status**: Coming Soon (Enterprise tier)
+
+### Module Management
+- **Tables**: `innovation_modules`, `organization_modules`
+- **API Routes**: `/api/innovation/modules/*`
+- **Features**: Enable/disable modules per organization, usage tracking
+
 ## Mobile App Deployment
 See `docs/MOBILE_APP_DEPLOYMENT.md` for complete instructions on:
 - Building for iOS App Store (Xcode, TestFlight, App Store Connect)
 - Building for Google Play Store (Android Studio, signing, Play Console)
 - Required screenshots, descriptions, and privacy policy requirements
 - Version management and update procedures
+
+## Key API Endpoints
+
+### Core APIs
+- `/api/user` - User management
+- `/api/properties` - Property CRUD
+- `/api/projects` - Project management
+- `/api/clients` - Client management
+- `/api/stormy/*` - Stormy AI chat and voice
+
+### Innovation APIs
+- `/api/innovation/modules` - Module management
+- `/api/innovation/claims/*` - Predictive claims
+- `/api/innovation/copilot/*` - Field co-pilot
+- `/api/innovation/iot/*` - IoT sensors
+- `/api/innovation/drones/*` - Drone integration
+- `/api/innovation/carriers/*` - Carrier console
+- `/api/innovation/contractors/*` - Marketplace
+- `/api/innovation/risk/*` - Risk intelligence
 
 ## External Dependencies
 - **PostgreSQL**: Primary database.
@@ -64,3 +142,39 @@ See `docs/MOBILE_APP_DEPLOYMENT.md` for complete instructions on:
 - **Capacitor Plugins**: Camera, Filesystem, Geolocation, Preferences, SQLite.
 - **Stripe**: Subscription payment processing.
 - **Google Maps**: Mapping and location services.
+
+## File Structure
+
+```
+├── client/src/
+│   ├── pages/
+│   │   ├── innovation-hub.tsx    # Innovation features dashboard
+│   │   ├── dashboard.tsx         # Main dashboard
+│   │   ├── clients.tsx           # Client management
+│   │   └── ...
+│   ├── components/
+│   │   ├── stormy-chat.tsx       # AI chat with voice
+│   │   └── ...
+│   └── hooks/
+│       ├── use-voice-chat.ts     # Voice interaction hook
+│       └── ...
+├── server/
+│   ├── routes.ts                 # Main API routes
+│   ├── innovation-routes.ts      # Innovation framework APIs
+│   ├── innovation-services.ts    # Service layer for all frameworks
+│   ├── stormy-ai-service.ts      # Stormy AI backend
+│   ├── voice-service.ts          # Voice processing
+│   └── ...
+├── shared/
+│   └── schema.ts                 # Database schema (all tables)
+├── ios/                          # iOS Capacitor project
+├── android/                      # Android Capacitor project
+└── docs/
+    └── MOBILE_APP_DEPLOYMENT.md  # Mobile deployment guide
+```
+
+## Development Notes
+- Demo login: demo@winnstorm.com / DemoTest123!
+- Production domain: https://winnstorm.com
+- Voice endpoints: /api/stormy/voice/chat, /api/stormy/voice/speak, /api/stormy/voice/transcribe
+- Initialize innovation modules: POST /api/innovation/modules/seed

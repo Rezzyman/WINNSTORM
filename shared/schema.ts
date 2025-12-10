@@ -1414,3 +1414,782 @@ export type AIMessage = typeof aiMessages.$inferSelect;
 export type InsertAIMessage = z.infer<typeof insertAIMessageSchema>;
 export type AIMemory = typeof aiMemory.$inferSelect;
 export type InsertAIMemory = z.infer<typeof insertAIMemorySchema>;
+
+// ============================================================================
+// INNOVATION FRAMEWORKS - Enterprise Features for World-Class Platform
+// ============================================================================
+
+// -----------------------------------------------------------------------------
+// 1. PREDICTIVE CLAIM OUTCOME ENGINE
+// AI-powered claim success prediction using historical data and insurer patterns
+// -----------------------------------------------------------------------------
+
+export interface ClaimOutcomeFactors {
+  evidenceQuality: number;
+  documentationCompleteness: number;
+  weatherDataMatch: number;
+  damageConsistency: number;
+  insulorHistoricalRate: number;
+  propertyAge: number;
+  previousClaimHistory: number;
+}
+
+export interface PredictionConfidence {
+  overall: number;
+  dataQuality: 'high' | 'medium' | 'low';
+  factorsConsidered: number;
+  similarCasesAnalyzed: number;
+}
+
+export const claimOutcomes = pgTable("claim_outcomes", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id),
+  insurerName: text("insurer_name").notNull(),
+  insurerRegion: text("insurer_region"),
+  claimType: text("claim_type").notNull(),
+  claimAmount: integer("claim_amount"),
+  approvedAmount: integer("approved_amount"),
+  outcome: text("outcome").notNull(),
+  daysToResolution: integer("days_to_resolution"),
+  appealAttempts: integer("appeal_attempts").default(0),
+  factors: jsonb("factors").$type<ClaimOutcomeFactors>(),
+  notes: text("notes"),
+  anonymized: boolean("anonymized").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const claimPredictions = pgTable("claim_predictions", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  predictedOutcome: text("predicted_outcome").notNull(),
+  confidenceScore: doublePrecision("confidence_score").notNull(),
+  confidence: jsonb("confidence").$type<PredictionConfidence>(),
+  predictedAmount: integer("predicted_amount"),
+  predictedDaysToResolution: integer("predicted_days_to_resolution"),
+  recommendations: text("recommendations").array().default([]),
+  riskFactors: text("risk_factors").array().default([]),
+  strengthFactors: text("strength_factors").array().default([]),
+  modelVersion: text("model_version"),
+  actualOutcome: text("actual_outcome"),
+  accuracyScore: doublePrecision("accuracy_score"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insurerPatterns = pgTable("insurer_patterns", {
+  id: serial("id").primaryKey(),
+  insurerName: text("insurer_name").notNull().unique(),
+  region: text("region"),
+  avgApprovalRate: doublePrecision("avg_approval_rate"),
+  avgDaysToDecision: doublePrecision("avg_days_to_decision"),
+  avgPayoutPercentage: doublePrecision("avg_payout_percentage"),
+  preferredEvidenceTypes: text("preferred_evidence_types").array().default([]),
+  commonDenialReasons: text("common_denial_reasons").array().default([]),
+  appealSuccessRate: doublePrecision("appeal_success_rate"),
+  claimVolume: integer("claim_volume").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  dataQuality: text("data_quality").default('medium'),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertClaimOutcomeSchema = createInsertSchema(claimOutcomes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertClaimPredictionSchema = createInsertSchema(claimPredictions).omit({
+  id: true,
+  actualOutcome: true,
+  accuracyScore: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInsurerPatternSchema = createInsertSchema(insurerPatterns).omit({
+  id: true,
+  lastUpdated: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 2. STORMY FIELD CO-PILOT
+// Real-time AI guidance during inspections with wearable integration
+// -----------------------------------------------------------------------------
+
+export interface FieldSessionContext {
+  currentStep: string;
+  completedSteps: string[];
+  activeGuidance: string;
+  environmentalConditions: {
+    lighting: string;
+    weather: string;
+    accessibility: string;
+  };
+  realTimeAlerts: Array<{
+    type: 'warning' | 'info' | 'critical';
+    message: string;
+    timestamp: string;
+  }>;
+}
+
+export interface WearableDevice {
+  deviceId: string;
+  deviceType: 'limitless_pendant' | 'smart_glasses' | 'smartwatch' | 'ar_headset';
+  capabilities: string[];
+  lastSync: string;
+  batteryLevel?: number;
+}
+
+export const fieldCopilotSessions = pgTable("field_copilot_sessions", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  inspectionId: integer("inspection_id").references(() => inspectionSessions.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  sessionType: text("session_type").notNull(),
+  status: text("status").notNull().default('active'),
+  context: jsonb("context").$type<FieldSessionContext>(),
+  connectedDevices: jsonb("connected_devices").$type<WearableDevice[]>(),
+  guidanceMode: text("guidance_mode").default('standard'),
+  voiceEnabled: boolean("voice_enabled").default(true),
+  handsFreeMode: boolean("hands_free_mode").default(false),
+  totalGuidanceEvents: integer("total_guidance_events").default(0),
+  startedAt: timestamp("started_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const copilotGuidanceEvents = pgTable("copilot_guidance_events", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").references(() => fieldCopilotSessions.id).notNull(),
+  eventType: text("event_type").notNull(),
+  triggerSource: text("trigger_source"),
+  guidanceContent: text("guidance_content").notNull(),
+  visualContext: text("visual_context"),
+  userAction: text("user_action"),
+  feedbackRating: integer("feedback_rating"),
+  responseTimeMs: integer("response_time_ms"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const wearableDevices = pgTable("wearable_devices", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  deviceId: text("device_id").notNull().unique(),
+  deviceType: text("device_type").notNull(),
+  deviceName: text("device_name"),
+  capabilities: text("capabilities").array().default([]),
+  firmwareVersion: text("firmware_version"),
+  isActive: boolean("is_active").default(true),
+  lastConnectedAt: timestamp("last_connected_at"),
+  configSettings: jsonb("config_settings").$type<Record<string, any>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFieldCopilotSessionSchema = createInsertSchema(fieldCopilotSessions).omit({
+  id: true,
+  totalGuidanceEvents: true,
+  endedAt: true,
+  createdAt: true,
+});
+
+export const insertCopilotGuidanceEventSchema = createInsertSchema(copilotGuidanceEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWearableDeviceSchema = createInsertSchema(wearableDevices).omit({
+  id: true,
+  lastConnectedAt: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 3. SMART SENSOR NETWORK (IoT)
+// Property monitoring sensors for moisture, impact, and environmental tracking
+// -----------------------------------------------------------------------------
+
+export interface SensorReadingData {
+  value: number;
+  unit: string;
+  timestamp: string;
+  quality: 'good' | 'degraded' | 'poor';
+}
+
+export interface AlertThreshold {
+  metric: string;
+  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+  value: number;
+  severity: 'info' | 'warning' | 'critical';
+  autoNotify: boolean;
+}
+
+export const iotDevices = pgTable("iot_devices", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id),
+  deviceSerialNumber: text("device_serial_number").notNull().unique(),
+  deviceType: text("device_type").notNull(),
+  manufacturer: text("manufacturer"),
+  model: text("model"),
+  firmwareVersion: text("firmware_version"),
+  installLocation: text("install_location"),
+  installDate: timestamp("install_date"),
+  gpsCoordinates: jsonb("gps_coordinates").$type<{ lat: number; lng: number }>(),
+  batteryLevel: integer("battery_level"),
+  signalStrength: integer("signal_strength"),
+  status: text("status").notNull().default('active'),
+  lastCommunication: timestamp("last_communication"),
+  alertThresholds: jsonb("alert_thresholds").$type<AlertThreshold[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const sensorReadings = pgTable("sensor_readings", {
+  id: serial("id").primaryKey(),
+  deviceId: integer("device_id").references(() => iotDevices.id).notNull(),
+  readingType: text("reading_type").notNull(),
+  value: doublePrecision("value").notNull(),
+  unit: text("unit").notNull(),
+  quality: text("quality").default('good'),
+  anomalyDetected: boolean("anomaly_detected").default(false),
+  recordedAt: timestamp("recorded_at").notNull(),
+  receivedAt: timestamp("received_at").defaultNow(),
+});
+
+export const sensorAlerts = pgTable("sensor_alerts", {
+  id: serial("id").primaryKey(),
+  deviceId: integer("device_id").references(() => iotDevices.id).notNull(),
+  propertyId: integer("property_id").references(() => properties.id),
+  alertType: text("alert_type").notNull(),
+  severity: text("severity").notNull(),
+  message: text("message").notNull(),
+  triggerValue: doublePrecision("trigger_value"),
+  thresholdValue: doublePrecision("threshold_value"),
+  acknowledged: boolean("acknowledged").default(false),
+  acknowledgedBy: text("acknowledged_by"),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  autoCreatedClaim: boolean("auto_created_claim").default(false),
+  relatedClaimId: integer("related_claim_id").references(() => projects.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIotDeviceSchema = createInsertSchema(iotDevices).omit({
+  id: true,
+  lastCommunication: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSensorReadingSchema = createInsertSchema(sensorReadings).omit({
+  id: true,
+  receivedAt: true,
+});
+
+export const insertSensorAlertSchema = createInsertSchema(sensorAlerts).omit({
+  id: true,
+  acknowledgedAt: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 4. DRONE INTEGRATION
+// Autonomous drone flights with thermal mapping and 3D modeling
+// -----------------------------------------------------------------------------
+
+export interface FlightPath {
+  waypoints: Array<{ lat: number; lng: number; altitude: number }>;
+  totalDistance: number;
+  estimatedDuration: number;
+}
+
+export interface ThermalMapData {
+  heatmapUrl: string;
+  minTemp: number;
+  maxTemp: number;
+  avgTemp: number;
+  hotspots: Array<{ lat: number; lng: number; temp: number; severity: string }>;
+}
+
+export interface Model3DData {
+  modelUrl: string;
+  format: string;
+  vertexCount: number;
+  textureResolution: string;
+  capturePoints: number;
+}
+
+export const dronePilots = pgTable("drone_pilots", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  faaLicenseNumber: text("faa_license_number"),
+  licenseType: text("license_type"),
+  licenseExpiry: timestamp("license_expiry"),
+  totalFlightHours: doublePrecision("total_flight_hours").default(0),
+  certifications: text("certifications").array().default([]),
+  insuranceProvider: text("insurance_provider"),
+  insuranceExpiry: timestamp("insurance_expiry"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const droneAssets = pgTable("drone_assets", {
+  id: serial("id").primaryKey(),
+  ownerId: integer("owner_id").references(() => users.id),
+  serialNumber: text("serial_number").notNull().unique(),
+  manufacturer: text("manufacturer").notNull(),
+  model: text("model").notNull(),
+  nickname: text("nickname"),
+  droneType: text("drone_type"),
+  hasThermallCamera: boolean("has_thermal_camera").default(false),
+  thermalCameraModel: text("thermal_camera_model"),
+  maxFlightTime: integer("max_flight_time"),
+  maxAltitude: integer("max_altitude"),
+  firmwareVersion: text("firmware_version"),
+  lastMaintenance: timestamp("last_maintenance"),
+  status: text("status").notNull().default('available'),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const flightSessions = pgTable("flight_sessions", {
+  id: serial("id").primaryKey(),
+  droneId: integer("drone_id").references(() => droneAssets.id).notNull(),
+  pilotId: integer("pilot_id").references(() => dronePilots.id).notNull(),
+  propertyId: integer("property_id").references(() => properties.id),
+  inspectionId: integer("inspection_id").references(() => inspectionSessions.id),
+  flightPlan: jsonb("flight_plan").$type<FlightPath>(),
+  flightMode: text("flight_mode").notNull(),
+  weatherConditions: jsonb("weather_conditions").$type<Record<string, any>>(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  actualDuration: integer("actual_duration"),
+  distanceCovered: doublePrecision("distance_covered"),
+  maxAltitudeReached: integer("max_altitude_reached"),
+  batteryUsed: integer("battery_used"),
+  photosCapture: integer("photos_captured").default(0),
+  thermalMaps: jsonb("thermal_maps").$type<ThermalMapData[]>(),
+  model3D: jsonb("model_3d").$type<Model3DData>(),
+  status: text("status").notNull().default('planned'),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDronePilotSchema = createInsertSchema(dronePilots).omit({
+  id: true,
+  totalFlightHours: true,
+  createdAt: true,
+});
+
+export const insertDroneAssetSchema = createInsertSchema(droneAssets).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFlightSessionSchema = createInsertSchema(flightSessions).omit({
+  id: true,
+  endTime: true,
+  actualDuration: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 5. INSURANCE CARRIER CONSOLE
+// White-label portal for insurance companies to receive structured claims
+// -----------------------------------------------------------------------------
+
+export interface CarrierBranding {
+  logoUrl: string;
+  primaryColor: string;
+  secondaryColor: string;
+  companyName: string;
+}
+
+export interface AdjudicationWorkflow {
+  steps: Array<{
+    name: string;
+    required: boolean;
+    assignedRole: string;
+    slaHours: number;
+  }>;
+  autoApprovalThreshold: number;
+  escalationRules: Record<string, any>;
+}
+
+export const carrierAccounts = pgTable("carrier_accounts", {
+  id: serial("id").primaryKey(),
+  carrierCode: text("carrier_code").notNull().unique(),
+  companyName: text("company_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  branding: jsonb("branding").$type<CarrierBranding>(),
+  apiKey: text("api_key"),
+  webhookUrl: text("webhook_url"),
+  adjudicationWorkflow: jsonb("adjudication_workflow").$type<AdjudicationWorkflow>(),
+  preferredFormats: text("preferred_formats").array().default([]),
+  autoIngestEnabled: boolean("auto_ingest_enabled").default(false),
+  subscriptionTier: text("subscription_tier").default('standard'),
+  monthlyClaimLimit: integer("monthly_claim_limit"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const carrierUsers = pgTable("carrier_users", {
+  id: serial("id").primaryKey(),
+  carrierId: integer("carrier_id").references(() => carrierAccounts.id).notNull(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  permissions: text("permissions").array().default([]),
+  lastLoginAt: timestamp("last_login_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const carrierClaimSubmissions = pgTable("carrier_claim_submissions", {
+  id: serial("id").primaryKey(),
+  carrierId: integer("carrier_id").references(() => carrierAccounts.id).notNull(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  submissionFormat: text("submission_format").notNull(),
+  evidencePackageUrl: text("evidence_package_url"),
+  structuredData: jsonb("structured_data").$type<Record<string, any>>(),
+  aiSummary: text("ai_summary"),
+  adjudicationStatus: text("adjudication_status").notNull().default('pending'),
+  assignedAdjusterId: integer("assigned_adjuster_id").references(() => carrierUsers.id),
+  reviewNotes: text("review_notes"),
+  decision: text("decision"),
+  decisionReason: text("decision_reason"),
+  approvedAmount: integer("approved_amount"),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  decidedAt: timestamp("decided_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCarrierAccountSchema = createInsertSchema(carrierAccounts).omit({
+  id: true,
+  apiKey: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCarrierUserSchema = createInsertSchema(carrierUsers).omit({
+  id: true,
+  lastLoginAt: true,
+  createdAt: true,
+});
+
+export const insertCarrierClaimSubmissionSchema = createInsertSchema(carrierClaimSubmissions).omit({
+  id: true,
+  submittedAt: true,
+  decidedAt: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 6. CONTRACTOR MARKETPLACE
+// Matching verified contractors with property owners for repairs
+// -----------------------------------------------------------------------------
+
+export interface ContractorCredentials {
+  licenses: Array<{ type: string; number: string; state: string; expiry: string }>;
+  insurance: Array<{ type: string; provider: string; coverage: number; expiry: string }>;
+  certifications: Array<{ name: string; issuer: string; date: string }>;
+}
+
+export interface ContractorRating {
+  overall: number;
+  quality: number;
+  timeliness: number;
+  communication: number;
+  value: number;
+  reviewCount: number;
+}
+
+export const contractorProfiles = pgTable("contractor_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  companyName: text("company_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone").notNull(),
+  serviceAreas: text("service_areas").array().default([]),
+  specialties: text("specialties").array().default([]),
+  credentials: jsonb("credentials").$type<ContractorCredentials>(),
+  rating: jsonb("rating").$type<ContractorRating>(),
+  yearsInBusiness: integer("years_in_business"),
+  employeeCount: integer("employee_count"),
+  portfolioUrls: text("portfolio_urls").array().default([]),
+  description: text("description"),
+  responseTimeHours: integer("response_time_hours"),
+  verificationStatus: text("verification_status").notNull().default('pending'),
+  verifiedAt: timestamp("verified_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const repairJobs = pgTable("repair_jobs", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  jobType: text("job_type").notNull(),
+  urgency: text("urgency").notNull().default('standard'),
+  estimatedBudget: integer("estimated_budget"),
+  requiredSpecialties: text("required_specialties").array().default([]),
+  preferredStartDate: timestamp("preferred_start_date"),
+  status: text("status").notNull().default('open'),
+  selectedContractorId: integer("selected_contractor_id").references(() => contractorProfiles.id),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contractorBids = pgTable("contractor_bids", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => repairJobs.id).notNull(),
+  contractorId: integer("contractor_id").references(() => contractorProfiles.id).notNull(),
+  bidAmount: integer("bid_amount").notNull(),
+  estimatedDays: integer("estimated_days").notNull(),
+  proposalText: text("proposal_text"),
+  includedServices: text("included_services").array().default([]),
+  warranty: text("warranty"),
+  status: text("status").notNull().default('submitted'),
+  isWinningBid: boolean("is_winning_bid").default(false),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const referralFees = pgTable("referral_fees", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => repairJobs.id).notNull(),
+  contractorId: integer("contractor_id").references(() => contractorProfiles.id).notNull(),
+  referringConsultantId: integer("referring_consultant_id").references(() => users.id),
+  feePercentage: doublePrecision("fee_percentage").notNull(),
+  feeAmount: integer("fee_amount"),
+  jobValue: integer("job_value").notNull(),
+  status: text("status").notNull().default('pending'),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertContractorProfileSchema = createInsertSchema(contractorProfiles).omit({
+  id: true,
+  verifiedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRepairJobSchema = createInsertSchema(repairJobs).omit({
+  id: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContractorBidSchema = createInsertSchema(contractorBids).omit({
+  id: true,
+  submittedAt: true,
+  updatedAt: true,
+});
+
+export const insertReferralFeeSchema = createInsertSchema(referralFees).omit({
+  id: true,
+  paidAt: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 7. REGIONAL RISK INTELLIGENCE
+// Anonymized data product for insurers and reinsurers
+// -----------------------------------------------------------------------------
+
+export interface GeographicRiskMetrics {
+  hailFrequency: number;
+  windDamageFrequency: number;
+  floodRisk: number;
+  avgClaimSeverity: number;
+  avgPropertyAge: number;
+  predominantRoofTypes: Record<string, number>;
+}
+
+export interface RiskTrend {
+  period: string;
+  claimCount: number;
+  avgSeverity: number;
+  totalPayout: number;
+  primaryDamageTypes: string[];
+}
+
+export const riskRegions = pgTable("risk_regions", {
+  id: serial("id").primaryKey(),
+  regionCode: text("region_code").notNull().unique(),
+  regionName: text("region_name").notNull(),
+  regionType: text("region_type").notNull(),
+  state: text("state"),
+  boundaryGeoJson: jsonb("boundary_geo_json").$type<Record<string, any>>(),
+  centerPoint: jsonb("center_point").$type<{ lat: number; lng: number }>(),
+  propertyCount: integer("property_count").default(0),
+  dataQuality: text("data_quality").default('medium'),
+  lastCalculated: timestamp("last_calculated"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const riskAssessments = pgTable("risk_assessments", {
+  id: serial("id").primaryKey(),
+  regionId: integer("region_id").references(() => riskRegions.id).notNull(),
+  assessmentPeriod: text("assessment_period").notNull(),
+  metrics: jsonb("metrics").$type<GeographicRiskMetrics>(),
+  riskScore: doublePrecision("risk_score").notNull(),
+  riskCategory: text("risk_category").notNull(),
+  trends: jsonb("trends").$type<RiskTrend[]>(),
+  comparisonToState: doublePrecision("comparison_to_state"),
+  comparisonToNational: doublePrecision("comparison_to_national"),
+  confidenceLevel: doublePrecision("confidence_level"),
+  sampleSize: integer("sample_size"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const riskDataExports = pgTable("risk_data_exports", {
+  id: serial("id").primaryKey(),
+  carrierId: integer("carrier_id").references(() => carrierAccounts.id),
+  exportType: text("export_type").notNull(),
+  regionsIncluded: text("regions_included").array().default([]),
+  dateRange: jsonb("date_range").$type<{ start: string; end: string }>(),
+  format: text("format").notNull(),
+  fileUrl: text("file_url"),
+  recordCount: integer("record_count"),
+  pricePaid: integer("price_paid"),
+  status: text("status").notNull().default('pending'),
+  generatedAt: timestamp("generated_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRiskRegionSchema = createInsertSchema(riskRegions).omit({
+  id: true,
+  lastCalculated: true,
+  createdAt: true,
+});
+
+export const insertRiskAssessmentSchema = createInsertSchema(riskAssessments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRiskDataExportSchema = createInsertSchema(riskDataExports).omit({
+  id: true,
+  generatedAt: true,
+  createdAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// 8. INNOVATION MODULE REGISTRY
+// Tracks enabled/disabled features per organization
+// -----------------------------------------------------------------------------
+
+export interface ModuleConfig {
+  settings: Record<string, any>;
+  limits: Record<string, number>;
+  integrations: string[];
+}
+
+export const innovationModules = pgTable("innovation_modules", {
+  id: serial("id").primaryKey(),
+  moduleCode: text("module_code").notNull().unique(),
+  moduleName: text("module_name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  version: text("version").notNull().default('1.0.0'),
+  status: text("status").notNull().default('preview'),
+  requiredSubscription: text("required_subscription"),
+  defaultConfig: jsonb("default_config").$type<ModuleConfig>(),
+  dependencies: text("dependencies").array().default([]),
+  isActive: boolean("is_active").default(false),
+  releasedAt: timestamp("released_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const organizationModules = pgTable("organization_modules", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id"),
+  moduleId: integer("module_id").references(() => innovationModules.id).notNull(),
+  enabled: boolean("enabled").default(false),
+  config: jsonb("config").$type<ModuleConfig>(),
+  enabledBy: text("enabled_by"),
+  enabledAt: timestamp("enabled_at"),
+  usageStats: jsonb("usage_stats").$type<Record<string, number>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertInnovationModuleSchema = createInsertSchema(innovationModules).omit({
+  id: true,
+  releasedAt: true,
+  createdAt: true,
+});
+
+export const insertOrganizationModuleSchema = createInsertSchema(organizationModules).omit({
+  id: true,
+  enabledAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// -----------------------------------------------------------------------------
+// TYPE EXPORTS FOR ALL INNOVATION FRAMEWORKS
+// -----------------------------------------------------------------------------
+
+export type ClaimOutcome = typeof claimOutcomes.$inferSelect;
+export type InsertClaimOutcome = z.infer<typeof insertClaimOutcomeSchema>;
+export type ClaimPrediction = typeof claimPredictions.$inferSelect;
+export type InsertClaimPrediction = z.infer<typeof insertClaimPredictionSchema>;
+export type InsurerPattern = typeof insurerPatterns.$inferSelect;
+export type InsertInsurerPattern = z.infer<typeof insertInsurerPatternSchema>;
+
+export type FieldCopilotSession = typeof fieldCopilotSessions.$inferSelect;
+export type InsertFieldCopilotSession = z.infer<typeof insertFieldCopilotSessionSchema>;
+export type CopilotGuidanceEvent = typeof copilotGuidanceEvents.$inferSelect;
+export type InsertCopilotGuidanceEvent = z.infer<typeof insertCopilotGuidanceEventSchema>;
+export type WearableDeviceRecord = typeof wearableDevices.$inferSelect;
+export type InsertWearableDeviceRecord = z.infer<typeof insertWearableDeviceSchema>;
+
+export type IotDevice = typeof iotDevices.$inferSelect;
+export type InsertIotDevice = z.infer<typeof insertIotDeviceSchema>;
+export type SensorReading = typeof sensorReadings.$inferSelect;
+export type InsertSensorReading = z.infer<typeof insertSensorReadingSchema>;
+export type SensorAlert = typeof sensorAlerts.$inferSelect;
+export type InsertSensorAlert = z.infer<typeof insertSensorAlertSchema>;
+
+export type DronePilot = typeof dronePilots.$inferSelect;
+export type InsertDronePilot = z.infer<typeof insertDronePilotSchema>;
+export type DroneAsset = typeof droneAssets.$inferSelect;
+export type InsertDroneAsset = z.infer<typeof insertDroneAssetSchema>;
+export type FlightSession = typeof flightSessions.$inferSelect;
+export type InsertFlightSession = z.infer<typeof insertFlightSessionSchema>;
+
+export type CarrierAccount = typeof carrierAccounts.$inferSelect;
+export type InsertCarrierAccount = z.infer<typeof insertCarrierAccountSchema>;
+export type CarrierUser = typeof carrierUsers.$inferSelect;
+export type InsertCarrierUser = z.infer<typeof insertCarrierUserSchema>;
+export type CarrierClaimSubmission = typeof carrierClaimSubmissions.$inferSelect;
+export type InsertCarrierClaimSubmission = z.infer<typeof insertCarrierClaimSubmissionSchema>;
+
+export type ContractorProfile = typeof contractorProfiles.$inferSelect;
+export type InsertContractorProfile = z.infer<typeof insertContractorProfileSchema>;
+export type RepairJob = typeof repairJobs.$inferSelect;
+export type InsertRepairJob = z.infer<typeof insertRepairJobSchema>;
+export type ContractorBid = typeof contractorBids.$inferSelect;
+export type InsertContractorBid = z.infer<typeof insertContractorBidSchema>;
+export type ReferralFee = typeof referralFees.$inferSelect;
+export type InsertReferralFee = z.infer<typeof insertReferralFeeSchema>;
+
+export type RiskRegion = typeof riskRegions.$inferSelect;
+export type InsertRiskRegion = z.infer<typeof insertRiskRegionSchema>;
+export type RiskAssessment = typeof riskAssessments.$inferSelect;
+export type InsertRiskAssessment = z.infer<typeof insertRiskAssessmentSchema>;
+export type RiskDataExport = typeof riskDataExports.$inferSelect;
+export type InsertRiskDataExport = z.infer<typeof insertRiskDataExportSchema>;
+
+export type InnovationModule = typeof innovationModules.$inferSelect;
+export type InsertInnovationModule = z.infer<typeof insertInnovationModuleSchema>;
+export type OrganizationModule = typeof organizationModules.$inferSelect;
+export type InsertOrganizationModule = z.infer<typeof insertOrganizationModuleSchema>;
