@@ -294,8 +294,10 @@ const UploadPage = () => {
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div 
-                    className={`border rounded-lg p-3 flex items-center cursor-pointer ${
-                      scanType === 'drone' ? 'border-primary bg-blue-50' : 'border-neutral-medium'
+                    className={`border rounded-lg p-3 flex items-center cursor-pointer transition-colors ${
+                      scanType === 'drone' 
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20' 
+                        : 'border-muted-foreground/30 hover:border-muted-foreground/50'
                     }`}
                     onClick={() => setScanType('drone')}
                   >
@@ -307,13 +309,15 @@ const UploadPage = () => {
                       checked={scanType === 'drone'}
                       onChange={() => setScanType('drone')}
                     />
-                    <Label htmlFor="drone" className="ml-2 block text-sm text-neutral-darker cursor-pointer">
+                    <Label htmlFor="drone" className="ml-2 block text-sm text-foreground cursor-pointer">
                       Drone Capture
                     </Label>
                   </div>
                   <div 
-                    className={`border rounded-lg p-3 flex items-center cursor-pointer ${
-                      scanType === 'handheld' ? 'border-primary bg-blue-50' : 'border-neutral-medium'
+                    className={`border rounded-lg p-3 flex items-center cursor-pointer transition-colors ${
+                      scanType === 'handheld' 
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20' 
+                        : 'border-muted-foreground/30 hover:border-muted-foreground/50'
                     }`}
                     onClick={() => setScanType('handheld')}
                   >
@@ -325,7 +329,7 @@ const UploadPage = () => {
                       checked={scanType === 'handheld'}
                       onChange={() => setScanType('handheld')}
                     />
-                    <Label htmlFor="handheld" className="ml-2 block text-sm text-neutral-darker cursor-pointer">
+                    <Label htmlFor="handheld" className="ml-2 block text-sm text-foreground cursor-pointer">
                       Handheld Camera
                     </Label>
                   </div>
