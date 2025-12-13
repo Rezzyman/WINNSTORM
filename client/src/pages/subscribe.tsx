@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
 import { SEO } from '@/components/seo';
 
-// Conditionally load Stripe - prefer testing key for development
-const stripePublicKey = import.meta.env.TESTING_VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+// Load Stripe public key - only VITE_ prefixed variables are exposed to frontend
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey
   ? loadStripe(stripePublicKey)
   : null;

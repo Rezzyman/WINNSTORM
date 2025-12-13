@@ -7,7 +7,7 @@ import { CheckCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SEO } from '@/components/seo';
 
-const stripePublicKey = import.meta.env.TESTING_VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
 type PaymentStatus = 'loading' | 'succeeded' | 'processing' | 'failed' | 'requires_action';
