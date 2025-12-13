@@ -1389,7 +1389,8 @@ Keep the tone professional and technical but accessible.`;
       let paymentIntent = (invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent | string | null }).payment_intent;
       
       // If payment_intent is a string (not expanded) or null, try to finalize the invoice
-      if ((!paymentIntent || typeof paymentIntent === 'string') && invoice.id) {
+      // Only finalize if invoice is in draft status
+      if ((!paymentIntent || typeof paymentIntent === 'string') && invoice.id && invoice.status === 'draft') {
         try {
           const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
             expand: ['payment_intent'],
@@ -1397,6 +1398,14 @@ Keep the tone professional and technical but accessible.`;
           paymentIntent = (finalizedInvoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent | string | null }).payment_intent;
         } catch (finalizeError) {
           console.error('Error finalizing invoice:', finalizeError);
+        }
+      } else if (invoice.status !== 'draft' && typeof paymentIntent === 'string') {
+        // Invoice already finalized, retrieve the payment intent
+        try {
+          const retrievedIntent = await stripe.paymentIntents.retrieve(paymentIntent);
+          paymentIntent = retrievedIntent;
+        } catch (retrieveError) {
+          console.error('Error retrieving payment intent:', retrieveError);
         }
       }
 

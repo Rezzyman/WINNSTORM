@@ -21,45 +21,62 @@ const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMod
   const elements = useElements();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isElementReady, setIsElementReady] = useState(false);
   const [, navigate] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !isElementReady) {
+      toast({
+        title: "Please wait",
+        description: "Payment form is still loading...",
+        variant: "default",
+      });
       return;
     }
 
     setIsProcessing(true);
 
-    let result;
-    if (isSetupMode) {
-      // For setup intents, use confirmSetup
-      result = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/subscription-success`,
-        },
-      });
-    } else {
-      // For payment intents, use confirmPayment
-      result = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/subscription-success`,
-        },
-      });
-    }
+    try {
+      let result;
+      if (isSetupMode) {
+        // For setup intents, use confirmSetup
+        result = await stripe.confirmSetup({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/subscription-success`,
+          },
+        });
+      } else {
+        // For payment intents, use confirmPayment
+        result = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/subscription-success`,
+          },
+        });
+      }
 
-    if (result.error) {
+      if (result.error) {
+        toast({
+          title: "Payment Failed",
+          description: result.error.message,
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
       toast({
-        title: "Payment Failed",
-        description: result.error.message,
+        title: "Payment Error",
+        description: err.message || "An unexpected error occurred",
         variant: "destructive",
       });
       setIsProcessing(false);
     }
   };
+
+  const isButtonDisabled = !stripe || !isElementReady || isProcessing;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -69,11 +86,29 @@ const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMod
         </p>
       </div>
       
-      <PaymentElement />
+      <div className="min-h-[200px]">
+        <PaymentElement 
+          onReady={() => setIsElementReady(true)}
+          onLoadError={(error) => {
+            console.error('PaymentElement load error:', error);
+            toast({
+              title: "Payment Form Error",
+              description: "Failed to load payment form. Please refresh the page.",
+              variant: "destructive",
+            });
+          }}
+        />
+        {!isElementReady && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-sm text-muted-foreground">Loading payment form...</span>
+          </div>
+        )}
+      </div>
       
       <Button 
         type="submit" 
-        disabled={!stripe || isProcessing}
+        disabled={isButtonDisabled}
         className="w-full h-12 text-lg"
         data-testid="button-confirm-subscription"
       >
@@ -81,6 +116,11 @@ const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMod
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Processing...
+          </>
+        ) : !isElementReady ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Loading...
           </>
         ) : (
           'Confirm Subscription'
