@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ interface GoogleMapsDrawingProps {
   onSectionsChange: (sections: RoofSection[]) => void;
 }
 
-export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
+export function GoogleMapsDrawing({
   address,
   onAddressChange,
   roofSections,
@@ -180,11 +180,57 @@ export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
     return () => {
       isCancelled = true;
       mountedRef.current = false;
-      cleanupAllOverlays();
+      
+      // Clean up overlays first
+      removeClickListener();
+      overlaysRef.current.forEach(overlay => {
+        try {
+          if (overlay && typeof overlay.setMap === 'function') {
+            overlay.setMap(null);
+          }
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      });
+      overlaysRef.current = [];
+      
+      sectionPolygonsRef.current.forEach(polygon => {
+        try {
+          if (polygon && typeof polygon.setMap === 'function') {
+            polygon.setMap(null);
+          }
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      });
+      sectionPolygonsRef.current.clear();
+      
+      if (currentPolygonRef.current) {
+        try {
+          currentPolygonRef.current.setMap(null);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        currentPolygonRef.current = null;
+      }
+      
+      currentMarkersRef.current.forEach(marker => {
+        try {
+          if (marker && typeof marker.setMap === 'function') {
+            marker.setMap(null);
+          }
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      });
+      currentMarkersRef.current = [];
+      
+      // Clear map reference last
       mapInstanceRef.current = null;
       geocoderRef.current = null;
+      initializingRef.current = false;
     };
-  }, [cleanupAllOverlays]);
+  }, [removeClickListener]);
 
   const handleAddressSearch = useCallback(() => {
     if (!geocoderRef.current || !mapInstanceRef.current || !address) return;
@@ -434,14 +480,15 @@ export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
             </div>
           )}
           
-          <div 
-            ref={mapContainerRef}
-            className={`w-full h-96 rounded-lg border relative ${isDrawing ? 'border-primary cursor-crosshair' : 'border-border'}`}
-            style={{ minHeight: '400px' }}
-            data-testid="map-container"
-          >
+          <div className="relative" style={{ minHeight: '400px' }}>
+            <div 
+              ref={mapContainerRef}
+              className={`w-full h-96 rounded-lg border ${isDrawing ? 'border-primary cursor-crosshair' : 'border-border'}`}
+              style={{ minHeight: '400px' }}
+              data-testid="map-container"
+            />
             {isLoading && (
-              <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10 rounded-lg">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
                   <p className="text-muted-foreground">Loading Google Maps...</p>
@@ -449,7 +496,7 @@ export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
               </div>
             )}
             {mapError && (
-              <div className="absolute inset-0 bg-background flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-background flex items-center justify-center z-10 rounded-lg">
                 <div className="text-center p-6">
                   <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">{mapError}</p>
@@ -507,4 +554,4 @@ export const GoogleMapsDrawing = memo(function GoogleMapsDrawing({
       )}
     </div>
   );
-});
+}

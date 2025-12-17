@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,7 +65,7 @@ const WORKFLOW_STEPS = [
   { id: 'review', title: 'Review & Generate', icon: FileText },
 ];
 
-export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ propertyId, onComplete }) => {
+export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflowProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [reportData, setReportData] = useState<WinnReportData>({
     propertyId,
@@ -779,7 +779,10 @@ export const WinnReportWorkflow: React.FC<WinnReportWorkflowProps> = ({ property
           <Card className="bg-card border-border shadow-lg">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center">
-                {React.createElement(WORKFLOW_STEPS[currentStep].icon, { className: "h-5 w-5 mr-2" })}
+                {(() => {
+                  const StepIcon = WORKFLOW_STEPS[currentStep].icon;
+                  return <StepIcon className="h-5 w-5 mr-2" />;
+                })()}
                 {WORKFLOW_STEPS[currentStep].title}
               </CardTitle>
             </CardHeader>
