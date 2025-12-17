@@ -271,7 +271,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<StormyRe
         promptTokens: response.usage?.prompt_tokens || 0,
         completionTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0
-      }
+      } as Record<string, any>
     };
 
     const savedAssistantMessage = await storage.createAIMessage(assistantMessage);

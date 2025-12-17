@@ -77,6 +77,7 @@ function Router() {
       <Route path="/clients" component={Clients} />
       <Route path="/innovation" component={InnovationHub} />
       <Route path="/inspection/:propertyId" component={InspectionWizard} />
+      <Route path="/inspection-wizard" component={InspectionWizard} />
       <Route path="/transcripts" component={Transcripts} />
       <Route path="/docs" component={Docs} />
       <Route path="/api-docs" component={ApiDocs} />
