@@ -19,6 +19,7 @@ import {
   validateImportRows, convertToPropertyInsert, ColumnMapping 
 } from './property-import';
 import innovationRoutes from './innovation-routes';
+import adminRoutes from './admin-routes';
 
 function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
   if (!req.user?.dbUserId) {
@@ -88,6 +89,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Innovation Framework Routes - Enterprise Features
   app.use('/api/innovation', innovationRoutes);
+  
+  // Admin Panel Routes
+  app.use('/api/admin', adminRoutes);
 
   // Authentication routes
   // Note: Most authentication is handled via Firebase on the client-side

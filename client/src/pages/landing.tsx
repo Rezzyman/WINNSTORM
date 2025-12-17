@@ -909,9 +909,18 @@ const Landing = () => {
           <Separator className="my-8 bg-white/10" />
           
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-white/50">
-              © 2025 WinnStorm™. All rights reserved. Built with the proven Winn Methodology.
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-white/50">
+                © 2025 WinnStorm™. All rights reserved. Built with the proven Winn Methodology.
+              </p>
+              <a 
+                href="/admin/login" 
+                className="text-xs text-white/20 hover:text-white/40 transition-colors"
+                data-testid="link-admin"
+              >
+                Admin
+              </a>
+            </div>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
                 <Shield className="h-3 w-3 mr-1 text-primary" />

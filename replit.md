@@ -41,6 +41,12 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **Pre-built Damage Templates**: Categorized damage templates with severity ratings, affected components, recommended actions, and required evidence checklists.
 
 ## Recent Changes (December 2025)
+- **Admin Panel**: Secure admin dashboard at /admin with user management, project/client/property data grids
+  - Admin login at /admin/login with email allowlist protection
+  - Allowlisted emails: admin@winnstorm.com, eric@winnstorm.com, developer@winnstorm.com
+  - Server-side protection via requireAdmin middleware
+  - Discreet admin link in homepage footer
+- **Demo Login Removed**: Demo login button removed from public auth page for production security
 - **Innovation Hub**: Unified dashboard at /innovation for managing all enterprise features
 - **Voice Chat System**: Full voice interaction with Stormy AI using OpenAI Whisper (STT) and TTS
 - **Camera Integration**: Live camera preview with "What am I looking at?" visual queries

@@ -160,3 +160,87 @@ export function optionalAuth(req: AuthenticatedRequest, res: Response, next: Nex
 export function unauthorizedResponse(res: Response) {
   return res.status(401).json({ message: 'Unauthorized' });
 }
+
+// Admin allowlist - emails that can access admin panel
+const ADMIN_ALLOWLIST = [
+  'admin@winnstorm.com',
+  'eric@winnstorm.com',
+  'developer@winnstorm.com',
+];
+
+export interface AdminAuthenticatedRequest extends AuthenticatedRequest {
+  adminUser?: {
+    uid: string;
+    email: string;
+    dbUserId: number;
+    isAdmin: boolean;
+  };
+}
+
+export async function requireAdmin(req: AdminAuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ message: 'Admin authentication required.' });
+    return;
+  }
+
+  const idToken = authHeader.substring(7);
+
+  try {
+    const decodedToken = await verifyFirebaseToken(idToken);
+    if (!decodedToken) {
+      res.status(401).json({ message: 'Invalid or expired authentication token.' });
+      return;
+    }
+
+    const email = decodedToken.email;
+    if (!email) {
+      res.status(403).json({ message: 'Admin access denied - no email associated with account.' });
+      return;
+    }
+
+    // Check if email is in admin allowlist
+    if (!ADMIN_ALLOWLIST.includes(email.toLowerCase())) {
+      res.status(403).json({ message: 'Admin access denied - not authorized.' });
+      return;
+    }
+
+    const dbUserId = await getOrCreateDbUser(decodedToken);
+    if (!dbUserId) {
+      res.status(500).json({ message: 'Failed to verify admin user.' });
+      return;
+    }
+
+    // Verify user has isAdmin flag in database
+    const dbUser = await storage.getUser(dbUserId);
+    if (!dbUser?.isAdmin) {
+      // Auto-set isAdmin for allowlisted users
+      await storage.updateUser(dbUserId, { isAdmin: true });
+    }
+
+    req.user = {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      picture: decodedToken.picture,
+      dbUserId: dbUserId,
+    };
+
+    req.adminUser = {
+      uid: decodedToken.uid,
+      email: email,
+      dbUserId: dbUserId,
+      isAdmin: true,
+    };
+
+    next();
+  } catch (error) {
+    console.error('Admin auth middleware error:', error);
+    res.status(500).json({ message: 'Admin authentication error' });
+  }
+}
+
+export function isAdminEmail(email: string): boolean {
+  return ADMIN_ALLOWLIST.includes(email.toLowerCase());
+}

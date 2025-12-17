@@ -19,6 +19,7 @@ export const users = pgTable("users", {
   trainingProgress: jsonb("training_progress").$type<TrainingProgress>(),
   performanceMetrics: jsonb("performance_metrics").$type<PerformanceMetrics>(),
   onboardingCompleted: boolean("onboarding_completed").default(false),
+  isAdmin: boolean("is_admin").default(false), // Admin panel access flag
   createdAt: timestamp("created_at").defaultNow(),
 });
 

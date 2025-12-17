@@ -132,6 +132,12 @@ export interface IStorage {
   getAIMemoryByUser(userId: string): Promise<AIMemory[]>;
   createAIMemory(memory: InsertAIMemory): Promise<AIMemory>;
   updateAIMemory(id: number, updates: Partial<AIMemory>): Promise<AIMemory>;
+  
+  // Admin methods
+  getAllUsers(): Promise<User[]>;
+  getAllProjects(): Promise<Project[]>;
+  getAllProperties(): Promise<Property[]>;
+  getAllClients(): Promise<any[]>;
 }
 
 // Database storage implementation using Drizzle ORM
@@ -1099,6 +1105,47 @@ export class DatabaseStorage implements IStorage {
       .where(eq(aiMemory.id, id))
       .returning();
     return updated;
+  }
+
+  // Admin methods
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const result = await db.select().from(users);
+      return result as User[];
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+      return [];
+    }
+  }
+
+  async getAllProjects(): Promise<Project[]> {
+    try {
+      const result = await db.select().from(projects);
+      return result as Project[];
+    } catch (error) {
+      console.error('Error fetching all projects:', error);
+      return [];
+    }
+  }
+
+  async getAllProperties(): Promise<Property[]> {
+    try {
+      const result = await db.select().from(properties);
+      return result as Property[];
+    } catch (error) {
+      console.error('Error fetching all properties:', error);
+      return [];
+    }
+  }
+
+  async getAllClients(): Promise<any[]> {
+    try {
+      const result = await db.select().from(clients);
+      return result;
+    } catch (error) {
+      console.error('Error fetching all clients:', error);
+      return [];
+    }
   }
 }
 
