@@ -271,7 +271,7 @@ const Landing = () => {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 border-t border-white/20">
+            <div className="md:hidden mt-4 pb-4 pt-4 border-t border-white/20 bg-[#1A1A1A] -mx-6 px-6">
               <div className="flex flex-col space-y-4 pt-4">
                 <a href="#features" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Features</a>
                 <Link href="/services/thermal-inspection" className="text-white/80 hover:text-white text-sm pl-4">→ Thermal Inspection</Link>
