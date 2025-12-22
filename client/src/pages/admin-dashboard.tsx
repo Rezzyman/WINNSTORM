@@ -21,8 +21,26 @@ import {
   LogOut,
   RefreshCw,
   Activity,
-  Settings
+  Settings,
+  BookOpen,
+  Upload,
+  FileText,
+  FolderOpen,
+  CheckCircle2,
+  Clock,
+  Trash2,
+  Eye
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter 
+} from '@/components/ui/dialog';
 import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 
 interface AdminStats {
@@ -48,12 +66,53 @@ interface AdminUser {
   createdAt: string;
 }
 
+interface KnowledgeCategory {
+  id: number;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  orderIndex: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface KnowledgeDocument {
+  id: number;
+  title: string;
+  description: string | null;
+  categoryId: number | null;
+  documentType: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  mimeType: string | null;
+  content: string | null;
+  isActive: boolean;
+  isPublic: boolean;
+  version: number;
+  uploadedBy: number | null;
+  approvedBy: number | null;
+  approvedAt: string | null;
+  createdAt: string;
+}
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    description: '',
+    categoryId: '',
+    documentType: 'transcript',
+    content: '',
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const getToken = async (): Promise<string | null> => {
     if (!user) return null;
@@ -121,6 +180,101 @@ const AdminDashboard = () => {
     queryKey: ['/api/admin/clients'],
     enabled: isAuthorized === true,
   });
+
+  // Knowledge Base queries
+  const { data: knowledgeCategories, isLoading: categoriesLoading, refetch: refetchCategories } = useQuery<KnowledgeCategory[]>({
+    queryKey: ['/api/admin/knowledge/categories'],
+    enabled: isAuthorized === true,
+  });
+
+  const { data: knowledgeDocuments, isLoading: documentsLoading, refetch: refetchDocuments } = useQuery<KnowledgeDocument[]>({
+    queryKey: ['/api/admin/knowledge/documents'],
+    enabled: isAuthorized === true,
+  });
+
+  const handleUploadDocument = async () => {
+    if (!uploadForm.title) {
+      toast({ title: "Title is required", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const token = await getToken();
+      const formData = new FormData();
+      formData.append('title', uploadForm.title);
+      formData.append('description', uploadForm.description);
+      if (uploadForm.categoryId) {
+        formData.append('categoryId', uploadForm.categoryId);
+      }
+      formData.append('documentType', uploadForm.documentType);
+      formData.append('content', uploadForm.content);
+      
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      const response = await fetch('/api/admin/knowledge/documents', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload document');
+      }
+
+      toast({ title: "Document uploaded successfully" });
+      setShowUploadDialog(false);
+      setUploadForm({ title: '', description: '', categoryId: '', documentType: 'transcript', content: '' });
+      setSelectedFile(null);
+      refetchDocuments();
+    } catch (error) {
+      toast({ title: "Upload failed", description: (error as Error).message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleApproveDocument = async (docId: number) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/admin/knowledge/documents/${docId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to approve document');
+      toast({ title: "Document approved" });
+      refetchDocuments();
+    } catch (error) {
+      toast({ title: "Failed to approve document", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteDocument = async (docId: number) => {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+    
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/admin/knowledge/documents/${docId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to delete document');
+      toast({ title: "Document deleted" });
+      refetchDocuments();
+    } catch (error) {
+      toast({ title: "Failed to delete document", variant: "destructive" });
+    }
+  };
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ userId, updates }: { userId: number; updates: any }) => {
@@ -318,6 +472,10 @@ const AdminDashboard = () => {
               <UserCheck className="h-4 w-4 mr-2" />
               Clients
             </TabsTrigger>
+            <TabsTrigger value="knowledge" className="rounded-none data-[state=active]:bg-primary">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Knowledge Base
+            </TabsTrigger>
             <TabsTrigger value="system" className="rounded-none data-[state=active]:bg-primary">
               <Settings className="h-4 w-4 mr-2" />
               System
@@ -505,6 +663,181 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="knowledge">
+            <Card className="bg-white/5 border-white/10 rounded-none">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-purple-500" />
+                    Knowledge Base Management
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowUploadDialog(true)}
+                    className="bg-primary hover:bg-primary/90"
+                    data-testid="button-upload-knowledge"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Document
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-5 w-5 text-blue-400" />
+                      <span className="text-white font-medium">Total Documents</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{knowledgeDocuments?.length || 0}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FolderOpen className="h-5 w-5 text-yellow-400" />
+                      <span className="text-white font-medium">Categories</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{knowledgeCategories?.length || 0}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-400" />
+                      <span className="text-white font-medium">Approved</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">
+                      {knowledgeDocuments?.filter(d => d.approvedAt).length || 0}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    Categories
+                  </h3>
+                  {categoriesLoading ? (
+                    <div className="text-center py-4 text-white/60">Loading categories...</div>
+                  ) : knowledgeCategories?.length === 0 ? (
+                    <div className="text-center py-4 text-white/60">
+                      No categories yet. Categories will be created automatically.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                      {knowledgeCategories?.map((category) => (
+                        <div
+                          key={category.id}
+                          className="p-3 bg-white/5 border border-white/10 text-center"
+                        >
+                          <span className="text-white text-sm">{category.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Documents
+                  </h3>
+                  {documentsLoading ? (
+                    <div className="text-center py-8 text-white/60">Loading documents...</div>
+                  ) : knowledgeDocuments?.length === 0 ? (
+                    <div className="text-center py-8 text-white/60">
+                      <FileText className="h-12 w-12 mx-auto mb-3 text-white/30" />
+                      <p>No documents uploaded yet</p>
+                      <p className="text-sm mt-1">Upload transcripts, PDFs, or text files to train Stormy AI</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-white/10 hover:bg-transparent">
+                            <TableHead className="text-white/60">Title</TableHead>
+                            <TableHead className="text-white/60">Type</TableHead>
+                            <TableHead className="text-white/60">Category</TableHead>
+                            <TableHead className="text-white/60">Status</TableHead>
+                            <TableHead className="text-white/60">Uploaded</TableHead>
+                            <TableHead className="text-white/60">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {knowledgeDocuments?.map((doc) => (
+                            <TableRow key={doc.id} className="border-white/10 hover:bg-white/5">
+                              <TableCell className="text-white">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-blue-400" />
+                                  {doc.title}
+                                </div>
+                                {doc.fileName && (
+                                  <span className="text-xs text-white/40 ml-6">{doc.fileName}</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-white/60">
+                                  {doc.documentType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-white/60">
+                                {knowledgeCategories?.find(c => c.id === doc.categoryId)?.name || '-'}
+                              </TableCell>
+                              <TableCell>
+                                {doc.approvedAt ? (
+                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Approved
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Pending
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-white/60 text-sm">
+                                {new Date(doc.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1">
+                                  {!doc.approvedAt && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleApproveDocument(doc.id)}
+                                      className="text-green-400 hover:text-green-300 hover:bg-green-500/10"
+                                      data-testid={`button-approve-doc-${doc.id}`}
+                                    >
+                                      <CheckCircle2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-white/60 hover:text-white"
+                                    data-testid={`button-view-doc-${doc.id}`}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteDocument(doc.id)}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    data-testid={`button-delete-doc-${doc.id}`}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="system">
             <Card className="bg-white/5 border-white/10 rounded-none">
               <CardHeader>
@@ -582,6 +915,140 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="bg-[#1A1A1A] border-white/10 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
+              Upload Knowledge Document
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-white">Title *</Label>
+              <Input
+                id="title"
+                placeholder="Document title"
+                value={uploadForm.title}
+                onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
+                className="bg-white/5 border-white/20 text-white"
+                data-testid="input-doc-title"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-white">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Brief description of the document"
+                value={uploadForm.description}
+                onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
+                className="bg-white/5 border-white/20 text-white min-h-20"
+                data-testid="input-doc-description"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="documentType" className="text-white">Document Type</Label>
+                <Select
+                  value={uploadForm.documentType}
+                  onValueChange={(value) => setUploadForm({ ...uploadForm, documentType: value })}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="transcript">Transcript</SelectItem>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="procedure">Procedure</SelectItem>
+                    <SelectItem value="methodology">Methodology</SelectItem>
+                    <SelectItem value="training">Training Material</SelectItem>
+                    <SelectItem value="case_study">Case Study</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-white">Category</Label>
+                <Select
+                  value={uploadForm.categoryId}
+                  onValueChange={(value) => setUploadForm({ ...uploadForm, categoryId: value })}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {knowledgeCategories?.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id.toString()}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="file" className="text-white">Upload File (optional)</Label>
+              <Input
+                id="file"
+                type="file"
+                accept=".pdf,.txt,.md,.doc,.docx"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                className="bg-white/5 border-white/20 text-white file:bg-primary file:text-white file:border-0 file:mr-4 file:px-4 file:py-2"
+                data-testid="input-doc-file"
+              />
+              <p className="text-xs text-white/40">
+                Supported: PDF, TXT, MD, DOC, DOCX (max 50MB)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="content" className="text-white">Or paste content directly</Label>
+              <Textarea
+                id="content"
+                placeholder="Paste transcript or document content here..."
+                value={uploadForm.content}
+                onChange={(e) => setUploadForm({ ...uploadForm, content: e.target.value })}
+                className="bg-white/5 border-white/20 text-white min-h-32"
+                data-testid="input-doc-content"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowUploadDialog(false)}
+              className="border-white/20 text-white hover:bg-white/10"
+              data-testid="button-cancel-upload"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUploadDocument}
+              disabled={isUploading || !uploadForm.title}
+              className="bg-primary hover:bg-primary/90"
+              data-testid="button-submit-upload"
+            >
+              {isUploading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
