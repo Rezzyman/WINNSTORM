@@ -1,11 +1,12 @@
 import OpenAI from "openai";
 import { storage } from "./storage";
-import type { AIConversation, AIMessage, AIMemory, InsertAIConversation, InsertAIMessage, InsertAIMemory, AIMessageAttachment, AIMemoryPreferences } from "@shared/schema";
+import type { AIConversation, AIMessage, AIMemory, InsertAIConversation, InsertAIMessage, InsertAIMemory, AIMessageAttachment, AIMemoryPreferences, KnowledgeDocument } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const STORMY_MODEL = "gpt-5";
 const MAX_CONTEXT_MESSAGES = 30;
 const MAX_CONTEXT_TOKENS = 8000;
+const MAX_KNOWLEDGE_CONTEXT_CHARS = 12000;
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -134,9 +135,80 @@ export async function updateUserMemory(
   return await storage.createAIMemory(newMemory);
 }
 
+// Knowledge Base Integration
+async function getRelevantKnowledge(query: string): Promise<string> {
+  try {
+    // Get approved documents from knowledge base
+    const approvedDocs = await storage.getApprovedKnowledgeDocuments();
+    
+    if (approvedDocs.length === 0) {
+      return '';
+    }
+
+    // Simple keyword matching for now - can be upgraded to vector similarity later
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    
+    // Score documents by keyword relevance
+    const scoredDocs = approvedDocs.map(doc => {
+      const content = `${doc.title} ${doc.description || ''} ${doc.content || ''}`.toLowerCase();
+      let score = 0;
+      
+      for (const word of queryWords) {
+        if (content.includes(word)) {
+          score++;
+          // Boost for title matches
+          if (doc.title.toLowerCase().includes(word)) {
+            score += 2;
+          }
+        }
+      }
+      
+      return { doc, score };
+    }).filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (scoredDocs.length === 0) {
+      // If no keyword matches, include top 3 most relevant docs by document type
+      const topDocs = approvedDocs.slice(0, 3);
+      return formatKnowledgeContext(topDocs);
+    }
+
+    // Return top 5 most relevant documents
+    const relevantDocs = scoredDocs.slice(0, 5).map(item => item.doc);
+    return formatKnowledgeContext(relevantDocs);
+  } catch (error) {
+    console.error('Error fetching knowledge base:', error);
+    return '';
+  }
+}
+
+function formatKnowledgeContext(docs: KnowledgeDocument[]): string {
+  if (docs.length === 0) return '';
+  
+  let context = '\n\n## Knowledge Base Reference:\n';
+  let totalChars = 0;
+  
+  for (const doc of docs) {
+    const docContent = doc.content || '';
+    const truncatedContent = docContent.substring(0, 2000);
+    const docSection = `\n### ${doc.title}\n${doc.description || ''}\n${truncatedContent}${docContent.length > 2000 ? '...' : ''}`;
+    
+    if (totalChars + docSection.length > MAX_KNOWLEDGE_CONTEXT_CHARS) {
+      break;
+    }
+    
+    context += docSection;
+    totalChars += docSection.length;
+  }
+  
+  context += '\n\n[Use the above knowledge base content to inform your responses when relevant.]';
+  return context;
+}
+
 async function buildContextMessages(
   conversationId: number,
-  userMemory: AIMemory | null
+  userMemory: AIMemory | null,
+  currentQuery?: string
 ): Promise<StormyMessage[]> {
   const messages = await storage.getAIMessagesByConversation(conversationId);
   const recentMessages = messages.slice(-MAX_CONTEXT_MESSAGES);
@@ -144,6 +216,14 @@ async function buildContextMessages(
   const contextMessages: StormyMessage[] = [];
 
   let systemPrompt = STORMY_SYSTEM_PROMPT;
+  
+  // Add knowledge base context if there's a query
+  if (currentQuery) {
+    const knowledgeContext = await getRelevantKnowledge(currentQuery);
+    if (knowledgeContext) {
+      systemPrompt += knowledgeContext;
+    }
+  }
 
   if (userMemory?.preferences) {
     const prefs = userMemory.preferences;
@@ -224,7 +304,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<StormyRe
   const savedUserMessage = await storage.createAIMessage(userMessage);
 
   const userMemory = await getUserMemory(userId);
-  const contextMessages = await buildContextMessages(conversationId, userMemory);
+  const contextMessages = await buildContextMessages(conversationId, userMemory, message);
 
   const newUserContent: Array<{ type: "text" | "image_url"; text?: string; image_url?: { url: string } }> = [
     { type: "text", text: message }

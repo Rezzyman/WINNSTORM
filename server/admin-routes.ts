@@ -423,6 +423,33 @@ router.delete('/knowledge/documents/:id', requireAdmin, async (req: AdminAuthent
   }
 });
 
+// === SECURE FILE DOWNLOAD ===
+
+// Download knowledge document file (admin only)
+router.get('/knowledge/documents/:id/download', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: 'Invalid document ID' });
+    
+    const document = await storage.getKnowledgeDocumentById(id);
+    if (!document) return res.status(404).json({ message: 'Document not found' });
+    
+    if (!document.fileUrl) {
+      return res.status(404).json({ message: 'No file attached to this document' });
+    }
+    
+    const filePath = path.join(process.cwd(), document.fileUrl);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'File not found on server' });
+    }
+    
+    res.download(filePath, document.fileName || 'document');
+  } catch (error) {
+    console.error('Error downloading knowledge document:', error);
+    res.status(500).json({ message: 'Failed to download document' });
+  }
+});
+
 // === AUDIT LOG ===
 
 // Get knowledge audit log

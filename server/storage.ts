@@ -15,7 +15,7 @@ import {
   knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog
 } from "@shared/schema";
 import { db } from './db';
-import { eq, or, inArray, and, desc, ilike } from 'drizzle-orm';
+import { eq, or, inArray, and, desc, ilike, isNotNull } from 'drizzle-orm';
 
 // Interface for storage
 export interface IStorage {
@@ -1379,12 +1379,11 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(knowledgeDocuments.isActive, true),
-            // Documents that have been approved
-            // Note: We check for non-null approvedAt by comparing to a very old date
+            isNotNull(knowledgeDocuments.approvedAt)
           )
         )
         .orderBy(desc(knowledgeDocuments.createdAt));
-      return results.filter(doc => doc.approvedAt !== null);
+      return results;
     } catch (error) {
       console.error('Error fetching approved knowledge documents:', error);
       return [];
