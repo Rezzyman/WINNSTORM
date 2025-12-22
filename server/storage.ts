@@ -7,12 +7,15 @@ import {
   TeamAssignment, InsertTeamAssignment, DamageTemplate, InsertDamageTemplate,
   AIConversation, InsertAIConversation, AIMessage, InsertAIMessage, AIMemory, InsertAIMemory,
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
+  KnowledgeCategory, InsertKnowledgeCategory, KnowledgeDocument, InsertKnowledgeDocument,
+  KnowledgeEmbedding, InsertKnowledgeEmbedding, KnowledgeAuditLog, InsertKnowledgeAuditLog,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
-  scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory
+  scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory,
+  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog
 } from "@shared/schema";
 import { db } from './db';
-import { eq, or, inArray } from 'drizzle-orm';
+import { eq, or, inArray, and, desc, ilike } from 'drizzle-orm';
 
 // Interface for storage
 export interface IStorage {
@@ -1144,6 +1147,246 @@ export class DatabaseStorage implements IStorage {
       return result;
     } catch (error) {
       console.error('Error fetching all clients:', error);
+      return [];
+    }
+  }
+
+  // =============================================================================
+  // KNOWLEDGE BASE METHODS
+  // =============================================================================
+
+  // Knowledge Categories
+  async getAllKnowledgeCategories(): Promise<KnowledgeCategory[]> {
+    try {
+      const result = await db.select().from(knowledgeCategories).orderBy(knowledgeCategories.orderIndex);
+      return result;
+    } catch (error) {
+      console.error('Error fetching knowledge categories:', error);
+      return [];
+    }
+  }
+
+  async getKnowledgeCategoryById(id: number): Promise<KnowledgeCategory | undefined> {
+    try {
+      const [category] = await db.select().from(knowledgeCategories).where(eq(knowledgeCategories.id, id));
+      return category || undefined;
+    } catch (error) {
+      console.error('Error fetching knowledge category:', error);
+      return undefined;
+    }
+  }
+
+  async getKnowledgeCategoryByName(name: string): Promise<KnowledgeCategory | undefined> {
+    try {
+      const [category] = await db.select().from(knowledgeCategories).where(eq(knowledgeCategories.name, name));
+      return category || undefined;
+    } catch (error) {
+      console.error('Error fetching knowledge category by name:', error);
+      return undefined;
+    }
+  }
+
+  async createKnowledgeCategory(data: InsertKnowledgeCategory): Promise<KnowledgeCategory> {
+    const [category] = await db.insert(knowledgeCategories).values(data).returning();
+    return category;
+  }
+
+  async updateKnowledgeCategory(id: number, updates: Partial<KnowledgeCategory>): Promise<KnowledgeCategory | undefined> {
+    try {
+      const [updated] = await db
+        .update(knowledgeCategories)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(knowledgeCategories.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error updating knowledge category:', error);
+      return undefined;
+    }
+  }
+
+  async deleteKnowledgeCategory(id: number): Promise<boolean> {
+    try {
+      await db.delete(knowledgeCategories).where(eq(knowledgeCategories.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting knowledge category:', error);
+      return false;
+    }
+  }
+
+  // Knowledge Documents
+  async getAllKnowledgeDocuments(filters: { categoryId?: number; documentType?: string }): Promise<KnowledgeDocument[]> {
+    try {
+      let query = db.select().from(knowledgeDocuments);
+      
+      const conditions = [];
+      if (filters.categoryId) {
+        conditions.push(eq(knowledgeDocuments.categoryId, filters.categoryId));
+      }
+      if (filters.documentType) {
+        conditions.push(eq(knowledgeDocuments.documentType, filters.documentType));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions)) as any;
+      }
+      
+      const result = await query.orderBy(desc(knowledgeDocuments.createdAt));
+      return result;
+    } catch (error) {
+      console.error('Error fetching knowledge documents:', error);
+      return [];
+    }
+  }
+
+  async getKnowledgeDocumentById(id: number): Promise<KnowledgeDocument | undefined> {
+    try {
+      const [document] = await db.select().from(knowledgeDocuments).where(eq(knowledgeDocuments.id, id));
+      return document || undefined;
+    } catch (error) {
+      console.error('Error fetching knowledge document:', error);
+      return undefined;
+    }
+  }
+
+  async createKnowledgeDocument(data: InsertKnowledgeDocument): Promise<KnowledgeDocument> {
+    const [document] = await db.insert(knowledgeDocuments).values(data).returning();
+    return document;
+  }
+
+  async updateKnowledgeDocument(id: number, updates: Partial<KnowledgeDocument>): Promise<KnowledgeDocument | undefined> {
+    try {
+      const [updated] = await db
+        .update(knowledgeDocuments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(knowledgeDocuments.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error updating knowledge document:', error);
+      return undefined;
+    }
+  }
+
+  async approveKnowledgeDocument(id: number, approvedBy: number): Promise<KnowledgeDocument | undefined> {
+    try {
+      const [updated] = await db
+        .update(knowledgeDocuments)
+        .set({ 
+          approvedBy, 
+          approvedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(knowledgeDocuments.id, id))
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error('Error approving knowledge document:', error);
+      return undefined;
+    }
+  }
+
+  async deleteKnowledgeDocument(id: number): Promise<boolean> {
+    try {
+      // First delete related embeddings
+      await db.delete(knowledgeEmbeddings).where(eq(knowledgeEmbeddings.documentId, id));
+      // Then delete the document
+      await db.delete(knowledgeDocuments).where(eq(knowledgeDocuments.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting knowledge document:', error);
+      return false;
+    }
+  }
+
+  async searchKnowledgeDocuments(query: string): Promise<KnowledgeDocument[]> {
+    try {
+      const results = await db
+        .select()
+        .from(knowledgeDocuments)
+        .where(
+          or(
+            ilike(knowledgeDocuments.title, `%${query}%`),
+            ilike(knowledgeDocuments.content, `%${query}%`),
+            ilike(knowledgeDocuments.description, `%${query}%`)
+          )
+        )
+        .orderBy(desc(knowledgeDocuments.createdAt));
+      return results;
+    } catch (error) {
+      console.error('Error searching knowledge documents:', error);
+      return [];
+    }
+  }
+
+  // Knowledge Embeddings
+  async createKnowledgeEmbedding(data: InsertKnowledgeEmbedding): Promise<KnowledgeEmbedding> {
+    const [embedding] = await db.insert(knowledgeEmbeddings).values(data).returning();
+    return embedding;
+  }
+
+  async getKnowledgeEmbeddingsByDocument(documentId: number): Promise<KnowledgeEmbedding[]> {
+    try {
+      const results = await db
+        .select()
+        .from(knowledgeEmbeddings)
+        .where(eq(knowledgeEmbeddings.documentId, documentId))
+        .orderBy(knowledgeEmbeddings.chunkIndex);
+      return results;
+    } catch (error) {
+      console.error('Error fetching knowledge embeddings:', error);
+      return [];
+    }
+  }
+
+  async deleteKnowledgeEmbeddingsByDocument(documentId: number): Promise<boolean> {
+    try {
+      await db.delete(knowledgeEmbeddings).where(eq(knowledgeEmbeddings.documentId, documentId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting knowledge embeddings:', error);
+      return false;
+    }
+  }
+
+  // Knowledge Audit Log
+  async createKnowledgeAuditLog(data: InsertKnowledgeAuditLog): Promise<KnowledgeAuditLog> {
+    const [log] = await db.insert(knowledgeAuditLog).values(data).returning();
+    return log;
+  }
+
+  async getKnowledgeAuditLogs(limit: number = 100, offset: number = 0): Promise<KnowledgeAuditLog[]> {
+    try {
+      const results = await db
+        .select()
+        .from(knowledgeAuditLog)
+        .orderBy(desc(knowledgeAuditLog.createdAt))
+        .limit(limit)
+        .offset(offset);
+      return results;
+    } catch (error) {
+      console.error('Error fetching knowledge audit logs:', error);
+      return [];
+    }
+  }
+
+  async getApprovedKnowledgeDocuments(): Promise<KnowledgeDocument[]> {
+    try {
+      const results = await db
+        .select()
+        .from(knowledgeDocuments)
+        .where(
+          and(
+            eq(knowledgeDocuments.isActive, true),
+            // Documents that have been approved
+            // Note: We check for non-null approvedAt by comparing to a very old date
+          )
+        )
+        .orderBy(desc(knowledgeDocuments.createdAt));
+      return results.filter(doc => doc.approvedAt !== null);
+    } catch (error) {
+      console.error('Error fetching approved knowledge documents:', error);
       return [];
     }
   }

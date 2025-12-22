@@ -2194,3 +2194,119 @@ export type InnovationModule = typeof innovationModules.$inferSelect;
 export type InsertInnovationModule = z.infer<typeof insertInnovationModuleSchema>;
 export type OrganizationModule = typeof organizationModules.$inferSelect;
 export type InsertOrganizationModule = z.infer<typeof insertOrganizationModuleSchema>;
+
+// -----------------------------------------------------------------------------
+// 9. STORMY KNOWLEDGE BASE
+// Secure document storage for AI training and contextual responses
+// -----------------------------------------------------------------------------
+
+export interface DocumentMetadata {
+  author?: string;
+  source?: string;
+  pageCount?: number;
+  wordCount?: number;
+  language?: string;
+  extractedTopics?: string[];
+  processingStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+  processingError?: string;
+}
+
+export interface EmbeddingChunk {
+  chunkIndex: number;
+  content: string;
+  embedding?: number[];
+  tokenCount?: number;
+}
+
+export const knowledgeCategories = pgTable("knowledge_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  icon: text("icon"),
+  color: text("color"),
+  isActive: boolean("is_active").default(true),
+  orderIndex: integer("order_index").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const knowledgeDocuments = pgTable("knowledge_documents", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => knowledgeCategories.id),
+  documentType: text("document_type").notNull(), // 'transcript', 'manual', 'guide', 'faq', 'methodology', 'case_study'
+  fileUrl: text("file_url"),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"), // in bytes
+  mimeType: text("mime_type"),
+  content: text("content"), // Extracted text content for searchability
+  summary: text("summary"), // AI-generated summary
+  metadata: jsonb("metadata").$type<DocumentMetadata>(),
+  isPublic: boolean("is_public").default(false), // Whether available to all users or just admins
+  isActive: boolean("is_active").default(true),
+  version: integer("version").default(1),
+  uploadedBy: integer("uploaded_by").references(() => users.id),
+  approvedBy: integer("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const knowledgeEmbeddings = pgTable("knowledge_embeddings", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => knowledgeDocuments.id).notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  chunkContent: text("chunk_content").notNull(),
+  embedding: jsonb("embedding").$type<number[]>(), // Vector embedding for semantic search
+  tokenCount: integer("token_count"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const knowledgeAuditLog = pgTable("knowledge_audit_log", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => knowledgeDocuments.id),
+  categoryId: integer("category_id").references(() => knowledgeCategories.id),
+  action: text("action").notNull(), // 'create', 'update', 'delete', 'approve', 'upload', 'download'
+  userId: integer("user_id").references(() => users.id).notNull(),
+  userEmail: text("user_email"),
+  previousValue: jsonb("previous_value"),
+  newValue: jsonb("new_value"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertKnowledgeCategorySchema = createInsertSchema(knowledgeCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertKnowledgeDocumentSchema = createInsertSchema(knowledgeDocuments).omit({
+  id: true,
+  approvedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertKnowledgeEmbeddingSchema = createInsertSchema(knowledgeEmbeddings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertKnowledgeAuditLogSchema = createInsertSchema(knowledgeAuditLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type KnowledgeCategory = typeof knowledgeCategories.$inferSelect;
+export type InsertKnowledgeCategory = z.infer<typeof insertKnowledgeCategorySchema>;
+export type KnowledgeDocument = typeof knowledgeDocuments.$inferSelect;
+export type InsertKnowledgeDocument = z.infer<typeof insertKnowledgeDocumentSchema>;
+export type KnowledgeEmbedding = typeof knowledgeEmbeddings.$inferSelect;
+export type InsertKnowledgeEmbedding = z.infer<typeof insertKnowledgeEmbeddingSchema>;
+export type KnowledgeAuditLog = typeof knowledgeAuditLog.$inferSelect;
+export type InsertKnowledgeAuditLog = z.infer<typeof insertKnowledgeAuditLogSchema>;
