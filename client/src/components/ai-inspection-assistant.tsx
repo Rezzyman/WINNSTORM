@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { StormyAvatar } from './stormy-avatar';
 import { getStormySystemPrompt, getQuickActionsForStep, getStepWelcomeMessage, UserExperienceLevel } from '@/lib/stormy-guidance';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { apiRequest } from '@/lib/queryClient';
 
 interface AIMessage {
   id: string;
@@ -116,7 +117,7 @@ export function AIInspectionAssistant({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ai-assistant', {
+      const data = await apiRequest('/api/ai-assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,12 +128,6 @@ export function AIInspectionAssistant({
           conversationHistory: messages.slice(-5) // Last 5 messages for context
         }),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
-      }
-
-      const data = await response.json();
 
       const assistantMessage: AIMessage = {
         id: (Date.now() + 1).toString(),
