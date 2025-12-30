@@ -37,8 +37,8 @@ interface CrmSyncLog {
 }
 
 const CRM_TYPES = [
+  { value: 'aterna', label: 'ATERNA CRM+', description: 'Advanced marketing & automation' },
   { value: 'jobnimbus', label: 'JobNimbus', description: 'Construction job management' },
-  { value: 'gohighlevel', label: 'GoHighLevel', description: 'All-in-one CRM & marketing' },
   { value: 'salesforce', label: 'Salesforce', description: 'Enterprise CRM platform' },
   { value: 'hubspot', label: 'HubSpot', description: 'Inbound marketing & sales' },
   { value: 'pipedrive', label: 'Pipedrive', description: 'Sales-focused CRM' },
@@ -199,8 +199,8 @@ export const CrmConfigManager: React.FC = () => {
 
   const getDefaultBaseUrl = (type: string) => {
     const defaults: Record<string, string> = {
+      'aterna': 'https://api.aterna.io/v1',
       'jobnimbus': 'https://api.jobnimbus.com/api1',
-      'gohighlevel': 'https://rest.gohighlevel.com/v1',
       'salesforce': 'https://your-domain.my.salesforce.com',
       'hubspot': 'https://api.hubapi.com',
       'pipedrive': 'https://api.pipedrive.com/v1'

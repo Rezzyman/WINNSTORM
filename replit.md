@@ -35,7 +35,7 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **Step Validation System**: Enforces methodology requirements, provides AI feedback, and guidance.
 - **Multi-Property Scheduling**: Calendar management, route optimization, and schedule generation.
 - **AI Quality Services**: AI-powered thermal analysis, evidence quality checking, and inspection completeness tracking.
-- **CRM Integration**: Unified interface for various CRM platforms (JobNimbus, GoHighLevel, Salesforce, HubSpot, Pipedrive) for contact/job sync and report uploads.
+- **CRM Integration**: Native WinnStorm CRM plus ATERNA CRM+ (white-labeled premium CRM) and third-party integrations (JobNimbus, Salesforce, HubSpot, Pipedrive) for contact/job sync and report uploads.
 - **Bulk Property Import**: CSV/Excel parsing, column mapping, data validation, and batch creation.
 - **Team Assignment & Workload Management**: Assigning inspectors, tracking capacity, and workload visualization.
 - **Pre-built Damage Templates**: Categorized damage templates with severity ratings, affected components, recommended actions, and required evidence checklists.

@@ -137,7 +137,7 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
   const getCrmTypeIcon = (type: string) => {
     switch (type) {
       case 'jobnimbus': return '🔧';
-      case 'gohighlevel': return '📈';
+      case 'aterna': return '⚡';
       case 'salesforce': return '☁️';
       case 'hubspot': return '🟠';
       case 'pipedrive': return '🔵';
@@ -219,8 +219,8 @@ export const CrmSync: React.FC<CrmSyncProps> = ({ property, scan }) => {
               <p className="text-foreground">{property.name}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Health Score:</span>
-              <p className="text-foreground">{property.healthScore}/100</p>
+              <span className="text-muted-foreground">Condition:</span>
+              <p className="text-foreground">{property.overallCondition || 'Not assessed'}</p>
             </div>
             <div>
               <span className="text-muted-foreground">Address:</span>

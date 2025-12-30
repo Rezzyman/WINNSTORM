@@ -2,7 +2,7 @@ import { Property, Scan, Report } from "@shared/schema";
 
 // CRM Integration Types
 export interface CRMConfig {
-  type: 'jobnimbus' | 'gohighlevel' | 'salesforce' | 'hubspot' | 'pipedrive';
+  type: 'jobnimbus' | 'aterna' | 'salesforce' | 'hubspot' | 'pipedrive';
   apiKey: string;
   baseUrl: string;
   webhookUrl?: string;
@@ -639,8 +639,8 @@ class PipedriveIntegration {
   }
 }
 
-// GoHighLevel Integration
-class GoHighLevelIntegration {
+// ATERNA CRM+ Integration (White-labeled)
+class AternaIntegration {
   private config: CRMConfig;
 
   constructor(config: CRMConfig) {
@@ -670,7 +670,7 @@ class GoHighLevelIntegration {
       });
 
       if (!response.ok) {
-        throw new Error(`GoHighLevel API error: ${response.statusText}`);
+        throw new Error(`ATERNA CRM+ API error: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -708,7 +708,7 @@ class GoHighLevelIntegration {
       });
 
       if (!response.ok) {
-        throw new Error(`GoHighLevel API error: ${response.statusText}`);
+        throw new Error(`ATERNA CRM+ API error: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -737,8 +737,8 @@ export class CRMIntegrationManager {
       case 'jobnimbus':
         this.integrations.set(name, new JobNimbusIntegration(config));
         break;
-      case 'gohighlevel':
-        this.integrations.set(name, new GoHighLevelIntegration(config));
+      case 'aterna':
+        this.integrations.set(name, new AternaIntegration(config));
         break;
       case 'salesforce':
         this.integrations.set(name, new SalesforceIntegration(config));

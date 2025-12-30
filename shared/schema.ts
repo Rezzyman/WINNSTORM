@@ -867,7 +867,7 @@ export const crmConfigs = pgTable("crm_configs", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   name: text("name").notNull(), // User-defined name for this integration
-  type: text("type").notNull(), // 'jobnimbus', 'gohighlevel', etc.
+  type: text("type").notNull(), // 'jobnimbus', 'aterna', 'salesforce', 'hubspot', 'pipedrive'
   apiKey: text("api_key").notNull(),
   baseUrl: text("base_url").notNull(),
   webhookUrl: text("webhook_url"),
