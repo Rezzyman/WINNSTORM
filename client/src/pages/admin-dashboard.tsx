@@ -102,7 +102,7 @@ const AdminDashboard = () => {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [hasChecked, setHasChecked] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -120,13 +120,14 @@ const AdminDashboard = () => {
   };
 
   const verifyAdminAccess = async () => {
-    if (hasChecked) return;
+    if (isVerifying) return;
+    setIsVerifying(true);
     
     try {
       const token = await getToken();
       if (!token) {
         setIsAuthorized(false);
-        setHasChecked(true);
+        setIsVerifying(false);
         return;
       }
       
@@ -149,17 +150,17 @@ const AdminDashboard = () => {
     } catch (error) {
       setIsAuthorized(false);
     }
-    setHasChecked(true);
+    setIsVerifying(false);
   };
 
   useEffect(() => {
     if (!user) {
-      setIsAuthorized(false);
-      setHasChecked(true);
+      setIsAuthorized(null);
       return;
     }
+    setIsAuthorized(null);
     verifyAdminAccess();
-  }, [user, hasChecked]);
+  }, [user]);
 
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
