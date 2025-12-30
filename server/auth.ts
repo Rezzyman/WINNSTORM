@@ -166,6 +166,7 @@ const ADMIN_ALLOWLIST = [
   'admin@winnstorm.com',
   'eric@winnstorm.com',
   'developer@winnstorm.com',
+  'anthony@winnstorm.com',
 ];
 
 export interface AdminAuthenticatedRequest extends AuthenticatedRequest {
