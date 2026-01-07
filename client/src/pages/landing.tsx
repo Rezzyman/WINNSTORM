@@ -915,10 +915,11 @@ const Landing = () => {
               </p>
               <a 
                 href="/admin/login" 
-                className="text-xs text-white/20 hover:text-white/40 transition-colors"
+                className="text-white/30 hover:text-primary transition-colors"
                 data-testid="link-admin"
+                title="Admin"
               >
-                Admin
+                <Shield className="h-4 w-4" />
               </a>
             </div>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
