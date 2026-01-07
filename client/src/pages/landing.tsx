@@ -924,7 +924,7 @@ const Landing = () => {
             </div>
           </div>
           
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center items-center gap-4 mt-6">
             <a 
               href="/admin/login" 
               className="text-primary hover:text-primary/80 transition-colors"
@@ -932,6 +932,14 @@ const Landing = () => {
               title="Admin"
             >
               <Shield className="h-5 w-5" />
+            </a>
+            <a 
+              href="/team/knowledge" 
+              className="text-primary hover:text-primary/80 transition-colors"
+              data-testid="link-team-portal"
+              title="Staff Portal"
+            >
+              <Users className="h-5 w-5" />
             </a>
           </div>
         </div>
