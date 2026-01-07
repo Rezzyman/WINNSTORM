@@ -909,19 +909,9 @@ const Landing = () => {
           <Separator className="my-8 bg-white/10" />
           
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-4">
-              <p className="text-sm text-white/50">
-                © 2025 WinnStorm™. All rights reserved. Built with the proven Winn Methodology.
-              </p>
-              <a 
-                href="/admin/login" 
-                className="text-white/30 hover:text-primary transition-colors"
-                data-testid="link-admin"
-                title="Admin"
-              >
-                <Shield className="h-4 w-4" />
-              </a>
-            </div>
+            <p className="text-sm text-white/50">
+              © 2025 WinnStorm™. All rights reserved. Built with the proven Winn Methodology.
+            </p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <Badge variant="outline" className="text-xs border-white/20 text-white/60 rounded-none">
                 <Shield className="h-3 w-3 mr-1 text-primary" />
@@ -932,6 +922,17 @@ const Landing = () => {
                 Enterprise Security
               </Badge>
             </div>
+          </div>
+          
+          <div className="flex justify-center mt-6">
+            <a 
+              href="/admin/login" 
+              className="text-primary hover:text-primary/80 transition-colors"
+              data-testid="link-admin"
+              title="Admin"
+            >
+              <Shield className="h-5 w-5" />
+            </a>
           </div>
         </div>
       </footer>
