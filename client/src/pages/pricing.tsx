@@ -171,9 +171,8 @@ export default function PricingPage() {
               <h2 className="font-heading font-bold text-2xl text-white uppercase tracking-wide mb-4">
                 All Plans Include
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 {[
-                  "14-Day Free Trial",
                   "No Setup Fees",
                   "Cancel Anytime",
                   "Data Export"

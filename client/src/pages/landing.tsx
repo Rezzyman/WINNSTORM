@@ -120,7 +120,7 @@ const Landing = () => {
         "Basic project management"
       ],
       badge: null,
-      buttonText: "Start Free Trial",
+      buttonText: "Get Started",
       buttonVariant: "outline" as const
     },
     {
@@ -254,7 +254,7 @@ const Landing = () => {
               <a href="#contact" className="text-white/80 hover:text-white font-heading uppercase text-sm tracking-wide transition-colors">Contact</a>
               <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
               <Button className="btn-primary" onClick={() => navigate('/subscribe/professional')}>
-                Start Free Trial
+                Get Started
               </Button>
             </div>
 
@@ -673,7 +673,7 @@ const Landing = () => {
 
           <div className="text-center mt-12">
             <p className="text-white/60 mb-4 font-heading uppercase tracking-wide text-sm">
-              All plans include 14-day free trial - No setup fees - Cancel anytime
+              No setup fees - Cancel anytime
             </p>
             <div className="flex justify-center space-x-8 text-sm text-white/50">
               <div className="flex items-center">
@@ -804,7 +804,7 @@ const Landing = () => {
             className="text-xl mb-8 opacity-90 max-w-3xl mx-auto"
           >
             Join hundreds of certified consultants who trust WinnStorm for accurate, comprehensive damage assessment. 
-            Start your free trial today and experience the future of professional inspections.
+            Get started today and experience the future of professional inspections.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -823,7 +823,7 @@ const Landing = () => {
                 className="bg-white text-[#1A1A1A] hover:bg-white/90 text-lg px-8 py-6 rounded-none font-heading uppercase tracking-wide"
                 onClick={() => navigate('/auth')}
               >
-                Start Free Trial
+                Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </motion.div>

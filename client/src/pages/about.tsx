@@ -263,7 +263,7 @@ const About = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild>
               <Link href="/auth">
-                Start Free Trial
+                Get Started
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
             </Button>

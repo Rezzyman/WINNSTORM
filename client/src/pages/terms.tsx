@@ -101,12 +101,6 @@ const Terms = () => {
               <li>Failure to pay may result in suspension or termination of your account</li>
             </ul>
 
-            <h3>3.3 Free Trial</h3>
-            <p>
-              We may offer a free trial period. At the end of the trial, you will be charged unless you cancel before 
-              the trial expires. Trial terms may vary and are subject to change.
-            </p>
-
             <h2>4. Acceptable Use</h2>
             <p>You agree not to:</p>
             <ul>

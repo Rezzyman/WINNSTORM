@@ -322,7 +322,7 @@ const Methodology = () => {
             </Button>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary" asChild>
               <Link href="/auth">
-                Start Free Trial
+                Get Started
               </Link>
             </Button>
           </div>

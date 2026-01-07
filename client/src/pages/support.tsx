@@ -54,7 +54,7 @@ const Support = () => {
   const faqs = [
     {
       question: "How do I get started with WinnStorm?",
-      answer: "Getting started is easy! Sign up for a free trial, complete our quick onboarding tour, and you'll be ready to conduct your first inspection. Our Stormy AI assistant will guide you through each step of the Winn Methodology."
+      answer: "Getting started is easy! Sign up for an account, complete our quick onboarding tour, and you'll be ready to conduct your first inspection. Our Stormy AI assistant will guide you through each step of the Winn Methodology."
     },
     {
       question: "What equipment do I need for thermal analysis?",
