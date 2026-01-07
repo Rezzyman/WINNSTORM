@@ -2352,3 +2352,30 @@ export const insertAdminCredentialsSchema = createInsertSchema(adminCredentials)
 
 export type AdminCredentials = typeof adminCredentials.$inferSelect;
 export type InsertAdminCredentials = z.infer<typeof insertAdminCredentialsSchema>;
+
+// Team Member Credentials - Separate password-based auth for knowledge upload portal
+export const teamCredentials = pgTable("team_credentials", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  loginAttempts: integer("login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  createdBy: text("created_by"), // Admin email who created this team member
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTeamCredentialsSchema = createInsertSchema(teamCredentials).omit({
+  id: true,
+  lastLogin: true,
+  loginAttempts: true,
+  lockedUntil: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type TeamCredentials = typeof teamCredentials.$inferSelect;
+export type InsertTeamCredentials = z.infer<typeof insertTeamCredentialsSchema>;

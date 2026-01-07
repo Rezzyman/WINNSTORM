@@ -10,10 +10,11 @@ import {
   KnowledgeCategory, InsertKnowledgeCategory, KnowledgeDocument, InsertKnowledgeDocument,
   KnowledgeEmbedding, InsertKnowledgeEmbedding, KnowledgeAuditLog, InsertKnowledgeAuditLog,
   AdminCredentials, InsertAdminCredentials,
+  TeamCredentials, InsertTeamCredentials,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
   scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory,
-  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog, adminCredentials
+  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog, adminCredentials, teamCredentials
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray, and, desc, ilike, isNotNull } from 'drizzle-orm';
@@ -1449,6 +1450,64 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error updating admin credentials:', error);
       return undefined;
+    }
+  }
+
+  // Team Credentials
+  async getTeamCredentials(email: string): Promise<TeamCredentials | undefined> {
+    try {
+      const [creds] = await db
+        .select()
+        .from(teamCredentials)
+        .where(eq(teamCredentials.email, email));
+      return creds;
+    } catch (error) {
+      console.error('Error fetching team credentials:', error);
+      return undefined;
+    }
+  }
+
+  async getAllTeamMembers(): Promise<TeamCredentials[]> {
+    try {
+      const results = await db
+        .select()
+        .from(teamCredentials)
+        .orderBy(desc(teamCredentials.createdAt));
+      return results;
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      return [];
+    }
+  }
+
+  async createTeamCredentials(data: InsertTeamCredentials): Promise<TeamCredentials> {
+    const [creds] = await db.insert(teamCredentials).values(data).returning();
+    return creds;
+  }
+
+  async updateTeamCredentials(email: string, updates: Partial<TeamCredentials>): Promise<TeamCredentials | undefined> {
+    try {
+      const [updated] = await db
+        .update(teamCredentials)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(teamCredentials.email, email))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating team credentials:', error);
+      return undefined;
+    }
+  }
+
+  async deleteTeamCredentials(email: string): Promise<boolean> {
+    try {
+      await db
+        .delete(teamCredentials)
+        .where(eq(teamCredentials.email, email));
+      return true;
+    } catch (error) {
+      console.error('Error deleting team credentials:', error);
+      return false;
     }
   }
 }
