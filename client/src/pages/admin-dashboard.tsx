@@ -104,6 +104,7 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -130,10 +131,25 @@ const AdminDashboard = () => {
     setIsVerifying(true);
     
     try {
+      // First try session-based auth (password login)
+      const sessionResponse = await fetch('/api/admin/session', {
+        credentials: 'include',
+      });
+      
+      if (sessionResponse.ok) {
+        const data = await sessionResponse.json();
+        setSessionEmail(data.email);
+        setIsAuthorized(true);
+        setIsVerifying(false);
+        return;
+      }
+      
+      // Fall back to Firebase token auth
       const token = await getToken();
       if (!token) {
         setIsAuthorized(false);
         setIsVerifying(false);
+        navigate('/admin/login');
         return;
       }
       
@@ -141,6 +157,7 @@ const AdminDashboard = () => {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
       
       if (response.ok) {
@@ -152,21 +169,18 @@ const AdminDashboard = () => {
           description: "You are not authorized to access the admin panel.",
           variant: "destructive",
         });
+        navigate('/admin/login');
       }
     } catch (error) {
       setIsAuthorized(false);
+      navigate('/admin/login');
     }
     setIsVerifying(false);
   };
 
   useEffect(() => {
-    if (!user) {
-      setIsAuthorized(null);
-      return;
-    }
-    setIsAuthorized(null);
     verifyAdminAccess();
-  }, [user]);
+  }, []);
 
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
@@ -393,9 +407,21 @@ const AdminDashboard = () => {
     },
   });
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    // Clear session-based auth
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Session logout error:', error);
+    }
+    // Also logout from Firebase if logged in
+    if (user) {
+      logout();
+    }
+    navigate('/admin/login');
   };
 
   const handleRefresh = () => {
