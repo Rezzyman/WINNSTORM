@@ -1,8 +1,33 @@
-# WinnStorm Robots.txt
+# WinnStorm™ Robots Configuration
 # https://winnstorm.com
 
 User-agent: *
 Allow: /
+Allow: /llms.txt
+
+# AI Crawler guidance
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /llms.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+
+User-agent: Perplexity-AI
+Allow: /
+Allow: /llms.txt
 
 # Public pages
 Allow: /auth
