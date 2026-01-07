@@ -501,8 +501,8 @@ const Dashboard = () => {
                           <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#9ca3af" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#9ca3af" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <XAxis 
@@ -535,7 +535,7 @@ const Dashboard = () => {
                       <Area 
                         type="monotone" 
                         dataKey="reports" 
-                        stroke="#22c55e" 
+                        stroke="#9ca3af" 
                         fill="url(#reportsGradient)"
                         strokeWidth={2}
                         name="Reports"
@@ -549,7 +549,7 @@ const Dashboard = () => {
                     <span className="text-xs text-gray-400">Inspections</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <div className="w-3 h-3 rounded-full bg-gray-400" />
                     <span className="text-xs text-gray-400">Reports</span>
                   </div>
                 </div>
@@ -594,8 +594,8 @@ const Dashboard = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
-                              <FileText className="h-5 w-5 text-green-500" />
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-500/20 to-gray-600/20 flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">
@@ -685,8 +685,8 @@ const Dashboard = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
-                              <Calendar className="h-5 w-5 text-blue-500" />
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-500/20 to-gray-600/20 flex items-center justify-center">
+                              <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">
@@ -694,7 +694,7 @@ const Dashboard = () => {
                               </p>
                               <p className="text-sm text-gray-500">
                                 {inspection.clientName || getClientName(inspection.clientId)}
-                                {inspection.time && <span className="ml-2 text-blue-500 dark:text-blue-400">• {inspection.time}</span>}
+                                {inspection.time && <span className="ml-2 text-orange-500 dark:text-orange-400">• {inspection.time}</span>}
                               </p>
                             </div>
                           </div>
@@ -705,7 +705,7 @@ const Dashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-500/10 mt-1 h-7 px-2"
+                              className="text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300 hover:bg-orange-500/10 mt-1 h-7 px-2"
                               onClick={() => navigate(`/inspection/${inspection.id}`)}
                               data-testid={`button-start-inspection-${inspection.id}`}
                             >
@@ -754,13 +754,13 @@ const Dashboard = () => {
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-blue-500/10 dark:to-blue-600/5 border-gray-200 dark:border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/training')}
               data-testid="card-training"
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
-                  <ClipboardCheck className="h-5 w-5 text-blue-500" />
+                <div className="p-2 bg-gray-500/20 rounded-lg group-hover:bg-gray-500/30 transition-colors">
+                  <ClipboardCheck className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">Training Portal</p>
@@ -770,13 +770,13 @@ const Dashboard = () => {
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-purple-500/10 dark:to-purple-600/5 border-gray-200 dark:border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/crm-integrations')}
               data-testid="card-crm"
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-colors">
-                  <Users className="h-5 w-5 text-purple-500" />
+                <div className="p-2 bg-gray-500/20 rounded-lg group-hover:bg-gray-500/30 transition-colors">
+                  <Users className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">CRM Integration</p>
@@ -786,13 +786,13 @@ const Dashboard = () => {
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-cyan-500/10 dark:to-cyan-600/5 border-gray-200 dark:border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/innovation')}
               data-testid="card-innovation"
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 bg-cyan-500/20 rounded-lg group-hover:bg-cyan-500/30 transition-colors">
-                  <TrendingUp className="h-5 w-5 text-cyan-500" />
+                <div className="p-2 bg-gray-500/20 rounded-lg group-hover:bg-gray-500/30 transition-colors">
+                  <TrendingUp className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">Innovation Hub</p>
