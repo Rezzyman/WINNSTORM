@@ -179,6 +179,49 @@ export interface AdminAuthenticatedRequest extends AuthenticatedRequest {
 }
 
 export async function requireAdmin(req: AdminAuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  // First check for session-based admin auth (password login)
+  const sessionEmail = (req.session as any)?.adminEmail;
+  const sessionToken = (req.session as any)?.adminToken;
+  
+  if (sessionEmail && sessionToken) {
+    // Check if email is in admin allowlist
+    if (!ADMIN_ALLOWLIST.includes(sessionEmail.toLowerCase())) {
+      res.status(403).json({ message: 'Admin access denied - not authorized.' });
+      return;
+    }
+    
+    // Get or create DB user for session-based admin
+    let dbUser = await storage.getUserByEmail(sessionEmail);
+    if (!dbUser) {
+      try {
+        dbUser = await storage.createUser({
+          email: sessionEmail,
+          role: 'admin',
+          certificationLevel: 'none',
+        });
+      } catch (error) {
+        console.error('Failed to create admin user:', error);
+        res.status(500).json({ message: 'Failed to verify admin user.' });
+        return;
+      }
+    }
+    
+    if (!dbUser.isAdmin) {
+      await storage.updateUser(dbUser.id, { isAdmin: true });
+    }
+    
+    req.adminUser = {
+      uid: `session-${sessionEmail}`,
+      email: sessionEmail,
+      dbUserId: dbUser.id,
+      isAdmin: true,
+    };
+    
+    next();
+    return;
+  }
+  
+  // Fallback to Firebase token auth
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

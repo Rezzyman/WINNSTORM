@@ -1,10 +1,23 @@
-import { Router, Response } from 'express';
+import { Router, Response, Request } from 'express';
 import { requireAdmin, AdminAuthenticatedRequest, isAdminEmail } from './auth';
 import { storage } from './storage';
 import { User, Project, Property, InsertKnowledgeDocument, InsertKnowledgeCategory, InsertKnowledgeAuditLog } from '@shared/schema';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
+
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password: string, storedHash: string): boolean {
+  const [salt, hash] = storedHash.split(':');
+  const verifyHash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  return hash === verifyHash;
+}
 
 const uploadDir = path.join(process.cwd(), 'uploads', 'knowledge');
 if (!fs.existsSync(uploadDir)) {
@@ -96,6 +109,114 @@ router.post('/check-access', async (req, res) => {
   
   const hasAccess = isAdminEmail(email);
   res.json({ hasAccess });
+});
+
+// Admin password login (bypasses Firebase)
+router.post('/login', async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password required' });
+  }
+  
+  if (!isAdminEmail(email)) {
+    return res.status(403).json({ message: 'Email not authorized for admin access' });
+  }
+  
+  try {
+    const adminCreds = await storage.getAdminCredentials(email);
+    
+    if (!adminCreds) {
+      return res.status(401).json({ message: 'Admin credentials not set up. Please contact system administrator.' });
+    }
+    
+    if (adminCreds.lockedUntil && new Date() < new Date(adminCreds.lockedUntil)) {
+      return res.status(423).json({ message: 'Account temporarily locked. Try again later.' });
+    }
+    
+    if (!verifyPassword(password, adminCreds.passwordHash)) {
+      const attempts = (adminCreds.loginAttempts || 0) + 1;
+      const updates: any = { loginAttempts: attempts };
+      
+      if (attempts >= 5) {
+        updates.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min lockout
+      }
+      
+      await storage.updateAdminCredentials(email, updates);
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+    
+    await storage.updateAdminCredentials(email, { 
+      lastLogin: new Date(), 
+      loginAttempts: 0,
+      lockedUntil: null 
+    });
+    
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    
+    if (req.session) {
+      (req.session as any).adminToken = sessionToken;
+      (req.session as any).adminEmail = email;
+    }
+    
+    res.json({ 
+      success: true, 
+      email,
+      message: 'Login successful' 
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ message: 'Login failed' });
+  }
+});
+
+// Admin logout
+router.post('/logout', async (req: Request, res: Response) => {
+  if (req.session) {
+    (req.session as any).adminToken = null;
+    (req.session as any).adminEmail = null;
+  }
+  res.json({ success: true });
+});
+
+// Set admin password (requires existing admin or setup token)
+router.post('/set-password', async (req: Request, res: Response) => {
+  const { email, password, setupToken } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password required' });
+  }
+  
+  if (!isAdminEmail(email)) {
+    return res.status(403).json({ message: 'Email not authorized for admin access' });
+  }
+  
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters' });
+  }
+  
+  const adminSession = (req.session as any)?.adminEmail;
+  const validSetupToken = setupToken === process.env.ADMIN_SETUP_TOKEN;
+  
+  if (!adminSession && !validSetupToken) {
+    return res.status(403).json({ message: 'Not authorized to set passwords' });
+  }
+  
+  try {
+    const passwordHash = hashPassword(password);
+    const existing = await storage.getAdminCredentials(email);
+    
+    if (existing) {
+      await storage.updateAdminCredentials(email, { passwordHash });
+    } else {
+      await storage.createAdminCredentials({ email, passwordHash });
+    }
+    
+    res.json({ success: true, message: 'Password set successfully' });
+  } catch (error) {
+    console.error('Error setting admin password:', error);
+    res.status(500).json({ message: 'Failed to set password' });
+  }
 });
 
 // Get all users (admin only)

@@ -9,10 +9,11 @@ import {
   WinnMethodologyStep, WINN_METHODOLOGY_STEPS,
   KnowledgeCategory, InsertKnowledgeCategory, KnowledgeDocument, InsertKnowledgeDocument,
   KnowledgeEmbedding, InsertKnowledgeEmbedding, KnowledgeAuditLog, InsertKnowledgeAuditLog,
+  AdminCredentials, InsertAdminCredentials,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
   scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory,
-  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog
+  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog, adminCredentials
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray, and, desc, ilike, isNotNull } from 'drizzle-orm';
@@ -1415,6 +1416,39 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching approved knowledge documents:', error);
       return [];
+    }
+  }
+
+  // Admin Credentials
+  async getAdminCredentials(email: string): Promise<AdminCredentials | undefined> {
+    try {
+      const [creds] = await db
+        .select()
+        .from(adminCredentials)
+        .where(eq(adminCredentials.email, email));
+      return creds;
+    } catch (error) {
+      console.error('Error fetching admin credentials:', error);
+      return undefined;
+    }
+  }
+
+  async createAdminCredentials(data: InsertAdminCredentials): Promise<AdminCredentials> {
+    const [creds] = await db.insert(adminCredentials).values(data).returning();
+    return creds;
+  }
+
+  async updateAdminCredentials(email: string, updates: Partial<AdminCredentials>): Promise<AdminCredentials | undefined> {
+    try {
+      const [updated] = await db
+        .update(adminCredentials)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(adminCredentials.email, email))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating admin credentials:', error);
+      return undefined;
     }
   }
 }

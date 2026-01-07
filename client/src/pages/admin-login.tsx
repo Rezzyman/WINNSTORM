@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,44 +14,31 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const [hasCheckedAccess, setHasCheckedAccess] = useState(false);
-  const { user, login, logout } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (hasCheckedAccess) return;
-    
-    const checkAdminAccess = async () => {
-      if (!user) {
-        setCheckingAccess(false);
-        setHasCheckedAccess(true);
-        return;
-      }
-      
+    const checkAdminSession = async () => {
       try {
-        const token = await user.getIdToken();
         const response = await fetch('/api/admin/session', {
-          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include',
         });
         
         if (response.ok) {
           navigate('/admin');
           return;
-        } else {
-          setAccessDenied(true);
         }
       } catch (error) {
         console.error('Admin session check failed:', error);
       }
       
       setCheckingAccess(false);
-      setHasCheckedAccess(true);
     };
     
-    checkAdminAccess();
-  }, [user, navigate, hasCheckedAccess]);
+    checkAdminSession();
+  }, [navigate]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,26 +54,27 @@ const AdminLogin = () => {
     try {
       setIsLoading(true);
       setAccessDenied(false);
+      setErrorMessage('');
       
-      const response = await fetch('/api/admin/check-access', {
+      const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
       
-      const { hasAccess } = await response.json();
+      const data = await response.json();
       
-      if (!hasAccess) {
+      if (!response.ok) {
         setAccessDenied(true);
+        setErrorMessage(data.message || 'Login failed');
         toast({
-          title: "Access Denied",
-          description: "This email is not authorized for admin access.",
+          title: "Login Failed",
+          description: data.message || "Please check your credentials and try again.",
           variant: "destructive",
         });
         return;
       }
-
-      await login(email, password);
       
       toast({
         title: "Admin Login Successful",
@@ -147,32 +134,10 @@ const AdminLogin = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {accessDenied && user && (
-              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30">
-                <div className="flex items-center gap-2 text-red-400 text-sm mb-3">
-                  <AlertTriangle className="h-4 w-4" />
-                  Access denied. Your account ({user.email}) is not authorized for admin access.
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    await logout();
-                    setAccessDenied(false);
-                  }}
-                  className="w-full text-white border-white/20 hover:bg-white/10"
-                  data-testid="button-logout-admin"
-                >
-                  Sign out and try a different account
-                </Button>
-              </div>
-            )}
-            
-            {accessDenied && !user && (
+            {accessDenied && (
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 flex items-center gap-2 text-red-400 text-sm">
                 <AlertTriangle className="h-4 w-4" />
-                Access denied. This email is not authorized for admin access.
+                {errorMessage || 'Access denied. Please check your credentials.'}
               </div>
             )}
             
