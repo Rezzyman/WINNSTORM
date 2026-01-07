@@ -21,22 +21,22 @@ import {
   PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
 } from 'recharts';
 
-// Status color mapping
+// Status color mapping - simplified orange + gray palette
 const statusColors: Record<string, string> = {
-  active: 'bg-green-500/20 text-green-400 border-green-500/30',
+  active: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   inactive: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  lead: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  completed: 'bg-green-500/20 text-green-400 border-green-500/30',
-  in_progress: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  scheduled: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  draft: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  submitted: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-  denied: 'bg-red-500/20 text-red-400 border-red-500/30',
+  pending: 'bg-gray-400/20 text-gray-300 border-gray-400/30',
+  lead: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  completed: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  in_progress: 'bg-orange-400/20 text-orange-300 border-orange-400/30',
+  scheduled: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  draft: 'bg-gray-400/20 text-gray-300 border-gray-400/30',
+  submitted: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  denied: 'bg-gray-600/20 text-gray-500 border-gray-600/30',
 };
 
-// Pipeline stage colors for chart
-const pipelineColors = ['#3b82f6', '#f97316', '#22c55e', '#06b6d4', '#8b5cf6'];
+// Pipeline stage colors - orange shades + grays for enterprise look
+const pipelineColors = ['#6b7280', '#f97316', '#fdba74', '#fb923c', '#ea580c'];
 
 // Demo data for demonstration purposes (linked to testimonials on landing page)
 const demoClients = [
@@ -286,14 +286,14 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                  <span className="text-green-500">+2</span>
+                  <TrendingUp className="h-3 w-3 mr-1 text-orange-500" />
+                  <span className="text-orange-500">+2</span>
                   <span className="ml-1">this month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-blue-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-open-projects">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-orange-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-open-projects">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -302,18 +302,18 @@ const Dashboard = () => {
                       <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : openProjects}</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-blue-500/10 rounded-xl">
-                    <Briefcase className="h-6 w-6 text-blue-500" />
+                  <div className="p-3 bg-gray-500/10 rounded-xl">
+                    <Briefcase className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <Clock className="h-3 w-3 mr-1 text-yellow-500" />
+                  <Clock className="h-3 w-3 mr-1 text-orange-500" />
                   <span>{projects?.filter(p => p.status === 'in_progress').length || 0} in progress</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-green-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-inspections-month">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-orange-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-inspections-month">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -322,19 +322,19 @@ const Dashboard = () => {
                       <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : inspectionsThisMonth}</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-green-500/10 rounded-xl">
-                    <ClipboardCheck className="h-6 w-6 text-green-500" />
+                  <div className="p-3 bg-orange-500/10 rounded-xl">
+                    <ClipboardCheck className="h-6 w-6 text-orange-500" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />
-                  <span className="text-green-500">12%</span>
+                  <ArrowUpRight className="h-3 w-3 mr-1 text-orange-500" />
+                  <span className="text-orange-500">12%</span>
                   <span className="ml-1">vs last month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-purple-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-reports-generated">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-orange-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-reports-generated">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -343,12 +343,12 @@ const Dashboard = () => {
                       <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : reportsGenerated}</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-purple-500/10 rounded-xl">
-                    <FileText className="h-6 w-6 text-purple-500" />
+                  <div className="p-3 bg-gray-500/10 rounded-xl">
+                    <FileText className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                  <CheckCircle2 className="h-3 w-3 mr-1 text-orange-500" />
                   <span>{completedProjects} delivered</span>
                 </div>
               </CardContent>
