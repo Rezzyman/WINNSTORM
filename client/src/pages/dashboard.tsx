@@ -1,23 +1,46 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
 import { Header, Footer } from '@/components/navbar';
-import { PropertyCard } from '@/components/property-card';
 import { UserOnboarding } from '@/components/user-onboarding';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Property, Project, DamageAssessment } from '@shared/schema';
-import { FileText, Upload, BarChart3, Users, Briefcase, GraduationCap, AlertTriangle, Mic, BookOpen } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Property, Project, Client, InspectionSession } from '@shared/schema';
+import { 
+  FileText, Upload, Users, Briefcase, TrendingUp, Calendar,
+  Building2, ClipboardCheck, ChevronRight, Clock, CheckCircle2,
+  AlertCircle, Play, Eye, Download, Plus, ArrowUpRight
+} from 'lucide-react';
 import { StormyChat } from '@/components/stormy-chat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO, breadcrumbSchema } from '@/components/seo';
-import winnstormLogo from '@assets/logo-dark_1765042579232.png';
+import { 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
+} from 'recharts';
+
+// Status color mapping
+const statusColors: Record<string, string> = {
+  active: 'bg-green-500/20 text-green-400 border-green-500/30',
+  inactive: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+  lead: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  completed: 'bg-green-500/20 text-green-400 border-green-500/30',
+  in_progress: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  scheduled: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  draft: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  submitted: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  denied: 'bg-red-500/20 text-red-400 border-red-500/30',
+};
+
+// Pipeline stage colors for chart
+const pipelineColors = ['#3b82f6', '#f97316', '#22c55e', '#06b6d4', '#8b5cf6'];
 
 const Dashboard = () => {
   const { user, role } = useAuth();
   const [, navigate] = useLocation();
-  const [, params] = useRoute('/dashboard');
   const [showOnboarding, setShowOnboarding] = useState(false);
   
   // Redirect to login if not authenticated
@@ -40,7 +63,6 @@ const Dashboard = () => {
   const handleOnboardingComplete = async () => {
     if (user) {
       localStorage.setItem(`onboarding_completed_${user.uid}`, 'true');
-      // Persist to database
       try {
         await fetch('/api/user/onboarding', {
           method: 'PATCH',
@@ -54,39 +76,94 @@ const Dashboard = () => {
     setShowOnboarding(false);
   };
 
-  // Fetch properties and projects
+  // Fetch all data
+  const { data: clients, isLoading: clientsLoading } = useQuery<Client[]>({
+    queryKey: ['/api/clients'],
+  });
+
+  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+  });
+
   const { data: properties, isLoading: propertiesLoading } = useQuery<Property[]>({
     queryKey: ['/api/properties'],
   });
 
-  const { data: projectsList, isLoading: projectsLoading } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
+  const { data: inspections, isLoading: inspectionsLoading } = useQuery<InspectionSession[]>({
+    queryKey: ['/api/inspection/sessions'],
   });
 
-  const isLoading = propertiesLoading || projectsLoading;
+  const isLoading = clientsLoading || projectsLoading || propertiesLoading || inspectionsLoading;
 
-  // Stats calculation for WinnStorm™ dashboard
-  const activeProjects = projectsList?.filter(p => !['completed', 'denied'].includes(p.status)).length || 0;
-  const completedProjects = projectsList?.filter(p => p.status === 'completed').length || 0;
+  // Calculate stats (clients don't have status field - all are considered active)
+  const activeClients = clients?.length || 0;
+  const totalClients = clients?.length || 0;
+  const openProjects = projects?.filter(p => !['completed', 'denied'].includes(p.status)).length || 0;
+  const completedProjects = projects?.filter(p => p.status === 'completed').length || 0;
   
-  const stats = {
-    activeProjects,
-    completedAssessments: properties?.length || completedProjects,
-    avgCondition: properties && properties.length > 0 
-      ? 'Good'
-      : 'N/A',
-    certificationLevel: role === 'senior_consultant' ? 'Senior' : 
-                        role === 'admin' ? 'Admin' : 'Junior',
-    scans: properties?.length || 0,
-    reports: completedProjects || '—',
-    avgScore: '—'
+  // This month's inspections
+  const thisMonth = new Date();
+  const thisMonthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+  const inspectionsThisMonth = inspections?.filter(i => 
+    new Date(i.startedAt || '') >= thisMonthStart
+  ).length || 0;
+
+  // Reports generated (completed inspections)
+  const reportsGenerated = inspections?.filter(i => i.status === 'completed').length || 0;
+
+  // Pipeline data for chart
+  const pipelineData = [
+    { name: 'Scheduled', value: projects?.filter(p => p.status === 'scheduled').length || 0, fill: pipelineColors[0] },
+    { name: 'In Progress', value: projects?.filter(p => p.status === 'in_progress').length || 0, fill: pipelineColors[1] },
+    { name: 'Report Draft', value: projects?.filter(p => p.status === 'report_draft').length || 0, fill: pipelineColors[2] },
+    { name: 'Submitted', value: projects?.filter(p => p.status === 'submitted').length || 0, fill: pipelineColors[3] },
+    { name: 'Completed', value: completedProjects, fill: pipelineColors[4] },
+  ];
+
+  // Monthly trend data (mock for now - would come from API)
+  const monthlyTrendData = [
+    { month: 'Aug', inspections: 12, reports: 10 },
+    { month: 'Sep', inspections: 18, reports: 15 },
+    { month: 'Oct', inspections: 24, reports: 20 },
+    { month: 'Nov', inspections: 22, reports: 19 },
+    { month: 'Dec', inspections: 28, reports: 25 },
+    { month: 'Jan', inspections: inspectionsThisMonth || 15, reports: reportsGenerated || 12 },
+  ];
+
+  // Recent clients (last 5)
+  const recentClients = clients?.slice(0, 5) || [];
+
+  // Recent projects for reports (last 5 completed)
+  const recentReports = projects?.filter(p => p.status === 'completed').slice(0, 5) || [];
+
+  // Upcoming inspections (scheduled projects)
+  const upcomingInspections = projects
+    ?.filter(p => p.status === 'scheduled' && p.inspectionDate)
+    .sort((a, b) => new Date(a.inspectionDate!).getTime() - new Date(b.inspectionDate!).getTime())
+    .slice(0, 5) || [];
+
+  // Get client name by ID
+  const getClientName = (clientId: number | null) => {
+    if (!clientId) return 'Unknown Client';
+    const client = clients?.find(c => c.id === clientId);
+    return client?.companyName || client?.contactPerson || 'Unknown Client';
+  };
+
+  // Format date
+  const formatDate = (dateStr: string | null | Date) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-foreground">
+    <div className="min-h-screen flex flex-col relative bg-[#0f1419] text-foreground">
       <SEO
         title="Dashboard"
-        description="Manage your damage assessment projects, track inspections, and view certification progress. Access thermal analysis tools and generate comprehensive Winn Reports."
+        description="Manage your damage assessment projects, track inspections, and view certification progress."
         canonical="/dashboard"
         noindex={true}
         structuredData={breadcrumbSchema([
@@ -97,249 +174,559 @@ const Dashboard = () => {
       <Header />
       
       <main className="flex-grow pb-20">
-        <div className="p-6">
+        <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
           
-
-          {/* Dashboard Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-lg">
-                    <Briefcase className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-muted-foreground">Active Projects</p>
-                    <p className="text-2xl font-bold text-primary">{stats.activeProjects}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-card to-cyan-500/5 border-cyan-500/20">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg">
-                    <FileText className="h-6 w-6 text-cyan-500" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-muted-foreground">Assessments</p>
-                    <p className="text-2xl font-bold text-cyan-600">{stats.completedAssessments}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-card to-blue-500/5 border-blue-500/20">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-blue-500/20 to-primary/20 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-blue-500" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-muted-foreground">Avg. Condition</p>
-                    <p className="text-2xl font-bold text-blue-600">{stats.avgCondition}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-lg">
-                    <GraduationCap className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-muted-foreground">Certification</p>
-                    <p className="text-lg font-bold text-primary">{stats.certificationLevel}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Dashboard Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Dashboard</h1>
+              <p className="text-gray-400 text-sm">
+                Welcome back{user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}. Here's your overview.
+              </p>
+            </div>
+            <div className="flex gap-2 mt-4 md:mt-0">
               <Button 
-                onClick={() => navigate('/upload')} 
-                className="bg-gradient-to-br from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white p-4 h-auto flex flex-col items-center shadow-lg border-0"
+                onClick={() => navigate('/upload')}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0"
+                data-testid="button-new-assessment"
               >
-                <Upload className="h-6 w-6 mb-2" />
-                <span>New Assessment</span>
+                <Plus className="h-4 w-4 mr-2" />
+                New Assessment
               </Button>
-              
               <Button 
                 variant="outline" 
-                className="p-4 h-auto flex flex-col items-center border-primary/30 hover:bg-primary/10 hover:border-primary/50"
-                onClick={() => navigate('/training')}
+                onClick={() => navigate('/clients')}
+                className="border-gray-700 hover:bg-gray-800"
+                data-testid="button-add-client"
               >
-                <GraduationCap className="h-6 w-6 mb-2 text-primary" />
-                <span>Training Portal</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto flex flex-col items-center border-cyan-500/30 hover:bg-cyan-500/10 hover:border-cyan-500/50"
-                onClick={() => navigate('/projects')}
-              >
-                <Briefcase className="h-6 w-6 mb-2 text-cyan-500" />
-                <span>Manage Projects</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto flex flex-col items-center border-blue-500/30 hover:bg-blue-500/10 hover:border-blue-500/50"
-                onClick={() => navigate('/crm-integrations')}
-              >
-                <Users className="h-6 w-6 mb-2 text-blue-500" />
-                <span>CRM Integration</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto flex flex-col items-center border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50"
-                onClick={() => navigate('/transcripts')}
-                data-testid="button-transcripts"
-              >
-                <Mic className="h-6 w-6 mb-2 text-purple-500" />
-                <span>Transcripts</span>
+                <Users className="h-4 w-4 mr-2" />
+                Add Client
               </Button>
             </div>
           </div>
 
-          {/* Recent Projects & Assessments */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">Recent Projects</h3>
-              <Button variant="outline" onClick={() => navigate('/projects')}>
-                View All Projects
-              </Button>
-            </div>
-
-            {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Card>
-                <Skeleton className="h-48 w-full" />
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <Skeleton className="h-6 w-1/3" />
-                    <Skeleton className="h-6 w-1/4" />
-                  </div>
-                  <Skeleton className="h-4 w-2/3 mb-3" />
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-4 w-1/4" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <Skeleton className="h-48 w-full" />
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <Skeleton className="h-6 w-1/3" />
-                    <Skeleton className="h-6 w-1/4" />
-                  </div>
-                  <Skeleton className="h-4 w-2/3 mb-3" />
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-4 w-1/4" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : properties && properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <Card className="mb-6 border border-border shadow-md">
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground mb-4">No properties found. Start by adding a new thermal scan.</p>
-              </CardContent>
-            </Card>
-          )}
-          </div>
-
-          {/* Action Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            {/* Winn Report Card - Featured */}
-            <Card 
-              className="bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-primary/30 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              onClick={() => navigate('/winn-report/1')}
-            >
-              <CardContent className="p-6 text-center">
-                <div className="bg-primary/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <FileText className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-bold text-foreground mb-2">Create Winn Report</h3>
-                <p className="text-muted-foreground text-sm mb-3">Generate comprehensive 300+ page inspection report</p>
-                <div className="flex justify-center space-x-1">
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                    Verified
-                  </span>
-                  <span className="text-xs bg-secondary/20 text-secondary px-2 py-1 rounded-full">
-                    Digital Title
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* New Scan Card */}
-            <Card 
-              className="bg-card border border-border hover:border-secondary transition-colors cursor-pointer shadow-md"
-              onClick={() => navigate('/upload')}
-            >
-              <CardContent className="p-6 text-center">
-                <div className="bg-secondary/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Upload className="h-8 w-8 text-secondary" />
-                </div>
-                <h3 className="font-bold text-foreground mb-2">Upload New Scan</h3>
-                <p className="text-muted-foreground text-sm">Upload thermal images for analysis</p>
-              </CardContent>
-            </Card>
-
-            {/* View Reports Card */}
-            <Card 
-              className="bg-card border border-border hover:border-accent transition-colors cursor-pointer shadow-md"
-              onClick={() => navigate('/reports')}
-            >
-              <CardContent className="p-6 text-center">
-                <div className="bg-accent/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="h-8 w-8 text-accent" />
-                </div>
-                <h3 className="font-bold text-foreground mb-2">View Reports</h3>
-                <p className="text-muted-foreground text-sm">Access all damage assessment reports</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Stats */}
-          {!isLoading && (
-            <Card className="bg-card border border-border shadow-md">
+          {/* Hero Stats Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-orange-500/30 transition-colors" data-testid="stat-active-clients">
               <CardContent className="p-5">
-                <h3 className="font-bold text-foreground mb-4">Monthly Overview</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-background rounded-lg">
-                    <p className="text-2xl font-bold text-primary">{stats.scans}</p>
-                    <p className="text-muted-foreground text-sm mt-1">Scans</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium">Active Clients</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : activeClients}</span>
+                      <span className="text-gray-500 text-sm">/ {totalClients}</span>
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-background rounded-lg">
-                    <p className="text-2xl font-bold text-secondary">{stats.reports}</p>
-                    <p className="text-muted-foreground text-sm mt-1">Reports</p>
+                  <div className="p-3 bg-orange-500/10 rounded-xl">
+                    <Users className="h-6 w-6 text-orange-500" />
                   </div>
-                  <div className="text-center p-3 bg-background rounded-lg">
-                    <p className="text-2xl font-bold text-accent">{stats.avgScore}</p>
-                    <p className="text-muted-foreground text-sm mt-1">Avg Score</p>
+                </div>
+                <div className="mt-3 flex items-center text-xs text-gray-500">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                  <span className="text-green-500">+2</span>
+                  <span className="ml-1">this month</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-blue-500/30 transition-colors" data-testid="stat-open-projects">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium">Open Projects</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : openProjects}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-blue-500/10 rounded-xl">
+                    <Briefcase className="h-6 w-6 text-blue-500" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center text-xs text-gray-500">
+                  <Clock className="h-3 w-3 mr-1 text-yellow-500" />
+                  <span>{projects?.filter(p => p.status === 'in_progress').length || 0} in progress</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-green-500/30 transition-colors" data-testid="stat-inspections-month">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium">Inspections This Month</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : inspectionsThisMonth}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-500/10 rounded-xl">
+                    <ClipboardCheck className="h-6 w-6 text-green-500" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center text-xs text-gray-500">
+                  <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />
+                  <span className="text-green-500">12%</span>
+                  <span className="ml-1">vs last month</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-purple-500/30 transition-colors" data-testid="stat-reports-generated">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium">Reports Generated</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : reportsGenerated}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-purple-500/10 rounded-xl">
+                    <FileText className="h-6 w-6 text-purple-500" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center text-xs text-gray-500">
+                  <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                  <span>{completedProjects} delivered</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            
+            {/* Recent Clients */}
+            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-recent-clients">
+              <CardHeader className="pb-3 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-white">Recent Clients</CardTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate('/clients')}
+                    className="text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 -mr-2"
+                    data-testid="button-view-all-clients"
+                  >
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-4 space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-lg" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : recentClients.length > 0 ? (
+                  <div className="divide-y divide-gray-800" data-testid="list-recent-clients">
+                    {recentClients.map((client) => (
+                      <div 
+                        key={client.id} 
+                        className="p-4 hover:bg-gray-800/50 transition-colors cursor-pointer group"
+                        onClick={() => navigate(`/clients/${client.id}`)}
+                        data-testid={`client-row-${client.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center">
+                            <Building2 className="h-5 w-5 text-orange-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-white truncate group-hover:text-orange-400 transition-colors">
+                              {client.companyName || client.contactPerson}
+                            </p>
+                            <p className="text-sm text-gray-500 truncate">{client.email}</p>
+                          </div>
+                          <Badge className={`${statusColors['active']} border text-xs`}>
+                            active
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <Users className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400 mb-3">No clients yet</p>
+                    <Button 
+                      size="sm" 
+                      onClick={() => navigate('/clients')}
+                      className="bg-orange-500 hover:bg-orange-600"
+                      data-testid="button-add-first-client"
+                    >
+                      Add First Client
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Inspection Pipeline */}
+            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-pipeline">
+              <CardHeader className="pb-3 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-white">Inspection Pipeline</CardTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate('/projects')}
+                    className="text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 -mr-2"
+                    data-testid="button-view-all-projects"
+                  >
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <Skeleton className="h-[200px] w-full" />
+                ) : (
+                  <div className="space-y-4" data-testid="pipeline-chart">
+                    {pipelineData.map((stage, idx) => (
+                      <div key={stage.name} className="flex items-center gap-3">
+                        <div className="w-24 text-sm text-gray-400">{stage.name}</div>
+                        <div className="flex-1 h-8 bg-gray-800 rounded-lg overflow-hidden">
+                          <div 
+                            className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
+                            style={{ 
+                              width: `${Math.max((stage.value / Math.max(...pipelineData.map(d => d.value), 1)) * 100, stage.value > 0 ? 15 : 0)}%`,
+                              backgroundColor: stage.fill
+                            }}
+                          >
+                            {stage.value > 0 && (
+                              <span className="text-xs font-bold text-white">{stage.value}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Total indicator */}
+                    <div className="pt-3 border-t border-gray-800 flex items-center justify-between">
+                      <span className="text-sm text-gray-400">Total Pipeline</span>
+                      <span className="text-xl font-bold text-white">
+                        {pipelineData.reduce((sum, d) => sum + d.value, 0)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Monthly Trend */}
+            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-trend">
+              <CardHeader className="pb-3 border-b border-gray-800">
+                <CardTitle className="text-lg font-semibold text-white">Monthly Trend</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <Skeleton className="h-[200px] w-full" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart data={monthlyTrendData}>
+                      <defs>
+                        <linearGradient id="inspectionsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fill: '#6b7280', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fill: '#6b7280', fontSize: 12 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1f2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px'
+                        }}
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="inspections" 
+                        stroke="#f97316" 
+                        fill="url(#inspectionsGradient)"
+                        strokeWidth={2}
+                        name="Inspections"
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="reports" 
+                        stroke="#22c55e" 
+                        fill="url(#reportsGradient)"
+                        strokeWidth={2}
+                        name="Reports"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+                <div className="flex items-center justify-center gap-6 mt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500" />
+                    <span className="text-xs text-gray-400">Inspections</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="text-xs text-gray-400">Reports</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          </div>
+
+          {/* Bottom Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Recent Reports */}
+            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-recent-reports">
+              <CardHeader className="pb-3 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-white">Recent Reports</CardTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate('/reports')}
+                    className="text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 -mr-2"
+                    data-testid="button-view-all-reports"
+                  >
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-4 space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : recentReports.length > 0 ? (
+                  <div className="divide-y divide-gray-800" data-testid="list-recent-reports">
+                    {recentReports.map((project) => (
+                      <div 
+                        key={project.id} 
+                        className="p-4 hover:bg-gray-800/50 transition-colors"
+                        data-testid={`report-row-${project.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-green-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-white">{project.propertyAddress}</p>
+                              <p className="text-sm text-gray-500">
+                                {getClientName(project.clientId)} • {formatDate(project.submissionDate)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-gray-400 hover:text-white hover:bg-gray-700"
+                              onClick={() => navigate(`/winn-report/${project.id}`)}
+                              data-testid={`button-view-report-${project.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-gray-400 hover:text-white hover:bg-gray-700"
+                              data-testid={`button-download-report-${project.id}`}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <FileText className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400 mb-3">No reports yet</p>
+                    <Button 
+                      size="sm" 
+                      onClick={() => navigate('/upload')}
+                      className="bg-orange-500 hover:bg-orange-600"
+                      data-testid="button-start-assessment"
+                    >
+                      Start Assessment
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Upcoming Inspections */}
+            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-upcoming">
+              <CardHeader className="pb-3 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-white">Upcoming Inspections</CardTitle>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate('/schedule')}
+                    className="text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 -mr-2"
+                    data-testid="button-schedule"
+                  >
+                    Schedule
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-4 space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : upcomingInspections.length > 0 ? (
+                  <div className="divide-y divide-gray-800" data-testid="list-upcoming-inspections">
+                    {upcomingInspections.map((project) => (
+                      <div 
+                        key={project.id} 
+                        className="p-4 hover:bg-gray-800/50 transition-colors"
+                        data-testid={`inspection-row-${project.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
+                              <Calendar className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-white">{project.propertyAddress}</p>
+                              <p className="text-sm text-gray-500">
+                                {getClientName(project.clientId)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-orange-400">
+                              {formatDate(project.inspectionDate)}
+                            </p>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 mt-1 h-7 px-2"
+                              onClick={() => navigate(`/inspection/${project.id}`)}
+                              data-testid={`button-start-inspection-${project.id}`}
+                            >
+                              <Play className="h-3 w-3 mr-1" />
+                              Start
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <Calendar className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400 mb-3">No upcoming inspections</p>
+                    <Button 
+                      size="sm" 
+                      onClick={() => navigate('/schedule')}
+                      className="bg-orange-500 hover:bg-orange-600"
+                      data-testid="button-schedule-inspection"
+                    >
+                      Schedule Inspection
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions Row */}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card 
+              className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20 hover:border-orange-500/40 transition-all cursor-pointer group"
+              onClick={() => navigate('/reports')}
+              data-testid="card-winn-report"
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 bg-orange-500/20 rounded-lg group-hover:bg-orange-500/30 transition-colors">
+                  <FileText className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">View Reports</p>
+                  <p className="text-xs text-gray-500">Assessment reports</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group"
+              onClick={() => navigate('/training')}
+              data-testid="card-training"
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
+                  <ClipboardCheck className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">Training Portal</p>
+                  <p className="text-xs text-gray-500">Certifications</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group"
+              onClick={() => navigate('/crm-integrations')}
+              data-testid="card-crm"
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-colors">
+                  <Users className="h-5 w-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">CRM Integration</p>
+                  <p className="text-xs text-gray-500">Connect systems</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group"
+              onClick={() => navigate('/innovation')}
+              data-testid="card-innovation"
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 bg-cyan-500/20 rounded-lg group-hover:bg-cyan-500/30 transition-colors">
+                  <TrendingUp className="h-5 w-5 text-cyan-500" />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-sm">Innovation Hub</p>
+                  <p className="text-xs text-gray-500">Enterprise tools</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
       
