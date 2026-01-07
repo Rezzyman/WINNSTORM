@@ -2328,3 +2328,27 @@ export type KnowledgeEmbedding = typeof knowledgeEmbeddings.$inferSelect;
 export type InsertKnowledgeEmbedding = z.infer<typeof insertKnowledgeEmbeddingSchema>;
 export type KnowledgeAuditLog = typeof knowledgeAuditLog.$inferSelect;
 export type InsertKnowledgeAuditLog = z.infer<typeof insertKnowledgeAuditLogSchema>;
+
+// Admin Credentials - Separate password-based auth for admin panel
+export const adminCredentials = pgTable("admin_credentials", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  lastLogin: timestamp("last_login"),
+  loginAttempts: integer("login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAdminCredentialsSchema = createInsertSchema(adminCredentials).omit({
+  id: true,
+  lastLogin: true,
+  loginAttempts: true,
+  lockedUntil: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type AdminCredentials = typeof adminCredentials.$inferSelect;
+export type InsertAdminCredentials = z.infer<typeof insertAdminCredentialsSchema>;
