@@ -416,14 +416,26 @@ router.post('/knowledge/documents/:id/approve', requireAdmin, async (req: AdminA
     
     await logKnowledgeAudit(req, 'approve', id, document.categoryId || undefined, undefined, { approved: true });
     
-    // Automatically generate embeddings for approved documents with content
+    // Generate embeddings for approved documents with content
+    let embeddingsStatus = 'skipped';
+    let embeddingsError: string | undefined;
+    
     if (document.content) {
-      generateDocumentEmbeddings(id).catch(err => {
+      try {
+        const success = await generateDocumentEmbeddings(id);
+        embeddingsStatus = success ? 'generated' : 'failed';
+      } catch (err) {
+        embeddingsStatus = 'failed';
+        embeddingsError = err instanceof Error ? err.message : 'Unknown error';
         console.error(`Failed to generate embeddings for document ${id}:`, err);
-      });
+      }
     }
     
-    res.json(document);
+    res.json({ 
+      ...document, 
+      embeddingsStatus,
+      embeddingsError
+    });
   } catch (error) {
     console.error('Error approving knowledge document:', error);
     res.status(500).json({ message: 'Failed to approve document' });

@@ -49,6 +49,12 @@ function chunkText(text: string, chunkSize: number = CHUNK_SIZE, overlap: number
 }
 
 async function generateEmbedding(text: string): Promise<number[] | null> {
+  const apiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error('OpenAI API key not configured - cannot generate embeddings');
+    throw new Error('OpenAI API key not configured');
+  }
+  
   try {
     const response = await openai.embeddings.create({
       model: EMBEDDING_MODEL,
@@ -57,7 +63,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
     return response.data[0]?.embedding || null;
   } catch (error) {
     console.error('Error generating embedding:', error);
-    return null;
+    throw error;
   }
 }
 
