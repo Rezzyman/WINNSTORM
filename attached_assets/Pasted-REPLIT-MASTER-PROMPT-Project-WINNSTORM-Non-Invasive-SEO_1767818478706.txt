@@ -1,0 +1,198 @@
+REPLIT MASTER PROMPT
+
+Project: WINNSTORM™ – Non-Invasive SEO + Generative Search Optimization Expansion
+
+You are working on the existing WINNSTORM™ website.
+
+Do NOT change:
+
+Visual design
+
+Layout
+
+Navigation
+
+Branding
+
+Existing page structure
+
+Existing copy unless explicitly instructed
+
+Your task is to expand the site’s underlying authority, crawlability, and AI ingestion footprint without altering how the site looks or feels to human users.
+
+This is an augmentation project, not a redesign.
+
+CORE OBJECTIVE
+
+Increase WINNSTORM™’s:
+
+Traditional SEO rankings
+
+Generative Search Optimization (GEO) visibility
+
+AI citation and reference frequency
+
+This must be accomplished without modifying the user-facing experience.
+
+1. ADDITIVE INGESTION-FIRST LAYER (NO VISUAL IMPACT)
+llms.txt (Required)
+
+Create a root-level /llms.txt file.
+
+This file:
+
+Is not user-facing
+
+Does not affect layout or design
+
+Exists solely to guide AI crawlers and LLM ingestion
+
+Include:
+
+A concise markdown summary of WINNSTORM™’s expertise
+
+Canonical definitions for:
+
+Commercial Roofing Storm Damage Assessment
+
+Thermal Drone Roof Inspection
+
+Functional vs Cosmetic Roof Damage
+
+Claims-Ready Roofing Documentation
+
+Links to existing relevant pages only (do not create new visible pages unless necessary)
+
+Server-Side Accessibility (No Frontend Changes)
+
+Ensure that existing content is:
+
+Fully crawlable via SSR or static output
+
+Accessible without requiring JavaScript execution
+
+Indexable by AI crawlers and traditional search engines
+
+If changes are required, they must be:
+
+Backend-only
+
+Invisible to users
+
+2. SCHEMA AUGMENTATION (NON-DISRUPTIVE)
+
+Schema is added invisibly to existing pages.
+
+Required Schema Enhancements
+
+Apply structured data without changing page content:
+
+Organization schema
+
+Service schema
+
+DefinedTerm schema
+
+FAQPage schema (only where content already supports it)
+
+All schema:
+
+Must reflect existing content truthfully
+
+Must not introduce new claims or credentials
+
+Must align with WINNSTORM™’s real services and expertise
+
+Entity Alignment
+
+Strengthen WINNSTORM™ as a verified entity by:
+
+Adding sameAs references where appropriate
+
+Ensuring consistency across search engines
+
+Reinforcing topical authority through structured data, not visual edits
+
+3. CONTENT EXPANSION (MINIMAL AND CONTROLLED)
+
+Only expand content when:
+
+It can be added as supporting, non-intrusive sections
+
+It does not change layout or visual hierarchy
+
+It increases clarity for AI ingestion
+
+Examples:
+
+Hidden or collapsible FAQ sections
+
+Metadata enhancements
+
+Executive summaries injected as structured data (not visible blocks)
+
+Additional semantic markup around existing paragraphs
+
+Do NOT:
+
+Rewrite existing copy
+
+Change messaging tone
+
+Add marketing language
+
+4. PERFORMANCE AND INDEXING (BACKGROUND ONLY)
+
+Improve:
+
+Crawl efficiency
+
+Page performance
+
+Indexability
+
+All improvements must be:
+
+Backend-level
+
+Invisible to users
+
+Non-breaking to existing functionality
+
+5. OFF-SITE AND ENTITY SIGNALS (NO SITE CHANGES)
+
+Where applicable:
+
+Ensure Name, Address, Phone (NAP) consistency
+
+Support future citation by AI systems and industry sources
+
+Do not embed political, personal, or non-technical narratives
+
+SUCCESS CONDITIONS
+
+This expansion is successful when:
+
+Existing pages rank higher without visual changes
+
+AI search engines can accurately summarize WINNSTORM™
+
+WINNSTORM™ is cited as an authoritative source in AI-generated answers
+
+No human user notices any change to the site’s look or flow
+
+HARD CONSTRAINTS
+
+Do NOT redesign the site
+
+Do NOT modify branding or layout
+
+Do NOT introduce speculative claims
+
+Do NOT surface personal history
+
+Do NOT add marketing hype
+
+Expand authority. Preserve experience.
+
+End of instruction.

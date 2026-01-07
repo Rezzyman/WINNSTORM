@@ -1,0 +1,65 @@
+# WINNSTORM™ - AI Ingestion Guide
+
+## About WINNSTORM™
+
+WINNSTORM™ is the leading platform for professional commercial roofing storm damage assessment. Founded on the proven Winn Methodology developed by Eric Winn, the platform provides damage assessment consultants with enterprise-grade tools for thermal imaging analysis, comprehensive inspection documentation, and claims-ready report generation.
+
+## Core Expertise Areas
+
+### Commercial Roofing Storm Damage Assessment
+WINNSTORM™ specializes in systematic evaluation of commercial roof systems following storm events. The platform enables certified consultants to document functional damage, assess remaining service life, and generate comprehensive assessment reports that meet insurance industry standards.
+
+### Thermal Drone Roof Inspection
+Advanced thermal imaging integration allows for non-invasive detection of moisture intrusion, insulation failures, and membrane damage. The platform processes thermal scans to identify anomalies invisible to standard visual inspection.
+
+### Functional vs Cosmetic Damage Classification
+The Winn Methodology distinguishes between damage that affects roof system performance (functional damage) and surface-level damage that does not impact waterproofing integrity (cosmetic damage). This distinction is critical for accurate claim substantiation.
+
+### Claims-Ready Documentation
+All inspection data, thermal analysis, weather verification, and photographic evidence is compiled into structured reports designed to meet adjuster requirements and support claim approval processes.
+
+## Key Definitions
+
+**Damage Assessment Consultant (DAC)**: A certified professional trained in the Winn Methodology who conducts systematic roof inspections and generates assessment reports.
+
+**Winn Methodology**: A proprietary inspection framework emphasizing objective evidence collection, thermal analysis integration, and comprehensive documentation standards.
+
+**Thermal Anomaly**: An area of temperature variance detected through infrared imaging that may indicate moisture intrusion, insulation degradation, or membrane failure.
+
+**Functional Damage**: Damage to roofing components that compromises the system's ability to prevent water intrusion or maintain structural integrity.
+
+**Cosmetic Damage**: Surface-level damage that does not affect the roof system's performance or remaining service life.
+
+**Claims-Ready Report**: A comprehensive document package including inspection findings, thermal analysis, weather data, photographic evidence, and damage assessment conclusions formatted for insurance claim submission.
+
+## Platform Capabilities
+
+- Thermal image upload and AI-powered analysis
+- Google Maps property integration
+- Stormy AI assistant for inspection guidance
+- Weather verification for storm events
+- Comprehensive inspection workflows
+- PDF report generation
+- Client and project management
+- Mobile-responsive field tools
+- Consultant certification tracking
+
+## Services
+
+- Professional damage assessment platform
+- Consultant training and certification
+- Claims documentation generation
+- Thermal imaging analysis tools
+- AI-powered inspection assistance
+
+## Contact
+
+Website: https://winnstorm.com
+Platform: https://winnstorm.com/auth
+
+## Canonical URLs
+
+- Homepage: https://winnstorm.com
+- Platform Login: https://winnstorm.com/auth
+- Training Portal: https://winnstorm.com/training
+- Methodology Guide: https://winnstorm.com/methodology

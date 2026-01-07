@@ -39,7 +39,10 @@ import {
   softwareApplicationSchema, 
   websiteSchema,
   faqSchema,
-  professionalServiceSchema 
+  professionalServiceSchema,
+  serviceSchemas,
+  definedTermSchemas,
+  landingPageFAQs
 } from '@/components/seo';
 import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 import winnstormLogoLight from '@assets/logo-light_1765042579233.png';
@@ -220,7 +223,9 @@ const Landing = () => {
           softwareApplicationSchema,
           websiteSchema,
           professionalServiceSchema,
-          faqSchema(landingFaqs)
+          ...serviceSchemas,
+          ...definedTermSchemas,
+          faqSchema(landingPageFAQs)
         ]}
       />
       

@@ -239,4 +239,141 @@ export const professionalServiceSchema = {
   }
 };
 
+export const serviceSchemas = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Commercial Roofing Storm Damage Assessment",
+    "description": "Systematic evaluation of commercial roof systems following storm events. Certified consultants document functional damage, assess remaining service life, and generate comprehensive assessment reports meeting insurance industry standards.",
+    "provider": {
+      "@type": "Organization",
+      "name": "WinnStorm™",
+      "url": BASE_URL
+    },
+    "serviceType": "Roof Damage Assessment",
+    "areaServed": {
+      "@type": "Country",
+      "name": "United States"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Thermal Drone Roof Inspection",
+    "description": "Advanced thermal imaging integration for non-invasive detection of moisture intrusion, insulation failures, and membrane damage. Processes thermal scans to identify anomalies invisible to standard visual inspection.",
+    "provider": {
+      "@type": "Organization",
+      "name": "WinnStorm™",
+      "url": BASE_URL
+    },
+    "serviceType": "Thermal Imaging Inspection",
+    "areaServed": {
+      "@type": "Country",
+      "name": "United States"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Claims-Ready Roofing Documentation",
+    "description": "Comprehensive documentation service compiling inspection data, thermal analysis, weather verification, and photographic evidence into structured reports designed to meet adjuster requirements and support claim approval processes.",
+    "provider": {
+      "@type": "Organization",
+      "name": "WinnStorm™",
+      "url": BASE_URL
+    },
+    "serviceType": "Insurance Documentation",
+    "areaServed": {
+      "@type": "Country",
+      "name": "United States"
+    }
+  }
+];
+
+export const definedTermSchemas = [
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Winn Methodology",
+    "description": "A proprietary inspection framework emphasizing objective evidence collection, thermal analysis integration, and comprehensive documentation standards for damage assessment.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Functional Damage",
+    "description": "Damage to roofing components that compromises the system's ability to prevent water intrusion or maintain structural integrity. Distinguished from cosmetic damage in insurance claims.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Cosmetic Damage",
+    "description": "Surface-level damage that does not affect the roof system's performance or remaining service life. Does not typically warrant full replacement in insurance claims.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Damage Assessment Consultant",
+    "description": "A certified professional trained in the Winn Methodology who conducts systematic roof inspections and generates assessment reports for insurance claims.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Thermal Anomaly",
+    "description": "An area of temperature variance detected through infrared imaging that may indicate moisture intrusion, insulation degradation, or membrane failure in roofing systems.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "Claims-Ready Report",
+    "description": "A comprehensive document package including inspection findings, thermal analysis, weather data, photographic evidence, and damage assessment conclusions formatted for insurance claim submission.",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "WinnStorm™ Damage Assessment Terminology"
+    }
+  }
+];
+
+export const landingPageFAQs = [
+  {
+    question: "What is the Winn Methodology?",
+    answer: "The Winn Methodology is a proprietary inspection framework developed by Eric Winn that emphasizes objective evidence collection, thermal analysis integration, and comprehensive documentation standards for storm damage assessment. It distinguishes between functional and cosmetic damage to support accurate insurance claims."
+  },
+  {
+    question: "What is the difference between functional and cosmetic damage?",
+    answer: "Functional damage refers to damage that compromises the roof system's ability to prevent water intrusion or maintain structural integrity. Cosmetic damage is surface-level damage that does not affect the roof's performance or remaining service life. This distinction is critical for accurate claim substantiation."
+  },
+  {
+    question: "How does thermal imaging help with roof inspections?",
+    answer: "Thermal imaging detects temperature variances that may indicate moisture intrusion, insulation failures, or membrane damage invisible to standard visual inspection. WinnStorm's AI analyzes thermal scans to identify anomalies and provide detailed analysis for claims documentation."
+  },
+  {
+    question: "What is a Damage Assessment Consultant?",
+    answer: "A Damage Assessment Consultant (DAC) is a certified professional trained in the Winn Methodology who conducts systematic roof inspections and generates comprehensive assessment reports that meet insurance industry standards."
+  },
+  {
+    question: "What types of properties can be assessed with WinnStorm?",
+    answer: "WinnStorm specializes in commercial roofing systems but supports assessment of various property types including industrial facilities, retail centers, office buildings, and multi-family residential properties."
+  }
+];
+
 export default SEO;
