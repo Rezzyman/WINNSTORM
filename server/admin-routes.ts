@@ -23,25 +23,50 @@ const knowledgeStorage = multer.diskStorage({
 });
 
 const allowedMimeTypes = [
+  // Documents
   'text/plain',
   'text/markdown',
   'text/csv',
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/json',
+  // Images
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  // Audio
+  'audio/mpeg',
+  'audio/wav',
+  'audio/mp4',
+  'audio/m4a',
+  'audio/ogg',
+  'audio/webm',
+  // Video
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-msvideo',
 ];
 
 const knowledgeUpload = multer({
   storage: knowledgeStorage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max
+    fileSize: 200 * 1024 * 1024, // 200MB max for video files
   },
   fileFilter: (req, file, cb) => {
-    if (allowedMimeTypes.includes(file.mimetype) || file.mimetype.startsWith('text/')) {
+    if (allowedMimeTypes.includes(file.mimetype) || 
+        file.mimetype.startsWith('text/') || 
+        file.mimetype.startsWith('image/') ||
+        file.mimetype.startsWith('audio/') ||
+        file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error(`File type ${file.mimetype} not allowed. Allowed types: ${allowedMimeTypes.join(', ')}`));
+      cb(new Error(`File type ${file.mimetype} not allowed`));
     }
   }
 });
@@ -508,6 +533,12 @@ router.post('/knowledge/seed-categories', requireAdmin, async (req: AdminAuthent
       { name: 'Insurance Documentation', description: 'Insurance claim documentation and requirements', icon: 'FileText', color: '#10B981', orderIndex: 4 },
       { name: 'Training Materials', description: 'Consultant training transcripts and videos', icon: 'GraduationCap', color: '#8B5CF6', orderIndex: 5 },
       { name: 'Case Studies', description: 'Real-world damage assessment case studies', icon: 'FolderOpen', color: '#F59E0B', orderIndex: 6 },
+      { name: 'Manufacturer Specs', description: 'Roofing and building material manufacturer specifications', icon: 'Factory', color: '#6366F1', orderIndex: 7 },
+      { name: 'Installation Guides', description: 'Material installation guides and best practices', icon: 'Wrench', color: '#14B8A6', orderIndex: 8 },
+      { name: 'Damage Patterns', description: 'Reference images and documentation of damage types', icon: 'AlertTriangle', color: '#DC2626', orderIndex: 9 },
+      { name: 'Product Information', description: 'Product data sheets and specifications', icon: 'Package', color: '#0EA5E9', orderIndex: 10 },
+      { name: 'Audio Recordings', description: 'Training sessions, interviews, and field recordings', icon: 'Mic', color: '#A855F7', orderIndex: 11 },
+      { name: 'Video Content', description: 'Training videos, demonstrations, and field documentation', icon: 'Video', color: '#EC4899', orderIndex: 12 },
     ];
     
     const created = [];

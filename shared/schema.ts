@@ -2209,6 +2209,21 @@ export interface DocumentMetadata {
   extractedTopics?: string[];
   processingStatus?: 'pending' | 'processing' | 'completed' | 'failed';
   processingError?: string;
+  // Multimedia metadata
+  duration?: number; // For audio/video in seconds
+  resolution?: string; // For video/images (e.g., "1920x1080")
+  thumbnailUrl?: string; // Generated thumbnail for video/images
+  transcription?: string; // Transcribed text from audio/video
+  transcriptionStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+  // Manufacturer/product metadata
+  manufacturer?: string;
+  productModel?: string;
+  partNumber?: string;
+  specifications?: Record<string, string>;
+  // Reference metadata
+  tags?: string[];
+  relatedDocumentIds?: number[];
+  externalUrl?: string;
 }
 
 export interface EmbeddingChunk {

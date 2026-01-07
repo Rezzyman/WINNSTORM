@@ -963,11 +963,19 @@ const AdminDashboard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="transcript">Transcript</SelectItem>
-                    <SelectItem value="pdf">PDF Document</SelectItem>
-                    <SelectItem value="procedure">Procedure</SelectItem>
-                    <SelectItem value="methodology">Methodology</SelectItem>
+                    <SelectItem value="methodology">Methodology Guide</SelectItem>
+                    <SelectItem value="procedure">Procedure/Process</SelectItem>
                     <SelectItem value="training">Training Material</SelectItem>
                     <SelectItem value="case_study">Case Study</SelectItem>
+                    <SelectItem value="manufacturer_spec">Manufacturer Spec</SelectItem>
+                    <SelectItem value="product_info">Product Information</SelectItem>
+                    <SelectItem value="installation_guide">Installation Guide</SelectItem>
+                    <SelectItem value="reference_image">Reference Image</SelectItem>
+                    <SelectItem value="audio_recording">Audio Recording</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="damage_pattern">Damage Pattern</SelectItem>
+                    <SelectItem value="insurance_doc">Insurance Document</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -997,13 +1005,13 @@ const AdminDashboard = () => {
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.txt,.md,.doc,.docx"
+                accept=".pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.m4a,.ogg,.mp4,.webm,.mov"
                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                 className="bg-white/5 border-white/20 text-white file:bg-primary file:text-white file:border-0 file:mr-4 file:px-4 file:py-2"
                 data-testid="input-doc-file"
               />
               <p className="text-xs text-white/40">
-                Supported: PDF, TXT, MD, DOC, DOCX (max 50MB)
+                Documents: PDF, Word, Excel, Text | Images: JPG, PNG, WebP | Audio: MP3, WAV, M4A | Video: MP4, WebM
               </p>
             </div>
 
