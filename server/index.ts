@@ -4,6 +4,37 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Site-wide password protection (HTTP Basic Auth)
+const SITE_PASSWORD = process.env.SITE_PASSWORD;
+if (SITE_PASSWORD) {
+  app.use((req, res, next) => {
+    // Allow health checks and static assets without auth
+    if (req.path === '/health' || req.path.startsWith('/assets/')) {
+      return next();
+    }
+    
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Basic ')) {
+      res.setHeader('WWW-Authenticate', 'Basic realm="WinnStorm Access"');
+      return res.status(401).send('Authentication required');
+    }
+    
+    const base64Credentials = authHeader.split(' ')[1];
+    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
+    const [username, password] = credentials.split(':');
+    
+    // Accept any username with the correct password
+    if (password === SITE_PASSWORD) {
+      return next();
+    }
+    
+    res.setHeader('WWW-Authenticate', 'Basic realm="WinnStorm Access"');
+    return res.status(401).send('Invalid credentials');
+  });
+  log('Site password protection enabled');
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
