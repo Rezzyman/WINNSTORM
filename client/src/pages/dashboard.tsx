@@ -224,7 +224,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-[#0f1419] text-foreground">
+    <div className="min-h-screen flex flex-col relative bg-gray-50 dark:bg-[#0f1419] text-foreground">
       <SEO
         title="Dashboard"
         description="Manage your damage assessment projects, track inspections, and view certification progress."
@@ -243,8 +243,8 @@ const Dashboard = () => {
           {/* Dashboard Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Dashboard</h1>
-              <p className="text-gray-400 text-sm">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">Dashboard</h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Welcome back{user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}. Here's your overview.
               </p>
             </div>
@@ -260,7 +260,7 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/clients')}
-                className="border-gray-700 hover:bg-gray-800"
+                className="border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                 data-testid="button-add-client"
               >
                 <Users className="h-4 w-4 mr-2" />
@@ -271,13 +271,13 @@ const Dashboard = () => {
 
           {/* Hero Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-orange-500/30 transition-colors" data-testid="stat-active-clients">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-orange-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-active-clients">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm font-medium">Active Clients</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Active Clients</p>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : activeClients}</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : activeClients}</span>
                       <span className="text-gray-500 text-sm">/ {totalClients}</span>
                     </div>
                   </div>
@@ -293,13 +293,13 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-blue-500/30 transition-colors" data-testid="stat-open-projects">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-blue-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-open-projects">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm font-medium">Open Projects</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Open Projects</p>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : openProjects}</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : openProjects}</span>
                     </div>
                   </div>
                   <div className="p-3 bg-blue-500/10 rounded-xl">
@@ -313,13 +313,13 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-green-500/30 transition-colors" data-testid="stat-inspections-month">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-green-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-inspections-month">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm font-medium">Inspections This Month</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Inspections This Month</p>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : inspectionsThisMonth}</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : inspectionsThisMonth}</span>
                     </div>
                   </div>
                   <div className="p-3 bg-green-500/10 rounded-xl">
@@ -334,13 +334,13 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-[#1a1f26] to-[#1a1f26] border-gray-800 hover:border-purple-500/30 transition-colors" data-testid="stat-reports-generated">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1a1f26] dark:to-[#1a1f26] border-gray-200 dark:border-gray-800 hover:border-purple-500/30 transition-colors shadow-sm dark:shadow-none" data-testid="stat-reports-generated">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm font-medium">Reports Generated</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Reports Generated</p>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-bold text-white">{isLoading ? '—' : reportsGenerated}</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">{isLoading ? '—' : reportsGenerated}</span>
                     </div>
                   </div>
                   <div className="p-3 bg-purple-500/10 rounded-xl">
@@ -359,10 +359,10 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             
             {/* Recent Clients */}
-            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-recent-clients">
-              <CardHeader className="pb-3 border-b border-gray-800">
+            <Card className="bg-white dark:bg-[#1a1f26] border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" data-testid="widget-recent-clients">
+              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-white">Recent Clients</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Recent Clients</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -389,11 +389,11 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : recentClients.length > 0 ? (
-                  <div className="divide-y divide-gray-800" data-testid="list-recent-clients">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-800" data-testid="list-recent-clients">
                     {recentClients.map((client) => (
                       <div 
                         key={client.id} 
-                        className="p-4 hover:bg-gray-800/50 transition-colors cursor-pointer group"
+                        className="p-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group"
                         onClick={() => navigate(`/clients/${client.id}`)}
                         data-testid={`client-row-${client.id}`}
                       >
@@ -402,7 +402,7 @@ const Dashboard = () => {
                             <Building2 className="h-5 w-5 text-orange-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-white truncate group-hover:text-orange-400 transition-colors">
+                            <p className="font-medium text-gray-900 dark:text-white truncate group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
                               {client.companyName || client.contactPerson}
                             </p>
                             <p className="text-sm text-gray-500 truncate">{client.email}</p>
@@ -416,8 +416,8 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="p-8 text-center">
-                    <Users className="h-10 w-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400 mb-3">No clients yet</p>
+                    <Users className="h-10 w-10 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400 mb-3">No clients yet</p>
                     <Button 
                       size="sm" 
                       onClick={() => navigate('/clients')}
@@ -432,10 +432,10 @@ const Dashboard = () => {
             </Card>
 
             {/* Inspection Pipeline */}
-            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-pipeline">
-              <CardHeader className="pb-3 border-b border-gray-800">
+            <Card className="bg-white dark:bg-[#1a1f26] border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" data-testid="widget-pipeline">
+              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-white">Inspection Pipeline</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Inspection Pipeline</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -455,8 +455,8 @@ const Dashboard = () => {
                   <div className="space-y-4" data-testid="pipeline-chart">
                     {pipelineData.map((stage, idx) => (
                       <div key={stage.name} className="flex items-center gap-3">
-                        <div className="w-24 text-sm text-gray-400">{stage.name}</div>
-                        <div className="flex-1 h-8 bg-gray-800 rounded-lg overflow-hidden">
+                        <div className="w-24 text-sm text-gray-600 dark:text-gray-400">{stage.name}</div>
+                        <div className="flex-1 h-8 bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden">
                           <div 
                             className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
                             style={{ 
@@ -473,9 +473,9 @@ const Dashboard = () => {
                     ))}
                     
                     {/* Total indicator */}
-                    <div className="pt-3 border-t border-gray-800 flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Total Pipeline</span>
-                      <span className="text-xl font-bold text-white">
+                    <div className="pt-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Pipeline</span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">
                         {pipelineData.reduce((sum, d) => sum + d.value, 0)}
                       </span>
                     </div>
@@ -485,9 +485,9 @@ const Dashboard = () => {
             </Card>
 
             {/* Monthly Trend */}
-            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-trend">
-              <CardHeader className="pb-3 border-b border-gray-800">
-                <CardTitle className="text-lg font-semibold text-white">Monthly Trend</CardTitle>
+            <Card className="bg-white dark:bg-[#1a1f26] border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" data-testid="widget-trend">
+              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Monthly Trend</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 {isLoading ? (
@@ -561,10 +561,10 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Recent Reports */}
-            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-recent-reports">
-              <CardHeader className="pb-3 border-b border-gray-800">
+            <Card className="bg-white dark:bg-[#1a1f26] border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" data-testid="widget-recent-reports">
+              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-white">Recent Reports</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Recent Reports</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -585,11 +585,11 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : recentReportsData.length > 0 ? (
-                  <div className="divide-y divide-gray-800" data-testid="list-recent-reports">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-800" data-testid="list-recent-reports">
                     {recentReportsData.map((report: any) => (
                       <div 
                         key={report.id} 
-                        className="p-4 hover:bg-gray-800/50 transition-colors"
+                        className="p-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
                         data-testid={`report-row-${report.id}`}
                       >
                         <div className="flex items-center justify-between">
@@ -598,7 +598,7 @@ const Dashboard = () => {
                               <FileText className="h-5 w-5 text-green-500" />
                             </div>
                             <div>
-                              <p className="font-medium text-white">
+                              <p className="font-medium text-gray-900 dark:text-white">
                                 {report.projectName || report.propertyAddress || 'Damage Assessment Report'}
                               </p>
                               <p className="text-sm text-gray-500">
@@ -615,7 +615,7 @@ const Dashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              className="text-gray-400 hover:text-white hover:bg-gray-700"
+                              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
                               onClick={() => navigate(`/winn-report/${report.id}`)}
                               data-testid={`button-view-report-${report.id}`}
                             >
@@ -624,7 +624,7 @@ const Dashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              className="text-gray-400 hover:text-white hover:bg-gray-700"
+                              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
                               data-testid={`button-download-report-${report.id}`}
                             >
                               <Download className="h-4 w-4" />
@@ -636,8 +636,8 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="p-8 text-center">
-                    <FileText className="h-10 w-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400 mb-3">No reports yet</p>
+                    <FileText className="h-10 w-10 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400 mb-3">No reports yet</p>
                     <Button 
                       size="sm" 
                       onClick={() => navigate('/upload')}
@@ -652,10 +652,10 @@ const Dashboard = () => {
             </Card>
 
             {/* Upcoming Inspections */}
-            <Card className="bg-[#1a1f26] border-gray-800" data-testid="widget-upcoming">
-              <CardHeader className="pb-3 border-b border-gray-800">
+            <Card className="bg-white dark:bg-[#1a1f26] border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" data-testid="widget-upcoming">
+              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-white">Upcoming Inspections</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Inspections</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -676,11 +676,11 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : upcomingInspections.length > 0 ? (
-                  <div className="divide-y divide-gray-800" data-testid="list-upcoming-inspections">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-800" data-testid="list-upcoming-inspections">
                     {upcomingInspections.map((inspection: any) => (
                       <div 
                         key={inspection.id} 
-                        className="p-4 hover:bg-gray-800/50 transition-colors"
+                        className="p-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
                         data-testid={`inspection-row-${inspection.id}`}
                       >
                         <div className="flex items-center justify-between">
@@ -689,23 +689,23 @@ const Dashboard = () => {
                               <Calendar className="h-5 w-5 text-blue-500" />
                             </div>
                             <div>
-                              <p className="font-medium text-white">
+                              <p className="font-medium text-gray-900 dark:text-white">
                                 {inspection.address || inspection.propertyAddress || inspection.name}
                               </p>
                               <p className="text-sm text-gray-500">
                                 {inspection.clientName || getClientName(inspection.clientId)}
-                                {inspection.time && <span className="ml-2 text-blue-400">• {inspection.time}</span>}
+                                {inspection.time && <span className="ml-2 text-blue-500 dark:text-blue-400">• {inspection.time}</span>}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-orange-400">
+                            <p className="text-sm font-medium text-orange-500 dark:text-orange-400">
                               {formatDate(inspection.inspectionDate)}
                             </p>
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 mt-1 h-7 px-2"
+                              className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-500/10 mt-1 h-7 px-2"
                               onClick={() => navigate(`/inspection/${inspection.id}`)}
                               data-testid={`button-start-inspection-${inspection.id}`}
                             >
@@ -719,8 +719,8 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="p-8 text-center">
-                    <Calendar className="h-10 w-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400 mb-3">No upcoming inspections</p>
+                    <Calendar className="h-10 w-10 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400 mb-3">No upcoming inspections</p>
                     <Button 
                       size="sm" 
                       onClick={() => navigate('/schedule')}
@@ -738,7 +738,7 @@ const Dashboard = () => {
           {/* Quick Actions Row */}
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card 
-              className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20 hover:border-orange-500/40 transition-all cursor-pointer group"
+              className="bg-white dark:bg-gradient-to-br dark:from-orange-500/10 dark:to-orange-600/5 border-gray-200 dark:border-orange-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/reports')}
               data-testid="card-winn-report"
             >
@@ -747,14 +747,14 @@ const Dashboard = () => {
                   <FileText className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-white text-sm">View Reports</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">View Reports</p>
                   <p className="text-xs text-gray-500">Assessment reports</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group"
+              className="bg-white dark:bg-gradient-to-br dark:from-blue-500/10 dark:to-blue-600/5 border-gray-200 dark:border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/training')}
               data-testid="card-training"
             >
@@ -763,14 +763,14 @@ const Dashboard = () => {
                   <ClipboardCheck className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-white text-sm">Training Portal</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Training Portal</p>
                   <p className="text-xs text-gray-500">Certifications</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group"
+              className="bg-white dark:bg-gradient-to-br dark:from-purple-500/10 dark:to-purple-600/5 border-gray-200 dark:border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/crm-integrations')}
               data-testid="card-crm"
             >
@@ -779,14 +779,14 @@ const Dashboard = () => {
                   <Users className="h-5 w-5 text-purple-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-white text-sm">CRM Integration</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">CRM Integration</p>
                   <p className="text-xs text-gray-500">Connect systems</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group"
+              className="bg-white dark:bg-gradient-to-br dark:from-cyan-500/10 dark:to-cyan-600/5 border-gray-200 dark:border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
               onClick={() => navigate('/innovation')}
               data-testid="card-innovation"
             >
@@ -795,7 +795,7 @@ const Dashboard = () => {
                   <TrendingUp className="h-5 w-5 text-cyan-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-white text-sm">Innovation Hub</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Innovation Hub</p>
                   <p className="text-xs text-gray-500">Enterprise tools</p>
                 </div>
               </CardContent>
