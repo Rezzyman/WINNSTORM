@@ -34,10 +34,6 @@ export default function WinnReportPage() {
     setReportCompleted(true);
   };
 
-  const handleGenerateBlockchainEntry = () => {
-    // Future: integrate with blockchain system for immutable records
-  };
-
   if (reportCompleted && generatedReport) {
     return (
       <div className="min-h-screen bg-background">
@@ -79,9 +75,9 @@ export default function WinnReportPage() {
                   <Card className="bg-background border-border">
                     <CardContent className="p-4 text-center">
                       <Shield className="h-8 w-8 text-accent mx-auto mb-2" />
-                      <div className="text-lg font-semibold text-foreground">Blockchain Ready</div>
+                      <div className="text-lg font-semibold text-foreground">Verified Report</div>
                       <div className="text-sm text-muted-foreground">
-                        Immutable roof history
+                        Secure documentation
                       </div>
                     </CardContent>
                   </Card>
@@ -129,13 +125,6 @@ export default function WinnReportPage() {
                     providing immutable evidence of maintenance and inspection history.
                   </div>
                   <div className="flex justify-center space-x-4">
-                    <Button 
-                      onClick={handleGenerateBlockchainEntry}
-                      className="bg-primary text-primary-foreground"
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Generate Blockchain Entry
-                    </Button>
                     <Button 
                       variant="outline" 
                       className="border-border text-foreground"

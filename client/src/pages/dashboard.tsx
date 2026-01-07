@@ -280,7 +280,7 @@ const Dashboard = () => {
                 <p className="text-muted-foreground text-sm mb-3">Generate comprehensive 300+ page inspection report</p>
                 <div className="flex justify-center space-x-1">
                   <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                    Blockchain
+                    Verified
                   </span>
                   <span className="text-xs bg-secondary/20 text-secondary px-2 py-1 rounded-full">
                     Digital Title
