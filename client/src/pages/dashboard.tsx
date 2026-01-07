@@ -38,6 +38,47 @@ const statusColors: Record<string, string> = {
 // Pipeline stage colors for chart
 const pipelineColors = ['#3b82f6', '#f97316', '#22c55e', '#06b6d4', '#8b5cf6'];
 
+// Demo data for demonstration purposes (linked to testimonials on landing page)
+const demoClients = [
+  { id: 1, companyName: 'State Farm Insurance', contactPerson: 'Michael Rodriguez', email: 'mrodriguez@statefarm.com', phone: '(214) 555-0142', status: 'active' },
+  { id: 2, companyName: 'Elite Roofing Solutions', contactPerson: 'Sarah Chen', email: 'schen@eliteroofing.com', phone: '(972) 555-0198', status: 'active' },
+  { id: 3, companyName: 'Liberty Mutual', contactPerson: 'David Thompson', email: 'dthompson@libertymutual.com', phone: '(469) 555-0234', status: 'active' },
+  { id: 4, companyName: 'Allstate Claims', contactPerson: 'Jennifer Martinez', email: 'jmartinez@allstate.com', phone: '(817) 555-0167', status: 'active' },
+  { id: 5, companyName: 'Texas Premier Roofing', contactPerson: 'Robert Williams', email: 'rwilliams@texaspremier.com', phone: '(214) 555-0289', status: 'active' },
+  { id: 6, companyName: 'Farmers Insurance Group', contactPerson: 'Amanda Foster', email: 'afoster@farmers.com', phone: '(972) 555-0312', status: 'active' },
+  { id: 7, companyName: 'DFW Storm Repairs', contactPerson: 'Marcus Johnson', email: 'mjohnson@dfwstorm.com', phone: '(469) 555-0445', status: 'active' },
+  { id: 8, companyName: 'Nationwide Claims', contactPerson: 'Lisa Anderson', email: 'landerson@nationwide.com', phone: '(817) 555-0521', status: 'active' },
+];
+
+const demoProjects = [
+  { id: 1, name: 'State Farm - Richardson Hail Claim', clientId: 1, propertyId: 1, status: 'completed', inspectionDate: '2025-12-28', address: '2847 Prestonwood Blvd, Richardson, TX' },
+  { id: 2, name: 'Elite Roofing - Plano Commercial', clientId: 2, propertyId: 2, status: 'completed', inspectionDate: '2025-12-30', address: '5201 Legacy Dr, Plano, TX' },
+  { id: 3, name: 'Liberty Mutual - Frisco Storm', clientId: 3, propertyId: 3, status: 'completed', inspectionDate: '2026-01-02', address: '9100 Warren Pkwy, Frisco, TX' },
+  { id: 4, name: 'Allstate - McKinney Residential', clientId: 4, propertyId: 4, status: 'submitted', inspectionDate: '2026-01-04', address: '1420 Eldorado Pkwy, McKinney, TX' },
+  { id: 5, name: 'Texas Premier - Allen Multi-Unit', clientId: 5, propertyId: 5, status: 'report_draft', inspectionDate: '2026-01-05', address: '710 Stacy Rd, Allen, TX' },
+  { id: 6, name: 'Farmers - Carrollton Wind Damage', clientId: 6, propertyId: 6, status: 'in_progress', inspectionDate: '2026-01-06', address: '2220 E Hebron Pkwy, Carrollton, TX' },
+  { id: 7, name: 'DFW Storm - Irving Commercial', clientId: 7, propertyId: 7, status: 'in_progress', inspectionDate: '2026-01-06', address: '6401 N MacArthur Blvd, Irving, TX' },
+  { id: 8, name: 'State Farm - Lewisville Hail', clientId: 1, propertyId: 8, status: 'scheduled', inspectionDate: '2026-01-08', address: '1850 S Valley Pkwy, Lewisville, TX' },
+  { id: 9, name: 'Nationwide - Flower Mound', clientId: 8, propertyId: 9, status: 'scheduled', inspectionDate: '2026-01-09', address: '3401 Long Prairie Rd, Flower Mound, TX' },
+  { id: 10, name: 'Elite Roofing - Southlake Estate', clientId: 2, propertyId: 10, status: 'scheduled', inspectionDate: '2026-01-10', address: '1400 E Southlake Blvd, Southlake, TX' },
+  { id: 11, name: 'Liberty Mutual - Grapevine', clientId: 3, propertyId: 11, status: 'scheduled', inspectionDate: '2026-01-12', address: '2100 Glade Rd, Grapevine, TX' },
+];
+
+const demoReports = [
+  { id: 1, projectName: 'State Farm - Richardson Hail Claim', clientName: 'State Farm Insurance', completedDate: '2025-12-29', damageScore: 78, status: 'delivered' },
+  { id: 2, projectName: 'Elite Roofing - Plano Commercial', clientName: 'Elite Roofing Solutions', completedDate: '2026-01-01', damageScore: 85, status: 'delivered' },
+  { id: 3, projectName: 'Liberty Mutual - Frisco Storm', clientName: 'Liberty Mutual', completedDate: '2026-01-03', damageScore: 92, status: 'delivered' },
+  { id: 4, projectName: 'Allstate - Addison Office Park', clientName: 'Allstate Claims', completedDate: '2025-12-20', damageScore: 67, status: 'delivered' },
+  { id: 5, projectName: 'Texas Premier - Garland Complex', clientName: 'Texas Premier Roofing', completedDate: '2025-12-15', damageScore: 73, status: 'delivered' },
+];
+
+const demoUpcoming = [
+  { id: 8, name: 'State Farm - Lewisville Hail', clientName: 'State Farm Insurance', inspectionDate: '2026-01-08', address: '1850 S Valley Pkwy, Lewisville, TX', time: '9:00 AM' },
+  { id: 9, name: 'Nationwide - Flower Mound', clientName: 'Nationwide Claims', inspectionDate: '2026-01-09', address: '3401 Long Prairie Rd, Flower Mound, TX', time: '10:30 AM' },
+  { id: 10, name: 'Elite Roofing - Southlake Estate', clientName: 'Elite Roofing Solutions', inspectionDate: '2026-01-10', address: '1400 E Southlake Blvd, Southlake, TX', time: '2:00 PM' },
+  { id: 11, name: 'Liberty Mutual - Grapevine', clientName: 'Liberty Mutual', inspectionDate: '2026-01-12', address: '2100 Glade Rd, Grapevine, TX', time: '11:00 AM' },
+];
+
 const Dashboard = () => {
   const { user, role } = useAuth();
   const [, navigate] = useLocation();
@@ -95,24 +136,43 @@ const Dashboard = () => {
 
   const isLoading = clientsLoading || projectsLoading || propertiesLoading || inspectionsLoading;
 
-  // Calculate stats (clients don't have status field - all are considered active)
-  const activeClients = clients?.length || 0;
-  const totalClients = clients?.length || 0;
-  const openProjects = projects?.filter(p => !['completed', 'denied'].includes(p.status)).length || 0;
-  const completedProjects = projects?.filter(p => p.status === 'completed').length || 0;
+  // Check if we should use demo data (when no real data exists)
+  const hasRealClients = clients && clients.length > 0;
+  const hasRealProjects = projects && projects.length > 0;
+  const useDemoData = !hasRealClients && !hasRealProjects && !isLoading;
+
+  // Use demo or real data
+  const displayClients = useDemoData ? demoClients : (clients || []);
+  const displayProjects = useDemoData ? demoProjects : (projects || []);
+
+  // Calculate stats with demo fallback
+  const activeClients = useDemoData ? demoClients.length : (clients?.length || 0);
+  const totalClients = useDemoData ? demoClients.length : (clients?.length || 0);
+  const openProjects = useDemoData 
+    ? demoProjects.filter(p => !['completed', 'denied'].includes(p.status)).length 
+    : (projects?.filter(p => !['completed', 'denied'].includes(p.status)).length || 0);
+  const completedProjects = useDemoData
+    ? demoProjects.filter(p => p.status === 'completed').length
+    : (projects?.filter(p => p.status === 'completed').length || 0);
   
-  // This month's inspections
+  // This month's inspections (demo: 15)
   const thisMonth = new Date();
   const thisMonthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
-  const inspectionsThisMonth = inspections?.filter(i => 
-    new Date(i.startedAt || '') >= thisMonthStart
-  ).length || 0;
+  const inspectionsThisMonth = useDemoData 
+    ? 15 
+    : (inspections?.filter(i => new Date(i.startedAt || '') >= thisMonthStart).length || 0);
 
-  // Reports generated (completed inspections)
-  const reportsGenerated = inspections?.filter(i => i.status === 'completed').length || 0;
+  // Reports generated (demo: 47)
+  const reportsGenerated = useDemoData ? 47 : (inspections?.filter(i => i.status === 'completed').length || 0);
 
   // Pipeline data for chart
-  const pipelineData = [
+  const pipelineData = useDemoData ? [
+    { name: 'Scheduled', value: 4, fill: pipelineColors[0] },
+    { name: 'In Progress', value: 2, fill: pipelineColors[1] },
+    { name: 'Report Draft', value: 1, fill: pipelineColors[2] },
+    { name: 'Submitted', value: 1, fill: pipelineColors[3] },
+    { name: 'Completed', value: 3, fill: pipelineColors[4] },
+  ] : [
     { name: 'Scheduled', value: projects?.filter(p => p.status === 'scheduled').length || 0, fill: pipelineColors[0] },
     { name: 'In Progress', value: projects?.filter(p => p.status === 'in_progress').length || 0, fill: pipelineColors[1] },
     { name: 'Report Draft', value: projects?.filter(p => p.status === 'report_draft').length || 0, fill: pipelineColors[2] },
@@ -120,33 +180,37 @@ const Dashboard = () => {
     { name: 'Completed', value: completedProjects, fill: pipelineColors[4] },
   ];
 
-  // Monthly trend data (mock for now - would come from API)
+  // Monthly trend data
   const monthlyTrendData = [
     { month: 'Aug', inspections: 12, reports: 10 },
     { month: 'Sep', inspections: 18, reports: 15 },
     { month: 'Oct', inspections: 24, reports: 20 },
     { month: 'Nov', inspections: 22, reports: 19 },
     { month: 'Dec', inspections: 28, reports: 25 },
-    { month: 'Jan', inspections: inspectionsThisMonth || 15, reports: reportsGenerated || 12 },
+    { month: 'Jan', inspections: useDemoData ? 15 : (inspectionsThisMonth || 15), reports: useDemoData ? 12 : (reportsGenerated || 12) },
   ];
 
-  // Recent clients (last 5)
-  const recentClients = clients?.slice(0, 5) || [];
+  // Recent clients (last 5) - use demo if no real data
+  const recentClients = useDemoData ? demoClients.slice(0, 5) : (clients?.slice(0, 5) || []);
 
-  // Recent projects for reports (last 5 completed)
-  const recentReports = projects?.filter(p => p.status === 'completed').slice(0, 5) || [];
+  // Recent projects for reports - use demo reports if no real data
+  const recentReportsData = useDemoData ? demoReports : (projects?.filter(p => p.status === 'completed').slice(0, 5) || []);
 
-  // Upcoming inspections (scheduled projects)
-  const upcomingInspections = projects
-    ?.filter(p => p.status === 'scheduled' && p.inspectionDate)
-    .sort((a, b) => new Date(a.inspectionDate!).getTime() - new Date(b.inspectionDate!).getTime())
-    .slice(0, 5) || [];
+  // Upcoming inspections - use demo if no real data
+  const upcomingInspections = useDemoData 
+    ? demoUpcoming 
+    : (projects
+        ?.filter(p => p.status === 'scheduled' && p.inspectionDate)
+        .sort((a, b) => new Date(a.inspectionDate!).getTime() - new Date(b.inspectionDate!).getTime())
+        .slice(0, 5) || []);
 
-  // Get client name by ID
+  // Get client name by ID (check both demo and real clients)
   const getClientName = (clientId: number | null) => {
     if (!clientId) return 'Unknown Client';
-    const client = clients?.find(c => c.id === clientId);
-    return client?.companyName || client?.contactPerson || 'Unknown Client';
+    const realClient = clients?.find(c => c.id === clientId);
+    if (realClient) return realClient.companyName || realClient.contactPerson || 'Unknown Client';
+    const demoClient = demoClients.find(c => c.id === clientId);
+    return demoClient?.companyName || demoClient?.contactPerson || 'Unknown Client';
   };
 
   // Format date
@@ -520,13 +584,13 @@ const Dashboard = () => {
                       <Skeleton key={i} className="h-16 w-full" />
                     ))}
                   </div>
-                ) : recentReports.length > 0 ? (
+                ) : recentReportsData.length > 0 ? (
                   <div className="divide-y divide-gray-800" data-testid="list-recent-reports">
-                    {recentReports.map((project) => (
+                    {recentReportsData.map((report: any) => (
                       <div 
-                        key={project.id} 
+                        key={report.id} 
                         className="p-4 hover:bg-gray-800/50 transition-colors"
-                        data-testid={`report-row-${project.id}`}
+                        data-testid={`report-row-${report.id}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -534,19 +598,26 @@ const Dashboard = () => {
                               <FileText className="h-5 w-5 text-green-500" />
                             </div>
                             <div>
-                              <p className="font-medium text-white">{project.propertyAddress}</p>
+                              <p className="font-medium text-white">
+                                {report.projectName || report.propertyAddress || 'Damage Assessment Report'}
+                              </p>
                               <p className="text-sm text-gray-500">
-                                {getClientName(project.clientId)} • {formatDate(project.submissionDate)}
+                                {report.clientName || getClientName(report.clientId)} • {formatDate(report.completedDate || report.submissionDate)}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            {useDemoData && report.damageScore && (
+                              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 mr-2">
+                                {report.damageScore}% damage
+                              </Badge>
+                            )}
                             <Button 
                               variant="ghost" 
                               size="sm"
                               className="text-gray-400 hover:text-white hover:bg-gray-700"
-                              onClick={() => navigate(`/winn-report/${project.id}`)}
-                              data-testid={`button-view-report-${project.id}`}
+                              onClick={() => navigate(`/winn-report/${report.id}`)}
+                              data-testid={`button-view-report-${report.id}`}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -554,7 +625,7 @@ const Dashboard = () => {
                               variant="ghost" 
                               size="sm"
                               className="text-gray-400 hover:text-white hover:bg-gray-700"
-                              data-testid={`button-download-report-${project.id}`}
+                              data-testid={`button-download-report-${report.id}`}
                             >
                               <Download className="h-4 w-4" />
                             </Button>
@@ -606,11 +677,11 @@ const Dashboard = () => {
                   </div>
                 ) : upcomingInspections.length > 0 ? (
                   <div className="divide-y divide-gray-800" data-testid="list-upcoming-inspections">
-                    {upcomingInspections.map((project) => (
+                    {upcomingInspections.map((inspection: any) => (
                       <div 
-                        key={project.id} 
+                        key={inspection.id} 
                         className="p-4 hover:bg-gray-800/50 transition-colors"
-                        data-testid={`inspection-row-${project.id}`}
+                        data-testid={`inspection-row-${inspection.id}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -618,22 +689,25 @@ const Dashboard = () => {
                               <Calendar className="h-5 w-5 text-blue-500" />
                             </div>
                             <div>
-                              <p className="font-medium text-white">{project.propertyAddress}</p>
+                              <p className="font-medium text-white">
+                                {inspection.address || inspection.propertyAddress || inspection.name}
+                              </p>
                               <p className="text-sm text-gray-500">
-                                {getClientName(project.clientId)}
+                                {inspection.clientName || getClientName(inspection.clientId)}
+                                {inspection.time && <span className="ml-2 text-blue-400">• {inspection.time}</span>}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-medium text-orange-400">
-                              {formatDate(project.inspectionDate)}
+                              {formatDate(inspection.inspectionDate)}
                             </p>
                             <Button 
                               variant="ghost" 
                               size="sm"
                               className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 mt-1 h-7 px-2"
-                              onClick={() => navigate(`/inspection/${project.id}`)}
-                              data-testid={`button-start-inspection-${project.id}`}
+                              onClick={() => navigate(`/inspection/${inspection.id}`)}
+                              data-testid={`button-start-inspection-${inspection.id}`}
                             >
                               <Play className="h-3 w-3 mr-1" />
                               Start
