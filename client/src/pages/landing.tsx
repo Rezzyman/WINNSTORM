@@ -283,7 +283,7 @@ const Landing = () => {
                 <div className="flex flex-col space-y-2 pt-4">
                   <Button variant="outline" onClick={() => navigate('/auth')} className="rounded-none border-white/40 text-white hover:bg-white hover:text-[#1A1A1A] font-heading uppercase tracking-wide">Sign In</Button>
                   <Button className="btn-primary" onClick={() => navigate('/subscribe/professional')}>
-                    Start Free Trial
+                    Get Started
                   </Button>
                 </div>
               </div>
