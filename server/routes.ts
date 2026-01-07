@@ -20,6 +20,7 @@ import {
 } from './property-import';
 import innovationRoutes from './innovation-routes';
 import adminRoutes from './admin-routes';
+import teamRoutes from './team-routes';
 
 function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
   if (!req.user?.dbUserId) {
@@ -92,6 +93,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin Panel Routes
   app.use('/api/admin', adminRoutes);
+  
+  // Team Knowledge Portal Routes
+  app.use('/api/team', teamRoutes);
 
   // Authentication routes
   // Note: Most authentication is handled via Firebase on the client-side

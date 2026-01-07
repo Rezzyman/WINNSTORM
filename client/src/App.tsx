@@ -37,6 +37,7 @@ import Clients from "@/pages/clients";
 import InnovationHub from "@/pages/innovation-hub";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import TeamPortal from "@/pages/team-portal";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useEffect } from "react";
@@ -99,6 +100,7 @@ function Router() {
       <Route path="/blog/:slug">{(params) => <BlogPost slug={params.slug} />}</Route>
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/team/knowledge" component={TeamPortal} />
       <Route component={NotFound} />
     </Switch>
   );

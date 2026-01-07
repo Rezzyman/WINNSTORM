@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +29,8 @@ import {
   CheckCircle2,
   Clock,
   Trash2,
-  Eye
+  Eye,
+  Plus
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -113,6 +114,11 @@ const AdminDashboard = () => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Team member state
+  const [showAddTeamMember, setShowAddTeamMember] = useState(false);
+  const [teamMemberForm, setTeamMemberForm] = useState({ name: '', email: '', password: '' });
+  const [isCreatingTeamMember, setIsCreatingTeamMember] = useState(false);
 
   const getToken = async (): Promise<string | null> => {
     if (!user) return null;
@@ -190,6 +196,12 @@ const AdminDashboard = () => {
 
   const { data: knowledgeDocuments, isLoading: documentsLoading, refetch: refetchDocuments } = useQuery<KnowledgeDocument[]>({
     queryKey: ['/api/admin/knowledge/documents'],
+    enabled: isAuthorized === true,
+  });
+
+  // Team members query
+  const { data: teamMembers, isLoading: teamMembersLoading, refetch: refetchTeamMembers } = useQuery<{id: number; email: string; name: string; isActive: boolean; lastLogin: string | null; createdAt: string}[]>({
+    queryKey: ['/api/admin/team-members'],
     enabled: isAuthorized === true,
   });
 
@@ -274,6 +286,85 @@ const AdminDashboard = () => {
       refetchDocuments();
     } catch (error) {
       toast({ title: "Failed to delete document", variant: "destructive" });
+    }
+  };
+
+  // Team member handlers
+  const handleCreateTeamMember = async () => {
+    if (!teamMemberForm.name || !teamMemberForm.email || !teamMemberForm.password) {
+      toast({ title: "All fields are required", variant: "destructive" });
+      return;
+    }
+    if (teamMemberForm.password.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+    
+    setIsCreatingTeamMember(true);
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/admin/team-members', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(teamMemberForm),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to create team member');
+      }
+
+      toast({ title: "Team member created successfully" });
+      setShowAddTeamMember(false);
+      setTeamMemberForm({ name: '', email: '', password: '' });
+      refetchTeamMembers();
+    } catch (error) {
+      toast({ title: "Failed to create team member", description: (error as Error).message, variant: "destructive" });
+    } finally {
+      setIsCreatingTeamMember(false);
+    }
+  };
+
+  const handleToggleTeamMember = async (email: string, isActive: boolean) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/admin/team-members/${encodeURIComponent(email)}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isActive: !isActive }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update team member');
+      toast({ title: isActive ? "Team member deactivated" : "Team member activated" });
+      refetchTeamMembers();
+    } catch (error) {
+      toast({ title: "Failed to update team member", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteTeamMember = async (email: string) => {
+    if (!confirm('Are you sure you want to delete this team member?')) return;
+    
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/admin/team-members/${encodeURIComponent(email)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to delete team member');
+      toast({ title: "Team member deleted" });
+      refetchTeamMembers();
+    } catch (error) {
+      toast({ title: "Failed to delete team member", variant: "destructive" });
     }
   };
 
@@ -476,6 +567,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="knowledge" className="rounded-none data-[state=active]:bg-primary">
               <BookOpen className="h-4 w-4 mr-2" />
               Knowledge Base
+            </TabsTrigger>
+            <TabsTrigger value="team-members" className="rounded-none data-[state=active]:bg-primary">
+              <UserCheck className="h-4 w-4 mr-2" />
+              Team Portal
             </TabsTrigger>
             <TabsTrigger value="system" className="rounded-none data-[state=active]:bg-primary">
               <Settings className="h-4 w-4 mr-2" />
@@ -834,6 +929,160 @@ const AdminDashboard = () => {
                       </Table>
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team-members">
+            <Card className="bg-white/5 border-white/10 rounded-none">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <UserCheck className="h-5 w-5 text-primary" />
+                    Team Knowledge Portal Access
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowAddTeamMember(true)}
+                    className="bg-primary hover:bg-primary/90"
+                    data-testid="button-add-team-member"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Team Member
+                  </Button>
+                </div>
+                <CardDescription className="text-white/60">
+                  Manage team members who can upload documents to Stormy's knowledge base at /team/knowledge
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {showAddTeamMember && (
+                  <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-none">
+                    <h4 className="text-white font-medium mb-4">Add New Team Member</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-white/60">Name</Label>
+                        <Input
+                          placeholder="John Doe"
+                          value={teamMemberForm.name}
+                          onChange={(e) => setTeamMemberForm({ ...teamMemberForm, name: e.target.value })}
+                          className="bg-white/5 border-white/20 text-white"
+                          data-testid="input-team-name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white/60">Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          value={teamMemberForm.email}
+                          onChange={(e) => setTeamMemberForm({ ...teamMemberForm, email: e.target.value })}
+                          className="bg-white/5 border-white/20 text-white"
+                          data-testid="input-team-email"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white/60">Password (min 8 chars)</Label>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          value={teamMemberForm.password}
+                          onChange={(e) => setTeamMemberForm({ ...teamMemberForm, password: e.target.value })}
+                          className="bg-white/5 border-white/20 text-white"
+                          data-testid="input-team-password"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        onClick={handleCreateTeamMember}
+                        disabled={isCreatingTeamMember}
+                        className="bg-primary"
+                        data-testid="button-create-team-member"
+                      >
+                        {isCreatingTeamMember ? 'Creating...' : 'Create Team Member'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setShowAddTeamMember(false);
+                          setTeamMemberForm({ name: '', email: '', password: '' });
+                        }}
+                        className="text-white/60"
+                        data-testid="button-cancel-team-member"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {teamMembersLoading ? (
+                  <div className="text-center py-8 text-white/60">Loading team members...</div>
+                ) : !teamMembers || teamMembers.length === 0 ? (
+                  <div className="text-center py-8 text-white/60">
+                    No team members yet. Add team members to give them access to upload documents.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-white/10 hover:bg-transparent">
+                          <TableHead className="text-white/60">Name</TableHead>
+                          <TableHead className="text-white/60">Email</TableHead>
+                          <TableHead className="text-white/60">Status</TableHead>
+                          <TableHead className="text-white/60">Last Login</TableHead>
+                          <TableHead className="text-white/60">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {teamMembers.map((member) => (
+                          <TableRow key={member.id} className="border-white/10 hover:bg-white/5">
+                            <TableCell className="text-white">{member.name}</TableCell>
+                            <TableCell className="text-white/80">{member.email}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 text-xs rounded ${member.isActive ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'}`}>
+                                {member.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-white/60">
+                              {member.lastLogin ? new Date(member.lastLogin).toLocaleDateString() : 'Never'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleTeamMember(member.email, member.isActive)}
+                                  className={member.isActive ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'}
+                                  data-testid={`button-toggle-team-${member.id}`}
+                                >
+                                  {member.isActive ? 'Deactivate' : 'Activate'}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTeamMember(member.email)}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  data-testid={`button-delete-team-${member.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+                
+                <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-none">
+                  <h4 className="text-blue-400 font-medium mb-2">Team Portal URL</h4>
+                  <p className="text-white/80 font-mono text-sm">/team/knowledge</p>
+                  <p className="text-white/60 text-sm mt-2">
+                    Share this URL with team members. They can log in with the credentials you create here.
+                  </p>
                 </div>
               </CardContent>
             </Card>

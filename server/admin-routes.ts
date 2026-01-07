@@ -219,6 +219,126 @@ router.post('/set-password', async (req: Request, res: Response) => {
   }
 });
 
+// ============ Team Member Management ============
+
+// Get all team members
+router.get('/team-members', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const members = await storage.getAllTeamMembers();
+    const sanitized = members.map(m => ({
+      id: m.id,
+      email: m.email,
+      name: m.name,
+      isActive: m.isActive,
+      lastLogin: m.lastLogin,
+      createdBy: m.createdBy,
+      createdAt: m.createdAt,
+    }));
+    res.json(sanitized);
+  } catch (error) {
+    console.error('Error fetching team members:', error);
+    res.status(500).json({ message: 'Failed to fetch team members' });
+  }
+});
+
+// Create team member
+router.post('/team-members', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const { email, name, password } = req.body;
+    
+    if (!email || !name || !password) {
+      return res.status(400).json({ message: 'Email, name, and password are required' });
+    }
+    
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+    
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const existing = await storage.getTeamCredentials(normalizedEmail);
+    if (existing) {
+      return res.status(400).json({ message: 'Team member with this email already exists' });
+    }
+    
+    const passwordHash = hashPassword(password);
+    const member = await storage.createTeamCredentials({
+      email: normalizedEmail,
+      name,
+      passwordHash,
+      isActive: true,
+      createdBy: req.adminUser?.email || 'admin',
+    });
+    
+    res.json({
+      success: true,
+      member: {
+        id: member.id,
+        email: member.email,
+        name: member.name,
+        isActive: member.isActive,
+        createdAt: member.createdAt,
+      }
+    });
+  } catch (error) {
+    console.error('Error creating team member:', error);
+    res.status(500).json({ message: 'Failed to create team member' });
+  }
+});
+
+// Update team member (activate/deactivate, reset password)
+router.patch('/team-members/:email', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const { email } = req.params;
+    const { isActive, password, name } = req.body;
+    
+    const updates: any = {};
+    if (typeof isActive === 'boolean') updates.isActive = isActive;
+    if (name) updates.name = name;
+    if (password) {
+      if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+      }
+      updates.passwordHash = hashPassword(password);
+    }
+    
+    const updated = await storage.updateTeamCredentials(email, updates);
+    if (!updated) {
+      return res.status(404).json({ message: 'Team member not found' });
+    }
+    
+    res.json({
+      success: true,
+      member: {
+        id: updated.id,
+        email: updated.email,
+        name: updated.name,
+        isActive: updated.isActive,
+      }
+    });
+  } catch (error) {
+    console.error('Error updating team member:', error);
+    res.status(500).json({ message: 'Failed to update team member' });
+  }
+});
+
+// Delete team member
+router.delete('/team-members/:email', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const { email } = req.params;
+    const success = await storage.deleteTeamCredentials(email);
+    
+    if (!success) {
+      return res.status(404).json({ message: 'Team member not found' });
+    }
+    
+    res.json({ success: true, message: 'Team member deleted' });
+  } catch (error) {
+    console.error('Error deleting team member:', error);
+    res.status(500).json({ message: 'Failed to delete team member' });
+  }
+});
+
 // Get all users (admin only)
 router.get('/users', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
   try {

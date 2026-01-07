@@ -40,10 +40,21 @@ The platform utilizes a **React, TypeScript, and Tailwind CSS** frontend, featur
 - **Team Assignment & Workload Management**: Assigning inspectors, tracking capacity, and workload visualization.
 - **Pre-built Damage Templates**: Categorized damage templates with severity ratings, affected components, recommended actions, and required evidence checklists.
 
-## Recent Changes (December 2025)
+## Recent Changes (January 2026)
+- **Team Knowledge Portal**: Separate portal for team members to upload knowledge base documents
+  - Access at /team/knowledge with password-based authentication
+  - Team members can upload documents for Stormy AI (pending admin approval)
+  - Admin manages team members from Admin Panel > Team Portal tab
+  - Separate credentials from admin (stored in teamCredentials table)
+- **Password-Based Admin Auth**: Admin panel now supports password login (bypasses Firebase issues)
+  - Admin credentials: anthony@winnstorm.com with password authentication
+  - PBKDF2 password hashing with random salt, login attempt limiting
+  - Express-session for secure session management
+
+## Previous Changes (December 2025)
 - **Admin Panel**: Secure admin dashboard at /admin with user management, project/client/property data grids
   - Admin login at /admin/login with email allowlist protection
-  - Allowlisted emails: admin@winnstorm.com, eric@winnstorm.com, developer@winnstorm.com
+  - Allowlisted emails: admin@winnstorm.com, eric@winnstorm.com, developer@winnstorm.com, anthony@winnstorm.com
   - Server-side protection via requireAdmin middleware
   - Discreet admin link in homepage footer
 - **Demo Login Removed**: Demo login button removed from public auth page for production security
