@@ -135,20 +135,29 @@ export async function updateUserMemory(
   return await storage.createAIMemory(newMemory);
 }
 
-// Knowledge Base Integration
+// Knowledge Base Integration with Semantic Search
+import { hybridSearch, formatSearchResultsForContext } from "./knowledge-service";
+
 async function getRelevantKnowledge(query: string): Promise<string> {
   try {
-    // Get approved documents from knowledge base
+    // Use hybrid search (semantic + keyword) for best results
+    const searchResults = await hybridSearch(query, 5);
+    
+    if (searchResults.length > 0) {
+      console.log(`Found ${searchResults.length} relevant knowledge base entries for query`);
+      return formatSearchResultsForContext(searchResults);
+    }
+
+    // Fallback: Get recent approved documents if no semantic matches
     const approvedDocs = await storage.getApprovedKnowledgeDocuments();
     
     if (approvedDocs.length === 0) {
       return '';
     }
 
-    // Simple keyword matching for now - can be upgraded to vector similarity later
+    // Simple keyword matching as fallback
     const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 3);
     
-    // Score documents by keyword relevance
     const scoredDocs = approvedDocs.map(doc => {
       const content = `${doc.title} ${doc.description || ''} ${doc.content || ''}`.toLowerCase();
       let score = 0;
@@ -156,7 +165,6 @@ async function getRelevantKnowledge(query: string): Promise<string> {
       for (const word of queryWords) {
         if (content.includes(word)) {
           score++;
-          // Boost for title matches
           if (doc.title.toLowerCase().includes(word)) {
             score += 2;
           }
@@ -168,12 +176,10 @@ async function getRelevantKnowledge(query: string): Promise<string> {
       .sort((a, b) => b.score - a.score);
 
     if (scoredDocs.length === 0) {
-      // If no keyword matches, include top 3 most relevant docs by document type
       const topDocs = approvedDocs.slice(0, 3);
       return formatKnowledgeContext(topDocs);
     }
 
-    // Return top 5 most relevant documents
     const relevantDocs = scoredDocs.slice(0, 5).map(item => item.doc);
     return formatKnowledgeContext(relevantDocs);
   } catch (error) {
@@ -185,13 +191,13 @@ async function getRelevantKnowledge(query: string): Promise<string> {
 function formatKnowledgeContext(docs: KnowledgeDocument[]): string {
   if (docs.length === 0) return '';
   
-  let context = '\n\n## Knowledge Base Reference:\n';
+  let context = '\n\n## WinnStorm Knowledge Base:\n';
   let totalChars = 0;
   
   for (const doc of docs) {
     const docContent = doc.content || '';
     const truncatedContent = docContent.substring(0, 2000);
-    const docSection = `\n### ${doc.title}\n${doc.description || ''}\n${truncatedContent}${docContent.length > 2000 ? '...' : ''}`;
+    const docSection = `\n### ${doc.title} (${doc.documentType})\n${doc.description || ''}\n${truncatedContent}${docContent.length > 2000 ? '...' : ''}`;
     
     if (totalChars + docSection.length > MAX_KNOWLEDGE_CONTEXT_CHARS) {
       break;
@@ -201,7 +207,7 @@ function formatKnowledgeContext(docs: KnowledgeDocument[]): string {
     totalChars += docSection.length;
   }
   
-  context += '\n\n[Use the above knowledge base content to inform your responses when relevant.]';
+  context += '\n\n[Use the above WinnStorm knowledge base content as your primary source. Only supplement with general knowledge when the KB doesn\'t cover the topic.]';
   return context;
 }
 

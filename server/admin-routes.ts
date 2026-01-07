@@ -402,6 +402,9 @@ router.patch('/knowledge/documents/:id', requireAdmin, async (req: AdminAuthenti
   }
 });
 
+// Import knowledge service for embedding generation
+import { generateDocumentEmbeddings } from './knowledge-service';
+
 // Approve knowledge document
 router.post('/knowledge/documents/:id/approve', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
   try {
@@ -412,10 +415,45 @@ router.post('/knowledge/documents/:id/approve', requireAdmin, async (req: AdminA
     if (!document) return res.status(404).json({ message: 'Document not found' });
     
     await logKnowledgeAudit(req, 'approve', id, document.categoryId || undefined, undefined, { approved: true });
+    
+    // Automatically generate embeddings for approved documents with content
+    if (document.content) {
+      generateDocumentEmbeddings(id).catch(err => {
+        console.error(`Failed to generate embeddings for document ${id}:`, err);
+      });
+    }
+    
     res.json(document);
   } catch (error) {
     console.error('Error approving knowledge document:', error);
     res.status(500).json({ message: 'Failed to approve document' });
+  }
+});
+
+// Generate embeddings for a document
+router.post('/knowledge/documents/:id/embeddings', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: 'Invalid document ID' });
+    
+    const document = await storage.getKnowledgeDocumentById(id);
+    if (!document) return res.status(404).json({ message: 'Document not found' });
+    
+    if (!document.content) {
+      return res.status(400).json({ message: 'Document has no content to generate embeddings from' });
+    }
+    
+    const success = await generateDocumentEmbeddings(id);
+    
+    if (success) {
+      await logKnowledgeAudit(req, 'update', id, document.categoryId || undefined, undefined, { embeddingsGenerated: true });
+      res.json({ success: true, message: 'Embeddings generated successfully' });
+    } else {
+      res.status(500).json({ message: 'Failed to generate embeddings' });
+    }
+  } catch (error) {
+    console.error('Error generating embeddings:', error);
+    res.status(500).json({ message: 'Failed to generate embeddings' });
   }
 });
 

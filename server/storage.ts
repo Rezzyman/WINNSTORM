@@ -1350,6 +1350,34 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllKnowledgeEmbeddingsWithDocs(): Promise<Array<KnowledgeEmbedding & { document: KnowledgeDocument }>> {
+    try {
+      const results = await db
+        .select({
+          id: knowledgeEmbeddings.id,
+          documentId: knowledgeEmbeddings.documentId,
+          chunkIndex: knowledgeEmbeddings.chunkIndex,
+          chunkContent: knowledgeEmbeddings.chunkContent,
+          embedding: knowledgeEmbeddings.embedding,
+          tokenCount: knowledgeEmbeddings.tokenCount,
+          createdAt: knowledgeEmbeddings.createdAt,
+          document: knowledgeDocuments,
+        })
+        .from(knowledgeEmbeddings)
+        .innerJoin(knowledgeDocuments, eq(knowledgeEmbeddings.documentId, knowledgeDocuments.id))
+        .where(
+          and(
+            eq(knowledgeDocuments.isActive, true),
+            isNotNull(knowledgeDocuments.approvedAt)
+          )
+        );
+      return results as any;
+    } catch (error) {
+      console.error('Error fetching all knowledge embeddings:', error);
+      return [];
+    }
+  }
+
   // Knowledge Audit Log
   async createKnowledgeAuditLog(data: InsertKnowledgeAuditLog): Promise<KnowledgeAuditLog> {
     const [log] = await db.insert(knowledgeAuditLog).values(data).returning();

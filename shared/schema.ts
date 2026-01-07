@@ -2224,6 +2224,9 @@ export interface DocumentMetadata {
   tags?: string[];
   relatedDocumentIds?: number[];
   externalUrl?: string;
+  // Embedding metadata
+  embeddingsGenerated?: boolean;
+  embeddingCount?: number;
 }
 
 export interface EmbeddingChunk {
