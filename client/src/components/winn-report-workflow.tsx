@@ -192,7 +192,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
-                  <MapPin className="h-5 w-5 text-primary" />
+                  <MapPin className="h-5 w-5 text-orange-500" />
                   Basic Property Information
                 </CardTitle>
               </CardHeader>
@@ -364,7 +364,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
               <Button 
                 data-testid="button-add-weather"
                 onClick={addWeatherCondition} 
-                className="bg-primary text-primary-foreground touch-target"
+                className="bg-orange-500 hover:bg-orange-600 text-white touch-target"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Reading
@@ -449,7 +449,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
               <Button 
                 data-testid="button-add-component"
                 onClick={addRoofComponent} 
-                className="bg-primary text-primary-foreground touch-target"
+                className="bg-orange-500 hover:bg-orange-600 text-white touch-target"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Component

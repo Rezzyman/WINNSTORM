@@ -285,7 +285,7 @@ export function StormyChat({
     switch (voiceChat.state) {
       case 'recording': return 'text-red-500';
       case 'processing': return 'text-yellow-500';
-      case 'speaking': return 'text-green-500';
+      case 'speaking': return 'text-orange-500';
       default: return 'text-muted-foreground';
     }
   };
@@ -412,7 +412,7 @@ export function StormyChat({
             <canvas ref={canvasRef} className="hidden" />
             {liveImageUrl && (
               <div className="absolute top-2 right-2">
-                <Badge className="bg-green-500">Captured</Badge>
+                <Badge className="bg-orange-500">Captured</Badge>
               </div>
             )}
             <div className="absolute bottom-2 left-2 right-2 flex justify-between">
@@ -488,7 +488,7 @@ export function StormyChat({
             )}
             {voiceChat.state === 'speaking' && (
               <span className="flex items-center gap-2">
-                <Volume2 className="h-4 w-4 text-green-500 animate-pulse" />
+                <Volume2 className="h-4 w-4 text-orange-500 animate-pulse" />
                 <span className={`text-sm font-medium ${getVoiceStatusColor()}`}>
                   {getVoiceStatusText()}
                 </span>
@@ -675,7 +675,7 @@ export function StormyChat({
           data-testid="button-open-stormy"
         >
           <Cloud className="h-7 w-7 text-white" />
-          <span className="absolute top-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white" />
+          <span className="absolute top-0 right-0 h-3 w-3 bg-orange-500 rounded-full border-2 border-white" />
         </button>
       )}
 
