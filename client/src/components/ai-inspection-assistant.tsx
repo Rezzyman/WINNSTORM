@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Bot, User, Send, Image, MapPin, Thermometer, Camera, FileText, AlertTriangle, GraduationCap } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Bot, User, Send, Image, MapPin, Thermometer, Camera, FileText, AlertTriangle, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StormyAvatar } from './stormy-avatar';
 import { getStormySystemPrompt, getQuickActionsForStep, getStepWelcomeMessage, UserExperienceLevel } from '@/lib/stormy-guidance';
@@ -175,136 +176,163 @@ export function AIInspectionAssistant({
     setTimeout(() => sendMessage(), 100);
   };
 
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <StormyAvatar size={20} />
-            Stormy - AI Coach
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            <Select value={userLevel} onValueChange={(value) => setUserLevel(value as UserExperienceLevel)}>
-              <SelectTrigger className="h-7 w-[120px] text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="expert">Expert</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardTitle>
-        {currentStep && (
-          <Badge variant="outline" className="text-primary border-primary mt-2 w-fit">
-            {currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-          </Badge>
-        )}
-      </CardHeader>
+  const [isOpen, setIsOpen] = useState(true);
 
-      <CardContent className="flex-1 flex flex-col gap-4 p-4">
-        {/* Messages */}
-        <ScrollArea className="flex-1 h-96 pr-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`flex gap-3 max-w-[80%] ${
-                    message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                  }`}
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="flex flex-col">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors" data-testid="button-toggle-stormy">
+            <CardTitle className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <StormyAvatar size={20} />
+                Stormy - AI Coach
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                <Select 
+                  value={userLevel} 
+                  onValueChange={(value) => setUserLevel(value as UserExperienceLevel)}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      // Prevent collapsible toggle when opening select
+                    }
+                  }}
                 >
-                  <div className="flex-shrink-0">
-                    {message.role === 'user' ? (
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                    ) : (
-                      <StormyAvatar size={32} />
-                    )}
-                  </div>
+                  <SelectTrigger 
+                    className="h-7 w-[120px] text-xs" 
+                    onClick={(e) => e.stopPropagation()}
+                    data-testid="select-user-level"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </CardTitle>
+            {currentStep && (
+              <Badge variant="outline" className="text-primary border-primary mt-2 w-fit">
+                {currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
+            )}
+          </CardHeader>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent>
+          <CardContent className="flex flex-col gap-4 p-4">
+            {/* Messages - Fixed height with scrolling */}
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`rounded-lg p-3 ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800'
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap text-sm">
-                      {message.content}
-                    </div>
-                    <div className="text-xs opacity-70 mt-2">
-                      {message.timestamp.toLocaleTimeString()}
+                    <div
+                      className={`flex gap-3 max-w-[80%] ${
+                        message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      }`}
+                    >
+                      <div className="flex-shrink-0">
+                        {message.role === 'user' ? (
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <User className="h-4 w-4 text-white" />
+                          </div>
+                        ) : (
+                          <StormyAvatar size={32} />
+                        )}
+                      </div>
+                      <div
+                        className={`rounded-lg p-3 ${
+                          message.role === 'user'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 dark:bg-gray-800'
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap text-sm">
+                          {message.content}
+                        </div>
+                        <div className="text-xs opacity-70 mt-2">
+                          {message.timestamp.toLocaleTimeString()}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <StormyAvatar size={32} />
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                ))}
+                {isLoading && (
+                  <div className="flex gap-3 justify-start">
+                    <StormyAvatar size={32} />
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+                <div ref={messagesEndRef} />
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
+            </ScrollArea>
 
-        {/* Quick Actions */}
-        <div className="space-y-2">
-          <Separator />
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Quick Actions
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {getQuickActions().slice(0, 3).map((action) => (
-              <Button
-                key={action.label}
-                variant="outline"
-                size="sm"
-                onClick={() => sendQuickAction(action.message)}
-                className="text-xs"
+            {/* Quick Actions */}
+            <div className="space-y-2">
+              <Separator />
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Quick Actions
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {getQuickActions().slice(0, 3).map((action) => (
+                  <Button
+                    key={action.label}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => sendQuickAction(action.message)}
+                    className="text-xs"
+                    disabled={isLoading}
+                  >
+                    <action.icon className="h-3 w-3 mr-1" />
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message Input */}
+            <div className="flex gap-2">
+              <Textarea
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about inspection procedures, damage assessment, or methodology..."
+                className="flex-1 min-h-[80px] resize-none"
                 disabled={isLoading}
+                data-testid="input-stormy-message"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={isLoading || !inputMessage.trim()}
+                size="sm"
+                className="self-end"
+                data-testid="button-send-stormy-message"
               >
-                <action.icon className="h-3 w-3 mr-1" />
-                {action.label}
+                <Send className="h-4 w-4" />
               </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Message Input */}
-        <div className="flex gap-2">
-          <Textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about inspection procedures, damage assessment, or methodology..."
-            className="flex-1 min-h-[80px] resize-none"
-            disabled={isLoading}
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={isLoading || !inputMessage.trim()}
-            size="sm"
-            className="self-end"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
