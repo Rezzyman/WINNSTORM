@@ -28,6 +28,7 @@ import {
   Cloud,
   Maximize2,
   Minimize2,
+  Minus,
   Mic,
   MicOff,
   Volume2,
@@ -65,6 +66,7 @@ export function StormyChat({
 }: StormyChatProps) {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<MessageAttachment[]>([]);
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -338,9 +340,19 @@ export function StormyChat({
     );
   };
 
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversationData?.messages, sendMessageMutation.isPending, scrollToBottom]);
+
   const chatContent = (
-    <div className={`flex flex-col ${isMaximized ? 'h-[80vh]' : 'h-[400px]'}`}>
-      <ScrollArea className="flex-1 p-4">
+    <div className={`flex flex-col ${isMaximized ? 'h-[80vh]' : 'h-[400px]'} max-h-[80vh] overflow-hidden`}>
+      <ScrollArea className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-4">
           {!conversationData?.messages?.length && !loadingMessages && (
             <div className="text-center py-8">
@@ -672,38 +684,65 @@ export function StormyChat({
           className={`fixed ${isMaximized ? 'inset-4' : 'bottom-6 right-6 w-96'} bg-background border rounded-lg shadow-2xl z-50 transition-all duration-200`}
           data-testid="stormy-chat-panel"
         >
-          <div className="flex items-center justify-between p-3 border-b bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-lg">
+          <div 
+            className={`flex items-center justify-between p-3 border-b bg-gradient-to-r from-orange-500 to-orange-600 ${isMinimized ? 'rounded-lg' : 'rounded-t-lg'} cursor-pointer`}
+            onClick={() => isMinimized && setIsMinimized(false)}
+          >
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
                 <Cloud className="h-4 w-4 text-white" />
               </div>
               <div>
                 <h3 className="font-semibold text-white text-sm">Stormy</h3>
-                <p className="text-xs text-white/80">AI Inspection Assistant</p>
+                <p className="text-xs text-white/80">{isMinimized ? 'Click to expand' : 'AI Inspection Assistant'}</p>
               </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/20"
-                onClick={() => setIsMaximized(!isMaximized)}
-                data-testid="button-toggle-maximize"
+                onClick={() => {
+                  if (isMinimized) {
+                    setIsMinimized(false);
+                  } else {
+                    setIsMinimized(true);
+                    setIsMaximized(false);
+                  }
+                }}
+                data-testid="button-toggle-minimize"
+                title={isMinimized ? "Expand" : "Minimize"}
               >
-                {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
               </Button>
+              {!isMinimized && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-white hover:bg-white/20"
+                  onClick={() => {
+                    setIsMaximized(!isMaximized);
+                    setIsMinimized(false);
+                  }}
+                  data-testid="button-toggle-maximize"
+                  title={isMaximized ? "Restore" : "Maximize"}
+                >
+                  {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/20"
                 onClick={() => setIsOpen(false)}
                 data-testid="button-close-stormy"
+                title="Close"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          {chatContent}
+          {!isMinimized && chatContent}
         </div>
       )}
     </>
