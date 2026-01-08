@@ -826,7 +826,42 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
 
         {/* AI Assistant Panel - Takes 1/3 of the width */}
         <div className="xl:col-span-1">
-          <div className="sticky top-6">
+          <div className="sticky top-6 space-y-4">
+            {/* Stormy AI Coach - Collapsible */}
+            <Card className="border-orange-500/20 bg-background/50 backdrop-blur-sm shadow-xl overflow-hidden">
+              <CardHeader 
+                className="flex flex-row items-center justify-between pb-2 space-y-0 bg-orange-500/5 cursor-pointer hover:bg-orange-500/10 transition-colors"
+                onClick={() => setShowStormy(!showStormy)}
+                data-testid="button-toggle-stormy"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-orange-500/10 rounded-lg">
+                    <MessageCircle className="h-4 w-4 text-orange-500" />
+                  </div>
+                  <CardTitle className="text-base font-semibold">Stormy AI Coach</CardTitle>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 hover:bg-orange-500/10 hover:text-orange-500"
+                  onClick={(e) => { e.stopPropagation(); setShowStormy(!showStormy); }}
+                >
+                  <X className={`h-4 w-4 transition-transform duration-200 ${showStormy ? 'rotate-0' : 'rotate-45'}`} />
+                </Button>
+              </CardHeader>
+              {showStormy && (
+                <CardContent className="p-0 animate-in slide-in-from-top duration-200">
+                  <StormyChat 
+                    propertyId={propertyId} 
+                    contextType="inspection" 
+                    position="inline"
+                    initialOpen={true}
+                  />
+                </CardContent>
+              )}
+            </Card>
+            
+            {/* AI Inspection Assistant */}
             <AIInspectionAssistant
               currentStep={WORKFLOW_STEPS[currentStep]?.id}
               propertyData={reportData.buildingInfo}
