@@ -85,8 +85,21 @@ const STEP_REQUIREMENTS: Record<WinnMethodologyStep, StepRequirements> = {
   },
 };
 
+import path from "path";
+import fs from "fs";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+
+  // Branding Kit Download Route
+  app.get("/download/branding-kit", (req, res) => {
+    const filePath = path.join(process.cwd(), "client/public/winnstorm-branding-kit.zip");
+    if (fs.existsSync(filePath)) {
+      res.download(filePath, "winnstorm-branding-kit.zip");
+    } else {
+      res.status(404).json({ message: "Branding kit not found" });
+    }
+  });
 
   // Innovation Framework Routes - Enterprise Features
   app.use('/api/innovation', innovationRoutes);
