@@ -351,8 +351,8 @@ export function StormyChat({
   }, [conversationData?.messages, sendMessageMutation.isPending, scrollToBottom]);
 
   const chatContent = (
-    <div className={`flex flex-col ${isMaximized ? 'h-[80vh]' : 'h-[400px]'} max-h-[80vh] overflow-hidden`}>
-      <ScrollArea className="flex-1 p-4 overflow-y-auto">
+    <div className={`flex flex-col ${isMaximized ? 'h-[80vh]' : 'h-[500px]'} overflow-hidden`}>
+      <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {!conversationData?.messages?.length && !loadingMessages && (
             <div className="text-center py-8">
