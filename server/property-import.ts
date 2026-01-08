@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import Papa from 'papaparse';
 
 export interface PropertyImportRow {
@@ -56,25 +56,35 @@ export interface ColumnMapping {
 
 const REQUIRED_FIELDS = ['name', 'address'];
 
-export function parseExcelFile(buffer: Buffer): { headers: string[]; rows: Record<string, any>[] } {
-  const workbook = XLSX.read(buffer, { type: 'buffer' });
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
+export async function parseExcelFile(buffer: Buffer): Promise<{ headers: string[]; rows: Record<string, any>[] }> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
   
-  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-  
-  if (jsonData.length === 0) {
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet || worksheet.rowCount === 0) {
     return { headers: [], rows: [] };
   }
   
-  const headers = jsonData[0].map((h: any) => String(h || '').trim());
-  const rows = jsonData.slice(1).map(row => {
+  const headers: string[] = [];
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+    headers[colNumber - 1] = String(cell.value || '').trim();
+  });
+  
+  const rows: Record<string, any>[] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+    if (rowNumber === 1) return;
     const obj: Record<string, any> = {};
-    headers.forEach((header, index) => {
-      obj[header] = row[index];
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      const header = headers[colNumber - 1];
+      if (header) {
+        obj[header] = cell.value;
+      }
     });
-    return obj;
-  }).filter(row => Object.values(row).some(v => v !== undefined && v !== ''));
+    if (Object.values(obj).some(v => v !== undefined && v !== null && v !== '')) {
+      rows.push(obj);
+    }
+  });
   
   return { headers, rows };
 }
