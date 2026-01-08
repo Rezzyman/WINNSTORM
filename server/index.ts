@@ -5,12 +5,13 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Site-wide password protection (HTTP Basic Auth)
+// Site password protection (HTTP Basic Auth) - ONLY on home page
 const SITE_PASSWORD = process.env.SITE_PASSWORD;
 if (SITE_PASSWORD) {
   app.use((req, res, next) => {
-    // Allow health checks and static assets without auth
-    if (req.path === '/health' || req.path.startsWith('/assets/')) {
+    // Only protect the home page (/) - allow all other routes
+    // This ensures logged-in users can navigate freely without auth popups
+    if (req.path !== '/') {
       return next();
     }
     
@@ -32,7 +33,7 @@ if (SITE_PASSWORD) {
     res.setHeader('WWW-Authenticate', 'Basic realm="WinnStorm Access"');
     return res.status(401).send('Invalid credentials');
   });
-  log('Site password protection enabled');
+  log('Site password protection enabled (home page only)');
 }
 
 app.use(express.json());
