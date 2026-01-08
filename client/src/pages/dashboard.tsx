@@ -738,7 +738,7 @@ const Dashboard = () => {
           {/* Quick Actions Row */}
           <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-orange-500/10 dark:to-orange-600/5 border-gray-200 dark:border-orange-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-orange-500/30 hover:border-orange-500 dark:hover:border-orange-500 transition-all cursor-pointer group shadow-sm"
               onClick={() => navigate('/winn-report/1')}
               data-testid="card-generate-winn-report"
             >
@@ -748,13 +748,13 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">Generate Winn Report</p>
-                  <p className="text-xs text-gray-500">Create new report</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Create new report</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-500 transition-all cursor-pointer group shadow-sm"
               onClick={() => navigate('/reports')}
               data-testid="card-view-reports"
             >
@@ -764,13 +764,13 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">View Reports</p>
-                  <p className="text-xs text-gray-500">Past assessments</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Past assessments</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-500 transition-all cursor-pointer group shadow-sm"
               onClick={() => navigate('/training')}
               data-testid="card-training"
             >
@@ -780,13 +780,13 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">Training Portal</p>
-                  <p className="text-xs text-gray-500">Certifications</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Certifications</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-500 transition-all cursor-pointer group shadow-sm"
               onClick={() => navigate('/crm-integrations')}
               data-testid="card-crm"
             >
@@ -796,13 +796,13 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">CRM Integration</p>
-                  <p className="text-xs text-gray-500">Connect systems</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Connect systems</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card 
-              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-500 transition-all cursor-pointer group shadow-sm"
               onClick={() => navigate('/innovation')}
               data-testid="card-innovation"
             >
@@ -812,7 +812,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">Innovation Hub</p>
-                  <p className="text-xs text-gray-500">Enterprise tools</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Enterprise tools</p>
                 </div>
               </CardContent>
             </Card>
