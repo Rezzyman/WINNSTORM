@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { StormyAvatar } from './stormy-avatar';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -299,11 +300,13 @@ export function StormyChat({
         className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
         data-testid={`stormy-message-${msg.id}`}
       >
-        <Avatar className={`h-8 w-8 ${isUser ? 'bg-primary' : 'bg-gradient-to-br from-orange-500 to-orange-600'}`}>
-          <AvatarFallback className="text-white text-xs">
-            {isUser ? 'U' : <Cloud className="h-4 w-4" />}
-          </AvatarFallback>
-        </Avatar>
+        {isUser ? (
+          <Avatar className="h-8 w-8 bg-primary">
+            <AvatarFallback className="text-white text-xs">U</AvatarFallback>
+          </Avatar>
+        ) : (
+          <StormyAvatar size={32} />
+        )}
         <div className={`flex-1 max-w-[80%] ${isUser ? 'text-right' : ''}`}>
           <div
             className={`rounded-lg p-3 ${
@@ -356,8 +359,8 @@ export function StormyChat({
         <div className="space-y-4">
           {!conversationData?.messages?.length && !loadingMessages && (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                <Cloud className="h-8 w-8 text-white" />
+              <div className="mx-auto mb-4">
+                <StormyAvatar size={64} className="mx-auto" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Hi, I'm Stormy!</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
@@ -382,11 +385,7 @@ export function StormyChat({
 
           {sendMessageMutation.isPending && (
             <div className="flex gap-3">
-              <Avatar className="h-8 w-8 bg-gradient-to-br from-orange-500 to-orange-600">
-                <AvatarFallback className="text-white">
-                  <Cloud className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
+              <StormyAvatar size={32} />
               <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-3">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm text-muted-foreground">Stormy is thinking...</span>
@@ -626,9 +625,7 @@ export function StormyChat({
       <Card className="w-full" data-testid="stormy-chat-inline">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <Cloud className="h-4 w-4 text-white" />
-            </div>
+            <StormyAvatar size={32} />
             Stormy AI Assistant
           </CardTitle>
         </CardHeader>
@@ -643,20 +640,14 @@ export function StormyChat({
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button
-            size="icon"
-            className="h-12 w-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg"
-            data-testid="button-open-stormy-modal"
-          >
-            <Cloud className="h-6 w-6 text-white" />
-          </Button>
+          <div className="h-12 w-12 rounded-full overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer" data-testid="button-open-stormy-modal">
+            <StormyAvatar size={48} />
+          </div>
         </DialogTrigger>
         <DialogContent className="max-w-2xl p-0">
           <DialogHeader className="p-4 border-b">
             <DialogTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                <Cloud className="h-4 w-4 text-white" />
-              </div>
+              <StormyAvatar size={32} />
               Stormy AI Assistant
             </DialogTitle>
           </DialogHeader>
@@ -671,10 +662,10 @@ export function StormyChat({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg flex items-center justify-center transition-all hover:scale-105 z-50"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full overflow-hidden shadow-lg transition-all hover:scale-105 z-50"
           data-testid="button-open-stormy"
         >
-          <Cloud className="h-7 w-7 text-white" />
+          <StormyAvatar size={56} />
           <span className="absolute top-0 right-0 h-3 w-3 bg-orange-500 rounded-full border-2 border-white" />
         </button>
       )}
@@ -689,9 +680,7 @@ export function StormyChat({
             onClick={() => isMinimized && setIsMinimized(false)}
           >
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Cloud className="h-4 w-4 text-white" />
-              </div>
+              <StormyAvatar size={32} />
               <div>
                 <h3 className="font-semibold text-white text-sm">Stormy</h3>
                 <p className="text-xs text-white/80">{isMinimized ? 'Click to expand' : 'AI Inspection Assistant'}</p>

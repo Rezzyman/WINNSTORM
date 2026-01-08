@@ -29,6 +29,7 @@ import { MobileWorkflowNav } from './mobile-workflow-nav';
 import { EducationalTooltip } from './educational-tooltip';
 import { CameraCapture } from './camera-capture';
 import { StormyChat } from './stormy-chat';
+import { StormyAvatar } from './stormy-avatar';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -835,9 +836,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
                 data-testid="button-toggle-stormy"
               >
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-orange-500/10 rounded-lg">
-                    <MessageCircle className="h-4 w-4 text-orange-500" />
-                  </div>
+                  <StormyAvatar size={32} />
                   <CardTitle className="text-base font-semibold">Stormy AI Coach</CardTitle>
                 </div>
                 <Button 
