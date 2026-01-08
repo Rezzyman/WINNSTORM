@@ -140,8 +140,8 @@ const ReportsPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'processing': return 'bg-yellow-500';
+      case 'completed': return 'bg-orange-500';
+      case 'processing': return 'bg-orange-400';
       case 'pending': return 'bg-gray-500';
       default: return 'bg-gray-500';
     }
@@ -160,8 +160,8 @@ const ReportsPage: React.FC = () => {
   const getReportTypeIcon = (type: string) => {
     switch (type) {
       case 'winn-report': return <FileText className="h-5 w-5 text-primary" />;
-      case 'thermal-analysis': return <TrendingUp className="h-5 w-5 text-cyan-500" />;
-      case 'damage-assessment': return <BarChart3 className="h-5 w-5 text-blue-500" />;
+      case 'thermal-analysis': return <TrendingUp className="h-5 w-5 text-orange-500" />;
+      case 'damage-assessment': return <BarChart3 className="h-5 w-5 text-gray-500" />;
       default: return <FileText className="h-5 w-5 text-gray-500" />;
     }
   };
@@ -217,11 +217,11 @@ const ReportsPage: React.FC = () => {
               </Button>
               <div className="flex items-center">
                 <div className="relative mr-4">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/30 to-orange-400/30 rounded-lg blur-md"></div>
                   <img src={winnstormLogo} alt="WinnStorm" className="h-10 relative z-10" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold text-orange-500">
                     Damage Assessment Reports
                   </h1>
                   <p className="text-muted-foreground text-sm">
@@ -247,29 +247,29 @@ const ReportsPage: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-card to-green-500/5 border-green-500/20">
+              <Card className="bg-gradient-to-br from-card to-orange-500/5 border-orange-500/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <div className="p-2 bg-green-500/20 rounded-lg mr-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    <div className="p-2 bg-orange-500/20 rounded-lg mr-3">
+                      <CheckCircle className="h-5 w-5 text-orange-500" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-2xl font-bold text-green-600">{completedReports.length}</p>
+                      <p className="text-2xl font-bold text-orange-600">{completedReports.length}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-card to-blue-500/5 border-blue-500/20">
+              <Card className="bg-gradient-to-br from-card to-gray-500/5 border-gray-500/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <div className="p-2 bg-blue-500/20 rounded-lg mr-3">
-                      <PieChart className="h-5 w-5 text-blue-500" />
+                    <div className="p-2 bg-gray-500/20 rounded-lg mr-3">
+                      <PieChart className="h-5 w-5 text-gray-500" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Total Pages</p>
-                      <p className="text-2xl font-bold text-blue-600">{totalPages.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">{totalPages.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -482,7 +482,7 @@ const ReportsPage: React.FC = () => {
                 <Card className="bg-card border-border">
                   <CardHeader>
                     <CardTitle className="text-foreground flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-green-500" />
+                      <TrendingUp className="h-5 w-5 text-orange-500" />
                       Damage Severity Analysis
                     </CardTitle>
                     <CardDescription className="text-muted-foreground">

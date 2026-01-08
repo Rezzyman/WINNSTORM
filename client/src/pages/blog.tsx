@@ -270,8 +270,8 @@ function BlogIndex() {
               <Link href={`/blog/${featuredPost.slug}`}>
                 <Card className="border-primary/20 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-gradient-to-br from-primary/20 to-cyan-500/20 p-8 flex items-center justify-center">
-                      <Thermometer className="h-24 w-24 text-primary/60" />
+                    <div className="bg-gradient-to-br from-orange-500/20 to-gray-500/20 p-8 flex items-center justify-center">
+                      <Thermometer className="h-24 w-24 text-orange-500/60" />
                     </div>
                     <CardContent className="p-6 flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-3">
@@ -369,7 +369,7 @@ function BlogIndex() {
         </section>
 
         {/* Newsletter CTA */}
-        <section className="py-16 px-6 bg-gradient-to-r from-primary to-cyan-500 text-white">
+        <section className="py-16 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4">Stay Updated on Damage Assessment Insights</h2>
             <p className="text-lg opacity-90 mb-8">

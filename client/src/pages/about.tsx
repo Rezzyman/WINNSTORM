@@ -84,7 +84,7 @@ const About = () => {
                 </Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-primary to-cyan-500">Get Started</Button>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">Get Started</Button>
               </Link>
             </div>
           </div>
@@ -92,17 +92,17 @@ const About = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-primary/10 to-background relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-b from-orange-500/10 to-background relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-primary/40 to-cyan-500/40 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-orange-500/40 to-orange-400/40 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-gray-500/30 to-gray-600/30 rounded-full blur-3xl"></div>
         </div>
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/30">About Us</Badge>
+            <Badge className="mb-6 bg-orange-500/10 text-orange-500 border-orange-500/30">About Us</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Transforming Damage Assessment Through <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Expertise & Technology</span>
+              Transforming Damage Assessment Through <span className="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">Expertise & Technology</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               WinnStorm combines decades of field expertise with cutting-edge AI to help consultants 
@@ -118,7 +118,7 @@ const About = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl font-bold text-orange-500 mb-2">
                   {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -134,7 +134,7 @@ const About = () => {
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <Badge className="mb-4 bg-green-500/10 text-green-500 border-green-500/30">Our Mission</Badge>
+                <Badge className="mb-4 bg-orange-500/10 text-orange-500 border-orange-500/30">Our Mission</Badge>
                 <h2 className="text-3xl font-bold mb-6">Empowering Consultants to Deliver Excellence</h2>
                 <p className="text-muted-foreground mb-4">
                   Our mission is to democratize access to professional-grade damage assessment tools and training. 
@@ -147,20 +147,20 @@ const About = () => {
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span>Standardized methodology for consistent results</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span>AI-powered guidance for every inspection</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span>Comprehensive training and certification</span>
                   </li>
                 </ul>
               </div>
-              <div className="bg-gradient-to-br from-primary/10 to-cyan-500/10 rounded-2xl p-8 border border-primary/20">
+              <div className="bg-gradient-to-br from-orange-500/10 to-gray-500/10 rounded-2xl p-8 border border-orange-500/20">
                 <div className="grid grid-cols-2 gap-6">
                   {values.map((value, index) => {
                     const Icon = value.icon;
@@ -186,7 +186,7 @@ const About = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/30">Our Story</Badge>
+              <Badge className="mb-4 bg-orange-500/10 text-orange-500 border-orange-500/30">Our Story</Badge>
               <h2 className="text-3xl font-bold mb-4">From Field Experience to Industry Standard</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 WinnStorm was born from Eric Winn's decades of experience in property damage assessment 
@@ -195,11 +195,11 @@ const About = () => {
             </div>
 
             <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-cyan-500"></div>
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 to-gray-500"></div>
               <div className="space-y-8">
                 {milestones.map((milestone, index) => (
                   <div key={index} className="relative pl-20">
-                    <div className="absolute left-5 top-1 w-6 h-6 bg-gradient-to-r from-primary to-cyan-500 rounded-full flex items-center justify-center">
+                    <div className="absolute left-5 top-1 w-6 h-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                     <div className="bg-card border border-border/50 rounded-lg p-4">
@@ -252,7 +252,7 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white">
+      <section className="py-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <Users className="h-16 w-16 mx-auto mb-6 opacity-80" />
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the WinnStorm Community</h2>

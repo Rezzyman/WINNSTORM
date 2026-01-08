@@ -43,7 +43,7 @@ export default function WinnReportPage() {
             <Card className="bg-card border-border shadow-lg">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <CheckCircle className="h-16 w-16 text-green-500" />
+                  <CheckCircle className="h-16 w-16 text-orange-500" />
                 </div>
                 <CardTitle className="text-3xl font-bold text-foreground">
                   Winn Report Generated Successfully

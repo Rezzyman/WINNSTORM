@@ -736,19 +736,35 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Actions Row */}
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card 
               className="bg-white dark:bg-gradient-to-br dark:from-orange-500/10 dark:to-orange-600/5 border-gray-200 dark:border-orange-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
-              onClick={() => navigate('/reports')}
-              data-testid="card-winn-report"
+              onClick={() => navigate('/winn-report/1')}
+              data-testid="card-generate-winn-report"
             >
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="p-2 bg-orange-500/20 rounded-lg group-hover:bg-orange-500/30 transition-colors">
                   <FileText className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Generate Winn Report</p>
+                  <p className="text-xs text-gray-500">Create new report</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-500/10 dark:to-gray-600/5 border-gray-200 dark:border-gray-500/20 hover:border-orange-500/40 transition-all cursor-pointer group shadow-sm dark:shadow-none"
+              onClick={() => navigate('/reports')}
+              data-testid="card-view-reports"
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 bg-gray-500/20 rounded-lg group-hover:bg-gray-500/30 transition-colors">
+                  <Eye className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </div>
+                <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">View Reports</p>
-                  <p className="text-xs text-gray-500">Assessment reports</p>
+                  <p className="text-xs text-gray-500">Past assessments</p>
                 </div>
               </CardContent>
             </Card>

@@ -207,7 +207,7 @@ const PropertyDetail = () => {
 
           {/* Primary Action - Start Inspection */}
           <Button
-            className="w-full h-14 mb-4 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white font-medium rounded-lg transition flex items-center justify-center text-lg"
+            className="w-full h-14 mb-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition flex items-center justify-center text-lg"
             onClick={() => navigate(`/inspection/${propertyId}`)}
             data-testid="button-start-inspection"
           >

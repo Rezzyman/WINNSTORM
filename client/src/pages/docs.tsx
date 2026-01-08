@@ -125,7 +125,7 @@ const Docs = () => {
                 </Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-primary to-cyan-500">Sign In</Button>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">Sign In</Button>
               </Link>
             </div>
           </div>
@@ -137,7 +137,7 @@ const Docs = () => {
         <div className="container mx-auto px-6 text-center">
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/30">Documentation</Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            WinnStorm <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Documentation</span>
+            WinnStorm <span className="text-orange-500">Documentation</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Everything you need to master damage assessment with WinnStorm. From getting started to advanced techniques, we've got you covered.
@@ -258,7 +258,7 @@ const Docs = () => {
             {videoTutorials.map((video, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardContent className="p-4">
-                  <div className="aspect-video bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-lg mb-4 flex items-center justify-center group-hover:from-primary/30 group-hover:to-cyan-500/30 transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-orange-500/20 to-gray-500/20 rounded-lg mb-4 flex items-center justify-center group-hover:from-orange-500/30 group-hover:to-gray-500/30 transition-colors">
                     <Video className="h-12 w-12 text-primary/60" />
                   </div>
                   <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{video.title}</h3>
@@ -313,7 +313,7 @@ const Docs = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-primary to-cyan-500 text-white">
+      <section className="py-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-4">Need More Help?</h2>
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">

@@ -179,10 +179,10 @@ const ApiDocs = () => {
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-green-500/10 text-green-500 border-green-500/30';
-      case 'POST': return 'bg-blue-500/10 text-blue-500 border-blue-500/30';
-      case 'PATCH': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30';
-      case 'DELETE': return 'bg-red-500/10 text-red-500 border-red-500/30';
+      case 'GET': return 'bg-orange-500/10 text-orange-500 border-orange-500/30';
+      case 'POST': return 'bg-gray-500/10 text-gray-500 border-gray-500/30';
+      case 'PATCH': return 'bg-orange-400/10 text-orange-400 border-orange-400/30';
+      case 'DELETE': return 'bg-gray-600/10 text-gray-600 border-gray-600/30';
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/30';
     }
   };
@@ -214,7 +214,7 @@ const ApiDocs = () => {
                 <Button variant="ghost" size="sm">Documentation</Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-primary to-cyan-500">Sign In</Button>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">Sign In</Button>
               </Link>
             </div>
           </div>
@@ -222,12 +222,12 @@ const ApiDocs = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
+      <section className="py-16 bg-gradient-to-b from-orange-500/5 to-background">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/30">API Reference</Badge>
+            <Badge className="mb-4 bg-orange-500/10 text-orange-500 border-orange-500/30">API Reference</Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              WinnStorm <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">API</span>
+              WinnStorm <span className="text-orange-500">API</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               Integrate WinnStorm's powerful damage assessment capabilities into your applications. 
@@ -236,7 +236,7 @@ const ApiDocs = () => {
             <div className="flex flex-wrap gap-4">
               <Card className="border-border/50 bg-card/50">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-green-500" />
+                  <Shield className="h-5 w-5 text-orange-500" />
                   <div>
                     <div className="font-semibold">OAuth 2.0</div>
                     <div className="text-sm text-muted-foreground">Secure authentication</div>
@@ -245,7 +245,7 @@ const ApiDocs = () => {
               </Card>
               <Card className="border-border/50 bg-card/50">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Zap className="h-5 w-5 text-orange-400" />
                   <div>
                     <div className="font-semibold">Rate Limited</div>
                     <div className="text-sm text-muted-foreground">1000 req/min</div>
@@ -254,7 +254,7 @@ const ApiDocs = () => {
               </Card>
               <Card className="border-border/50 bg-card/50">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <FileJson className="h-5 w-5 text-blue-500" />
+                  <FileJson className="h-5 w-5 text-gray-500" />
                   <div>
                     <div className="font-semibold">JSON Response</div>
                     <div className="text-sm text-muted-foreground">Standard format</div>
@@ -407,7 +407,7 @@ const ApiDocs = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="border-border/50 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
-                <Code className="h-8 w-8 text-yellow-500 mb-4" />
+                <Code className="h-8 w-8 text-orange-400 mb-4" />
                 <h3 className="font-semibold mb-2">JavaScript / TypeScript</h3>
                 <p className="text-sm text-muted-foreground mb-4">npm install @winnstorm/sdk</p>
                 <Badge variant="outline">Coming Soon</Badge>
@@ -415,7 +415,7 @@ const ApiDocs = () => {
             </Card>
             <Card className="border-border/50 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
-                <Code className="h-8 w-8 text-blue-500 mb-4" />
+                <Code className="h-8 w-8 text-gray-500 mb-4" />
                 <h3 className="font-semibold mb-2">Python</h3>
                 <p className="text-sm text-muted-foreground mb-4">pip install winnstorm</p>
                 <Badge variant="outline">Coming Soon</Badge>
@@ -423,10 +423,10 @@ const ApiDocs = () => {
             </Card>
             <Card className="border-border/50 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
-                <Code className="h-8 w-8 text-cyan-500 mb-4" />
+                <Code className="h-8 w-8 text-orange-500 mb-4" />
                 <h3 className="font-semibold mb-2">REST API</h3>
                 <p className="text-sm text-muted-foreground mb-4">Direct HTTP requests</p>
-                <Badge className="bg-green-500/10 text-green-500 border-green-500/30">Available</Badge>
+                <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/30">Available</Badge>
               </CardContent>
             </Card>
           </div>
@@ -434,7 +434,7 @@ const ApiDocs = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-primary to-cyan-500 text-white">
+      <section className="py-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Integrate?</h2>
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">

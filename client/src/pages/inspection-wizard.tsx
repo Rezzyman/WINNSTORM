@@ -37,43 +37,43 @@ const STEP_CONFIG: Record<WinnMethodologyStep, {
     title: 'Weather Verification',
     icon: CloudLightning,
     description: 'Confirm storm occurrence and date correlation',
-    color: 'text-purple-500'
+    color: 'text-orange-500'
   },
   thermal_imaging: {
     title: 'Thermal Imaging',
     icon: Thermometer,
     description: 'Capture thermal scans for moisture detection',
-    color: 'text-red-500'
+    color: 'text-orange-600'
   },
   terrestrial_walk: {
     title: 'Terrestrial Walk',
     icon: Footprints,
     description: 'Document visible damage from ground level',
-    color: 'text-green-500'
+    color: 'text-gray-500'
   },
   test_squares: {
     title: 'Test Squares',
     icon: Grid3X3,
     description: 'Mark and count impacts in test areas',
-    color: 'text-blue-500'
+    color: 'text-orange-400'
   },
   soft_metals: {
     title: 'Soft Metals',
     icon: Droplet,
     description: 'Document dents on gutters, vents, and HVAC',
-    color: 'text-cyan-500'
+    color: 'text-gray-600'
   },
   moisture_testing: {
     title: 'Moisture Testing',
     icon: FlaskConical,
     description: 'Take moisture meter readings',
-    color: 'text-indigo-500'
+    color: 'text-orange-500'
   },
   core_samples: {
     title: 'Core Samples',
     icon: FlaskConical,
     description: 'Extract and document core samples if needed',
-    color: 'text-orange-500'
+    color: 'text-gray-500'
   },
   report_assembly: {
     title: 'Report Assembly',
@@ -458,18 +458,18 @@ export default function InspectionWizard() {
                   key={step}
                   className={`flex-shrink-0 flex flex-col items-center p-2 rounded-lg transition-all ${
                     isCurrent ? 'bg-primary/10 ring-2 ring-primary' :
-                    isCompleted ? 'bg-green-500/10' :
+                    isCompleted ? 'bg-orange-500/10' :
                     isLocked ? 'opacity-50' : ''
                   }`}
                   data-testid={`step-indicator-${step}`}
                 >
                   <div className={`p-2 rounded-full ${
-                    isCompleted ? 'bg-green-500/20' :
+                    isCompleted ? 'bg-orange-500/20' :
                     isCurrent ? 'bg-primary/20' :
                     'bg-muted'
                   }`}>
                     {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <CheckCircle2 className="h-5 w-5 text-orange-500" />
                     ) : isLocked ? (
                       <Lock className="h-5 w-5 text-muted-foreground" />
                     ) : (
@@ -492,7 +492,7 @@ export default function InspectionWizard() {
                 {(() => {
                   const StepIcon = stepConfig.icon;
                   return (
-                    <div className={`p-3 rounded-xl bg-gradient-to-br from-primary/20 to-cyan-500/20`}>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-400/20`}>
                       <StepIcon className={`h-6 w-6 ${stepConfig.color}`} />
                     </div>
                   );
@@ -505,7 +505,7 @@ export default function InspectionWizard() {
             </CardHeader>
             <CardContent>
               {showCoaching && coaching && (
-                <Alert className="mb-6 bg-gradient-to-r from-primary/5 to-cyan-500/5 border-primary/20">
+                <Alert className="mb-6 bg-gradient-to-r from-orange-500/5 to-orange-400/5 border-primary/20">
                   <Sparkles className="h-4 w-4 text-primary" />
                   <AlertTitle className="text-primary">Stormy's Guidance</AlertTitle>
                   <AlertDescription className="mt-2">
@@ -537,7 +537,7 @@ export default function InspectionWizard() {
                   <div className="flex items-center gap-2">
                     <span className={`font-bold ${
                       currentEvidence.length >= (requirements?.minPhotos || 0) 
-                        ? 'text-green-500' 
+                        ? 'text-orange-500' 
                         : 'text-amber-500'
                     }`}>
                       {currentEvidence.length}
@@ -556,7 +556,7 @@ export default function InspectionWizard() {
                     </div>
                     <div>
                       {currentEvidence.some(e => e.aiAnalysis?.isValid) ? (
-                        <Badge className="bg-green-500">
+                        <Badge className="bg-orange-500">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Validated
                         </Badge>
@@ -594,7 +594,7 @@ export default function InspectionWizard() {
                         )}
                         {evidence.aiAnalysis?.isValid !== undefined && (
                           <div className={`absolute top-1 right-1 p-1 rounded-full ${
-                            evidence.aiAnalysis.isValid ? 'bg-green-500' : 'bg-amber-500'
+                            evidence.aiAnalysis.isValid ? 'bg-orange-500' : 'bg-amber-500'
                           }`}>
                             {evidence.aiAnalysis.isValid ? (
                               <CheckCircle2 className="h-3 w-3 text-white" />
@@ -674,7 +674,7 @@ export default function InspectionWizard() {
               <div className="flex gap-3">
                 {currentEvidence.length > 0 && !currentEvidence.some(e => e.aiAnalysis) && (
                   <Button 
-                    className="flex-1 h-14 touch-target bg-gradient-to-r from-primary to-cyan-500"
+                    className="flex-1 h-14 touch-target bg-gradient-to-r from-orange-500 to-orange-600"
                     onClick={() => currentEvidence[0] && analyzeEvidence(currentEvidence[0].id)}
                     disabled={isAnalyzing}
                     data-testid="button-analyze"
@@ -705,7 +705,7 @@ export default function InspectionWizard() {
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-sm text-muted-foreground">Validation:</span>
                   {analysisResult.validation.isValid ? (
-                    <Badge className="bg-green-500">
+                    <Badge className="bg-orange-500">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Valid ({analysisResult.validation.confidence}% confidence)
                     </Badge>
@@ -723,7 +723,7 @@ export default function InspectionWizard() {
                     <ul className="text-sm text-muted-foreground space-y-1">
                       {analysisResult.validation.findings.map((finding, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
                           {finding}
                         </li>
                       ))}
@@ -833,7 +833,7 @@ export default function InspectionWizard() {
             )}
 
             <Button 
-              className="h-14 px-6 touch-target bg-gradient-to-r from-primary to-cyan-500"
+              className="h-14 px-6 touch-target bg-gradient-to-r from-orange-500 to-orange-600"
               disabled={!canAdvance() || advanceMutation.isPending}
               onClick={() => advanceMutation.mutate()}
               data-testid="button-next"

@@ -23,9 +23,9 @@ import {
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   pending: { label: 'Pending', color: 'bg-gray-500', icon: Clock },
-  processing: { label: 'Processing', color: 'bg-blue-500', icon: Loader2 },
+  processing: { label: 'Processing', color: 'bg-orange-400', icon: Loader2 },
   reviewed: { label: 'Reviewed', color: 'bg-amber-500', icon: AlertCircle },
-  approved: { label: 'Approved', color: 'bg-green-500', icon: CheckCircle2 },
+  approved: { label: 'Approved', color: 'bg-orange-500', icon: CheckCircle2 },
   rejected: { label: 'Rejected', color: 'bg-red-500', icon: XCircle },
 };
 
@@ -186,7 +186,7 @@ export default function TranscriptsPage() {
           </div>
           <Dialog open={showUpload} onOpenChange={setShowUpload}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-primary to-cyan-500" data-testid="button-upload-transcript">
+              <Button className="bg-gradient-to-r from-orange-500 to-orange-600" data-testid="button-upload-transcript">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Transcript
               </Button>
@@ -328,7 +328,7 @@ export default function TranscriptsPage() {
                               processMutation.mutate(transcript.id);
                             }}
                             disabled={processMutation.isPending}
-                            className="bg-gradient-to-r from-primary to-cyan-500"
+                            className="bg-gradient-to-r from-orange-500 to-orange-600"
                             data-testid={`button-process-${transcript.id}`}
                           >
                             {processMutation.isPending ? (
@@ -341,7 +341,7 @@ export default function TranscriptsPage() {
                         )}
                         {totalKnowledge > 0 && (
                           <div className="text-sm text-right">
-                            <span className="text-green-500 font-medium">{approvedCount}</span>
+                            <span className="text-orange-500 font-medium">{approvedCount}</span>
                             <span className="text-muted-foreground">/{totalKnowledge} approved</span>
                           </div>
                         )}
@@ -394,7 +394,7 @@ export default function TranscriptsPage() {
                       {selectedTranscript.extractedKnowledge.map((knowledge, index) => (
                         <Card 
                           key={index} 
-                          className={`${knowledge.approved === true ? 'border-green-500/50' : knowledge.approved === false ? 'border-red-500/50' : 'border-border'}`}
+                          className={`${knowledge.approved === true ? 'border-orange-500/50' : knowledge.approved === false ? 'border-red-500/50' : 'border-border'}`}
                           data-testid={`knowledge-item-${index}`}
                         >
                           <CardContent className="p-4">
@@ -417,7 +417,7 @@ export default function TranscriptsPage() {
                                 <Button
                                   size="sm"
                                   variant={knowledge.approved === true ? "default" : "outline"}
-                                  className={knowledge.approved === true ? "bg-green-500 hover:bg-green-600" : ""}
+                                  className={knowledge.approved === true ? "bg-orange-500 hover:bg-orange-600" : ""}
                                   onClick={() => approveMutation.mutate({
                                     transcriptId: selectedTranscript.id,
                                     knowledgeIndex: index,
@@ -487,7 +487,7 @@ export default function TranscriptsPage() {
                 <Button
                   onClick={() => finalizeTranscriptMutation.mutate(selectedTranscript.id)}
                   disabled={finalizeTranscriptMutation.isPending || !selectedTranscript.extractedKnowledge?.some(k => k.approved)}
-                  className="bg-gradient-to-r from-primary to-cyan-500"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600"
                   data-testid="button-finalize"
                 >
                   {finalizeTranscriptMutation.isPending ? (

@@ -101,18 +101,18 @@ const Projects = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="p-3 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-xl">
-                  <Briefcase className="h-8 w-8 text-primary" />
+                <div className="p-3 bg-gradient-to-br from-orange-500/20 to-orange-400/20 rounded-xl">
+                  <Briefcase className="h-8 w-8 text-orange-500" />
                 </div>
                 <div className="ml-4">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold text-orange-500">
                     Project Management
                   </h1>
                   <p className="text-muted-foreground">Manage damage assessment projects and clients</p>
                 </div>
               </div>
               
-              <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90" data-testid="btn-new-project">
+              <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" data-testid="btn-new-project">
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
               </Button>
@@ -162,13 +162,13 @@ const Projects = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+              <Card className="bg-gradient-to-br from-gray-500/5 to-gray-500/10 border-gray-500/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <Clock className="h-5 w-5 text-blue-500 mr-2" />
+                    <Clock className="h-5 w-5 text-gray-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">In Progress</p>
-                      <p className="text-2xl font-bold text-blue-600" data-testid="stat-in-progress">
+                      <p className="text-2xl font-bold text-gray-600 dark:text-gray-400" data-testid="stat-in-progress">
                         {displayProjects.filter(p => !['completed', 'approved', 'denied'].includes(p.status)).length}
                       </p>
                     </div>
@@ -176,13 +176,13 @@ const Projects = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+              <Card className="bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <CheckCircle className="h-5 w-5 text-orange-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-2xl font-bold text-green-600" data-testid="stat-completed">
+                      <p className="text-2xl font-bold text-orange-600" data-testid="stat-completed">
                         {displayProjects.filter(p => p.status === 'completed' || p.status === 'approved').length}
                       </p>
                     </div>
@@ -190,13 +190,13 @@ const Projects = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border-cyan-500/20">
+              <Card className="bg-gradient-to-br from-orange-400/5 to-orange-400/10 border-orange-400/20">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <FileText className="h-5 w-5 text-cyan-500 mr-2" />
+                    <FileText className="h-5 w-5 text-orange-400 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Total Value</p>
-                      <p className="text-2xl font-bold text-cyan-600" data-testid="stat-total-value">
+                      <p className="text-2xl font-bold text-orange-400" data-testid="stat-total-value">
                         ${((displayProjects.reduce((sum, p) => sum + (p.estimatedValue || 0), 0)) / 100).toLocaleString()}
                       </p>
                     </div>
@@ -243,7 +243,7 @@ const Projects = () => {
                       ? "Try adjusting your search or filters" 
                       : "Create your first project to get started"}
                   </p>
-                  <Button className="bg-gradient-to-r from-primary to-cyan-500" data-testid="btn-create-project-empty">
+                  <Button className="bg-gradient-to-r from-orange-500 to-orange-600" data-testid="btn-create-project-empty">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Project
                   </Button>

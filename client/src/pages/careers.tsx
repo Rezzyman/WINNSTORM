@@ -139,23 +139,23 @@ const Careers = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-primary/10 to-background relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-b from-orange-500/10 to-background relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-primary/40 to-cyan-500/40 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-orange-500/40 to-orange-400/40 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-gray-500/30 to-gray-600/30 rounded-full blur-3xl"></div>
         </div>
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/30">We're Hiring</Badge>
+            <Badge className="mb-6 bg-orange-500/10 text-orange-500 border-orange-500/30">We're Hiring</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Build the Future of <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Property Assessment</span>
+              Build the Future of <span className="text-orange-500">Property Assessment</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Join a team that's revolutionizing how damage assessments are conducted. 
               We're looking for passionate people who want to make a real impact.
             </p>
-            <Button size="lg" className="bg-gradient-to-r from-primary to-cyan-500" asChild>
+            <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" asChild>
               <a href="#positions">
                 View Open Positions
                 <ArrowRight className="h-5 w-5 ml-2" />
@@ -274,7 +274,7 @@ const Careers = () => {
                       </div>
                     </div>
                     <Button 
-                      className="bg-gradient-to-r from-primary to-cyan-500 shrink-0"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shrink-0"
                       onClick={() => window.location.href = `mailto:careers@winnstorm.com?subject=Application: ${position.title}`}
                     >
                       Apply Now
@@ -298,7 +298,7 @@ const Careers = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white">
+      <section className="py-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <Users className="h-16 w-16 mx-auto mb-6 opacity-80" />
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Don't See Your Role?</h2>

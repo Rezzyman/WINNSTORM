@@ -51,12 +51,12 @@ const MODULE_ICONS: Record<string, any> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  ai_intelligence: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  field_operations: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  iot_hardware: "bg-green-500/20 text-green-400 border-green-500/30",
+  ai_intelligence: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  field_operations: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  iot_hardware: "bg-gray-600/20 text-gray-400 border-gray-600/30",
   enterprise: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  marketplace: "bg-pink-500/20 text-pink-400 border-pink-500/30",
-  data_products: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  marketplace: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  data_products: "bg-orange-400/20 text-orange-400 border-orange-400/30",
 };
 
 const STATUS_BADGES: Record<string, { label: string; variant: string }> = {
@@ -160,10 +160,10 @@ export default function InnovationHub() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-400 text-sm">Active</p>
-                      <p className="text-2xl font-bold text-green-400" data-testid="text-active-modules">{moduleStats.active}</p>
+                      <p className="text-2xl font-bold text-orange-400" data-testid="text-active-modules">{moduleStats.active}</p>
                     </div>
-                    <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <Unlock className="h-5 w-5 text-green-400" />
+                    <div className="h-10 w-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                      <Unlock className="h-5 w-5 text-orange-400" />
                     </div>
                   </div>
                 </CardContent>
@@ -173,10 +173,10 @@ export default function InnovationHub() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-400 text-sm">Preview</p>
-                      <p className="text-2xl font-bold text-blue-400" data-testid="text-preview-modules">{moduleStats.preview}</p>
+                      <p className="text-2xl font-bold text-gray-400" data-testid="text-preview-modules">{moduleStats.preview}</p>
                     </div>
-                    <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <Eye className="h-5 w-5 text-blue-400" />
+                    <div className="h-10 w-10 rounded-full bg-gray-500/20 flex items-center justify-center">
+                      <Eye className="h-5 w-5 text-gray-400" />
                     </div>
                   </div>
                 </CardContent>
@@ -272,8 +272,8 @@ export default function InnovationHub() {
                           <Icon className="h-6 w-6" />
                         </div>
                         <Badge variant="outline" className={
-                          module.status === 'active' ? 'border-green-500 text-green-400' :
-                          module.status === 'preview' ? 'border-blue-500 text-blue-400' :
+                          module.status === 'active' ? 'border-orange-500 text-orange-400' :
+                          module.status === 'preview' ? 'border-gray-500 text-gray-400' :
                           'border-slate-500 text-slate-400'
                         }>
                           {statusConfig.label}

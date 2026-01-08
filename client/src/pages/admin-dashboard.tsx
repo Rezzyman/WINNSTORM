@@ -546,7 +546,7 @@ const AdminDashboard = () => {
                   <p className="text-white/60 text-sm">Active Projects</p>
                   <p className="text-2xl font-bold text-white">{stats?.activeProjects || 0}</p>
                 </div>
-                <Briefcase className="h-8 w-8 text-cyan-500" />
+                <Briefcase className="h-8 w-8 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -558,7 +558,7 @@ const AdminDashboard = () => {
                   <p className="text-white/60 text-sm">Total Properties</p>
                   <p className="text-2xl font-bold text-white">{stats?.totalProperties || 0}</p>
                 </div>
-                <Building2 className="h-8 w-8 text-green-500" />
+                <Building2 className="h-8 w-8 text-gray-500" />
               </div>
             </CardContent>
           </Card>
@@ -699,7 +699,7 @@ const AdminDashboard = () => {
             <Card className="bg-white/5 border-white/10 rounded-none">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-cyan-500" />
+                  <Briefcase className="h-5 w-5 text-orange-500" />
                   Project Management
                 </CardTitle>
               </CardHeader>
@@ -746,7 +746,7 @@ const AdminDashboard = () => {
             <Card className="bg-white/5 border-white/10 rounded-none">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <UserCheck className="h-5 w-5 text-green-500" />
+                  <UserCheck className="h-5 w-5 text-gray-500" />
                   Client Management
                 </CardTitle>
               </CardHeader>
@@ -903,7 +903,7 @@ const AdminDashboard = () => {
                               </TableCell>
                               <TableCell>
                                 {doc.approvedAt ? (
-                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
                                     <CheckCircle2 className="h-3 w-3 mr-1" />
                                     Approved
                                   </Badge>
@@ -924,7 +924,7 @@ const AdminDashboard = () => {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => handleApproveDocument(doc.id)}
-                                      className="text-green-400 hover:text-green-300 hover:bg-green-500/10"
+                                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
                                       data-testid={`button-approve-doc-${doc.id}`}
                                     >
                                       <CheckCircle2 className="h-4 w-4" />
@@ -1103,8 +1103,8 @@ const AdminDashboard = () => {
                   </div>
                 )}
                 
-                <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-none">
-                  <h4 className="text-blue-400 font-medium mb-2">Team Portal URL</h4>
+                <div className="mt-6 p-4 bg-orange-900/20 border border-orange-500/30 rounded-none">
+                  <h4 className="text-orange-400 font-medium mb-2">Team Portal URL</h4>
                   <p className="text-white/80 font-mono text-sm">/team/knowledge</p>
                   <p className="text-white/60 text-sm mt-2">
                     Share this URL with team members. They can log in with the credentials you create here.
@@ -1127,29 +1127,29 @@ const AdminDashboard = () => {
                   <div className="p-4 bg-white/5 border border-white/10">
                     <h3 className="text-white font-medium mb-2">Database Status</h3>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400">Connected</span>
+                      <div className="h-3 w-3 bg-orange-500 rounded-full animate-pulse" />
+                      <span className="text-orange-400">Connected</span>
                     </div>
                   </div>
                   <div className="p-4 bg-white/5 border border-white/10">
                     <h3 className="text-white font-medium mb-2">Firebase Auth</h3>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400">Active</span>
+                      <div className="h-3 w-3 bg-orange-500 rounded-full animate-pulse" />
+                      <span className="text-orange-400">Active</span>
                     </div>
                   </div>
                   <div className="p-4 bg-white/5 border border-white/10">
                     <h3 className="text-white font-medium mb-2">AI Services</h3>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400">Stormy AI Online</span>
+                      <div className="h-3 w-3 bg-orange-500 rounded-full animate-pulse" />
+                      <span className="text-orange-400">Stormy AI Online</span>
                     </div>
                   </div>
                   <div className="p-4 bg-white/5 border border-white/10">
                     <h3 className="text-white font-medium mb-2">Stripe Integration</h3>
                     <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400">Configured</span>
+                      <div className="h-3 w-3 bg-orange-500 rounded-full animate-pulse" />
+                      <span className="text-orange-400">Configured</span>
                     </div>
                   </div>
                 </div>

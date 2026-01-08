@@ -144,9 +144,9 @@ export default function ClientsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>;
+        return <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20">Active</Badge>;
       case 'prospect':
-        return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Prospect</Badge>;
+        return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">Prospect</Badge>;
       case 'inactive':
         return <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20">Inactive</Badge>;
       default:
@@ -289,9 +289,9 @@ export default function ClientsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Active Clients</p>
-                  <p className="text-3xl font-bold text-green-400">{activeClients}</p>
+                  <p className="text-3xl font-bold text-orange-400">{activeClients}</p>
                 </div>
-                <Badge className="bg-green-500/10 text-green-500 text-lg px-3 py-1">
+                <Badge className="bg-orange-500/10 text-orange-500 text-lg px-3 py-1">
                   {Math.round((activeClients / totalClients) * 100)}%
                 </Badge>
               </div>
@@ -302,9 +302,9 @@ export default function ClientsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Total Properties</p>
-                  <p className="text-3xl font-bold text-blue-400">{totalProperties}</p>
+                  <p className="text-3xl font-bold text-gray-400">{totalProperties}</p>
                 </div>
-                <Building2 className="h-10 w-10 text-blue-500/50" />
+                <Building2 className="h-10 w-10 text-gray-500/50" />
               </div>
             </CardContent>
           </Card>

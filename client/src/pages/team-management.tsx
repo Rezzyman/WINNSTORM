@@ -89,13 +89,13 @@ export default function TeamManagement() {
   const getUtilizationColor = (percent: number) => {
     if (percent >= 90) return "text-red-500";
     if (percent >= 70) return "text-amber-500";
-    return "text-green-500";
+    return "text-orange-500";
   };
 
   const getProgressColor = (percent: number) => {
     if (percent >= 90) return "bg-red-500";
     if (percent >= 70) return "bg-amber-500";
-    return "bg-green-500";
+    return "bg-orange-500";
   };
 
   const totalInspectors = workload.length;
@@ -163,8 +163,8 @@ export default function TeamManagement() {
           <Card className="bg-[#1A1A1A] border-gray-800">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-blue-500/20">
-                  <Users className="h-6 w-6 text-blue-400" />
+                <div className="p-3 rounded-lg bg-gray-500/20">
+                  <Users className="h-6 w-6 text-gray-400" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Total Inspectors</p>
@@ -179,8 +179,8 @@ export default function TeamManagement() {
           <Card className="bg-[#1A1A1A] border-gray-800">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-green-500/20">
-                  <CheckCircle className="h-6 w-6 text-green-400" />
+                <div className="p-3 rounded-lg bg-orange-500/20">
+                  <CheckCircle className="h-6 w-6 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Available</p>

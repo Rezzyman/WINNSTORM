@@ -35,7 +35,7 @@ const Methodology = () => {
         "Correlate weather events with reported damage dates",
         "Generate weather verification certificates"
       ],
-      color: "from-blue-500 to-cyan-500"
+      color: "from-gray-500 to-gray-600"
     },
     {
       number: 2,
@@ -48,7 +48,7 @@ const Methodology = () => {
         "Detect moisture patterns invisible to naked eye",
         "AI-assisted anomaly detection with Stormy"
       ],
-      color: "from-red-500 to-orange-500"
+      color: "from-orange-500 to-orange-600"
     },
     {
       number: 3,
@@ -61,7 +61,7 @@ const Methodology = () => {
         "Before and after comparison photography",
         "GPS-tagged evidence collection"
       ],
-      color: "from-green-500 to-emerald-500"
+      color: "from-gray-600 to-gray-700"
     },
     {
       number: 4,
@@ -74,7 +74,7 @@ const Methodology = () => {
         "Mark areas of concern for detailed inspection",
         "Calculate affected square footage"
       ],
-      color: "from-purple-500 to-pink-500"
+      color: "from-orange-400 to-orange-500"
     },
     {
       number: 5,
@@ -87,7 +87,7 @@ const Methodology = () => {
         "Statistical extrapolation to full roof area",
         "Industry-standard damage density calculations"
       ],
-      color: "from-yellow-500 to-amber-500"
+      color: "from-gray-500 to-gray-600"
     },
     {
       number: 6,
@@ -100,7 +100,7 @@ const Methodology = () => {
         "Chain of custody documentation",
         "Laboratory analysis coordination"
       ],
-      color: "from-teal-500 to-cyan-500"
+      color: "from-orange-500 to-orange-600"
     },
     {
       number: 7,
@@ -113,7 +113,7 @@ const Methodology = () => {
         "Apply depreciation where applicable",
         "Generate line-item damage schedules"
       ],
-      color: "from-indigo-500 to-blue-500"
+      color: "from-gray-600 to-gray-700"
     },
     {
       number: 8,
@@ -126,7 +126,7 @@ const Methodology = () => {
         "Evidence appendix compilation",
         "Executive summary generation"
       ],
-      color: "from-primary to-cyan-500"
+      color: "from-orange-500 to-orange-600"
     }
   ];
 
@@ -180,7 +180,7 @@ const Methodology = () => {
                 <Button variant="ghost" size="sm">Training</Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-primary to-cyan-500">Get Certified</Button>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">Get Certified</Button>
               </Link>
             </div>
           </div>
@@ -188,24 +188,24 @@ const Methodology = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-primary/10 to-background relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-b from-orange-500/10 to-background relative overflow-hidden">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-r from-orange-500/30 to-orange-400/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-[15%] w-96 h-96 bg-gradient-to-r from-gray-500/20 to-gray-600/20 rounded-full blur-3xl"></div>
         </div>
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/30">Industry Standard</Badge>
+            <Badge className="mb-6 bg-orange-500/10 text-orange-500 border-orange-500/30">Industry Standard</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              The <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Winn Methodology</span>
+              The <span className="text-orange-500">Winn Methodology</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               A comprehensive 8-step process for property damage assessment developed by Eric Winn. 
               The gold standard for creating accurate, defensible, and professional damage reports.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-cyan-500" asChild>
+              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" asChild>
                 <Link href="/training">
                   <BookOpen className="h-5 w-5 mr-2" />
                   Start Learning
@@ -290,7 +290,7 @@ const Methodology = () => {
                       <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {step.details.map((detail, detailIndex) => (
                           <li key={detailIndex} className="flex items-start gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                            <CheckCircle className="h-4 w-4 text-orange-500 mt-1 flex-shrink-0" />
                             <span className="text-sm">{detail}</span>
                           </li>
                         ))}
@@ -305,7 +305,7 @@ const Methodology = () => {
       </section>
 
       {/* Certification CTA */}
-      <section className="py-20 bg-gradient-to-r from-primary to-cyan-500 text-white">
+      <section className="py-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="container mx-auto px-6 text-center">
           <Award className="h-16 w-16 mx-auto mb-6 opacity-80" />
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Get Certified in the Winn Methodology</h2>

@@ -133,7 +133,7 @@ const serviceConfigs: Record<string, ServiceConfig> = {
       'hail storm property damage'
     ],
     icon: CloudLightning,
-    heroColor: 'from-blue-600 to-cyan-500',
+    heroColor: 'from-orange-600 to-orange-500',
     benefits: [
       {
         icon: Target,
@@ -465,7 +465,7 @@ export function ServiceLandingPage({ serviceSlug }: { serviceSlug: string }) {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
               {service.useCases.map((useCase, index) => (
                 <div key={index} className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
                   <span className="text-sm">{useCase}</span>
                 </div>
               ))}

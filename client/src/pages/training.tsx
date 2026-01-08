@@ -203,11 +203,11 @@ const Training = () => {
           {/* Training Portal Header */}
           <div className="mb-8">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-gradient-to-br from-primary/20 to-cyan-500/20 rounded-xl">
-                <GraduationCap className="h-8 w-8 text-primary" />
+              <div className="p-3 bg-gradient-to-br from-orange-500/20 to-orange-400/20 rounded-xl">
+                <GraduationCap className="h-8 w-8 text-orange-500" />
               </div>
               <div className="ml-4">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-orange-500">
                   Training Portal
                 </h1>
                 <p className="text-muted-foreground">WinnStorm™ Certification Program</p>
@@ -215,7 +215,7 @@ const Training = () => {
             </div>
             
             {/* Progress Overview */}
-            <Card className="bg-gradient-to-r from-primary/5 to-cyan-500/5 border-primary/20">
+            <Card className="bg-gradient-to-r from-orange-500/5 to-orange-400/5 border-orange-500/20">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
@@ -235,10 +235,10 @@ const Training = () => {
                   
                   <div>
                     <div className="flex items-center mb-2">
-                      <BookOpen className="h-5 w-5 text-cyan-500 mr-2" />
+                      <BookOpen className="h-5 w-5 text-orange-500 mr-2" />
                       <span className="font-semibold">Course Progress</span>
                     </div>
-                    <div className="text-2xl font-bold text-cyan-600">
+                    <div className="text-2xl font-bold text-orange-600">
                       {mockProgress.completedCourses}/{mockProgress.totalCourses}
                     </div>
                     <div className="text-sm text-muted-foreground">Courses Completed</div>
@@ -246,10 +246,10 @@ const Training = () => {
                   
                   <div>
                     <div className="flex items-center mb-2">
-                      <Clock className="h-5 w-5 text-blue-500 mr-2" />
+                      <Clock className="h-5 w-5 text-gray-500 mr-2" />
                       <span className="font-semibold">Study Time</span>
                     </div>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {Math.floor(mockCourses.reduce((acc, course) => acc + (course.completed ? course.duration : 0), 0) / 60)}h
                     </div>
                     <div className="text-sm text-muted-foreground">Hours Completed</div>
@@ -309,7 +309,7 @@ const Training = () => {
                           <div className="flex items-center space-x-3 mb-2">
                             <div className="flex items-center space-x-2">
                               {course.completed ? (
-                                <CheckCircle className="h-5 w-5 text-green-500" />
+                                <CheckCircle className="h-5 w-5 text-orange-500" />
                               ) : course.progress && course.progress > 0 ? (
                                 <PlayCircle className="h-5 w-5 text-primary" />
                               ) : (

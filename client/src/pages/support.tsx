@@ -93,7 +93,7 @@ const Support = () => {
       description: "Chat with our support team in real-time",
       availability: "Mon-Fri, 9AM-6PM EST",
       action: "Start Chat",
-      color: "text-green-500"
+      color: "text-orange-500"
     },
     {
       icon: Mail,
@@ -102,7 +102,7 @@ const Support = () => {
       availability: "Response within 24 hours",
       action: "Send Email",
       href: "mailto:support@winnstorm.com",
-      color: "text-blue-500"
+      color: "text-gray-500"
     },
     {
       icon: Phone,
@@ -111,7 +111,7 @@ const Support = () => {
       availability: "Professional & Enterprise plans",
       action: "Call Now",
       href: "tel:+15551234966",
-      color: "text-purple-500"
+      color: "text-orange-600"
     }
   ];
 
@@ -161,7 +161,7 @@ const Support = () => {
                 </Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-primary to-cyan-500">Sign In</Button>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">Sign In</Button>
               </Link>
             </div>
           </div>
@@ -173,7 +173,7 @@ const Support = () => {
         <div className="container mx-auto px-6 text-center">
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/30">Support Center</Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            How Can We <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">Help You?</span>
+            How Can We <span className="text-orange-500">Help You?</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Find answers to common questions, access resources, or get in touch with our support team.
@@ -344,7 +344,7 @@ const Support = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-gradient-to-r from-primary to-cyan-500"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                     disabled={isSubmitting}
                     data-testid="button-support-submit"
                   >
@@ -369,7 +369,7 @@ const Support = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-orange-500" />
               <span className="text-muted-foreground">All Systems Operational</span>
             </div>
             <div className="flex items-center gap-2">
@@ -377,7 +377,7 @@ const Support = () => {
               <span className="text-muted-foreground">Average response: 2 hours</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-orange-500" />
               <span className="text-muted-foreground">98% satisfaction rate</span>
             </div>
           </div>

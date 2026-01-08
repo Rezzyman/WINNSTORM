@@ -167,11 +167,11 @@ const CrmIntegrationsPage: React.FC = () => {
               </Button>
               <div className="flex items-center">
                 <div className="relative mr-4">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-lg blur-md"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/30 to-orange-400/30 rounded-lg blur-md"></div>
                   <img src={winnstormLogo} alt="WinnStorm" className="h-10 relative z-10" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold text-orange-500">
                     CRM & Data Management
                   </h1>
                   <p className="text-muted-foreground text-sm">
@@ -199,11 +199,11 @@ const CrmIntegrationsPage: React.FC = () => {
             </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <Card className="bg-gradient-to-r from-primary/5 via-cyan-500/5 to-primary/5 border-primary/30 mb-6">
+            <Card className="bg-gradient-to-r from-orange-500/5 via-orange-400/5 to-orange-500/5 border-orange-500/30 mb-6">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="p-4 bg-gradient-to-br from-primary to-cyan-500 rounded-xl shadow-lg">
+                    <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
                       <Home className="h-8 w-8 text-white" />
                     </div>
                     <div>
@@ -222,7 +222,7 @@ const CrmIntegrationsPage: React.FC = () => {
                   </div>
                   <Button 
                     onClick={() => navigate('/clients')}
-                    className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                     data-testid="button-open-native-crm"
                   >
                     <Home className="w-4 h-4 mr-2" />
@@ -232,19 +232,19 @@ const CrmIntegrationsPage: React.FC = () => {
                 
                 <div className="grid md:grid-cols-4 gap-4 mt-6">
                   <div className="flex items-center gap-3 bg-background/50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span className="text-sm text-foreground">Unlimited Clients</span>
                   </div>
                   <div className="flex items-center gap-3 bg-background/50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span className="text-sm text-foreground">Property Tracking</span>
                   </div>
                   <div className="flex items-center gap-3 bg-background/50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span className="text-sm text-foreground">Report History</span>
                   </div>
                   <div className="flex items-center gap-3 bg-background/50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-orange-500" />
                     <span className="text-sm text-foreground">No Extra Cost</span>
                   </div>
                 </div>
@@ -269,15 +269,15 @@ const CrmIntegrationsPage: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-card to-green-500/5 border-green-500/20">
+              <Card className="bg-gradient-to-br from-card to-orange-500/5 border-orange-500/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-foreground flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <CheckCircle className="w-5 h-5 text-orange-500" />
                     Successful Syncs
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600 mb-2">
+                  <div className="text-3xl font-bold text-orange-600 mb-2">
                     {logsLoading ? '...' : successfulSyncs}
                   </div>
                   <p className="text-muted-foreground text-sm">
@@ -393,7 +393,7 @@ const CrmIntegrationsPage: React.FC = () => {
                       >
                         <div className="flex items-center gap-3">
                           {log.status === 'success' ? (
-                            <CheckCircle className="w-5 h-5 text-green-500" />
+                            <CheckCircle className="w-5 h-5 text-orange-500" />
                           ) : log.status === 'failed' ? (
                             <AlertCircle className="w-5 h-5 text-red-500" />
                           ) : (
@@ -411,7 +411,7 @@ const CrmIntegrationsPage: React.FC = () => {
                         <div className="text-right">
                           <Badge
                             variant={log.status === 'success' ? 'default' : 'destructive'}
-                            className={log.status === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}
+                            className={log.status === 'success' ? 'bg-orange-600 hover:bg-orange-700' : ''}
                           >
                             {log.status}
                           </Badge>
@@ -430,17 +430,17 @@ const CrmIntegrationsPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="configurations" className="space-y-6">
-            <Card className="bg-gradient-to-r from-primary/5 via-cyan-500/5 to-primary/5 border-primary/30">
+            <Card className="bg-gradient-to-r from-orange-500/5 via-orange-400/5 to-orange-500/5 border-orange-500/30">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="p-4 bg-gradient-to-br from-primary to-cyan-500 rounded-xl shadow-lg">
+                    <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
                       <Home className="h-8 w-8 text-white" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h2 className="text-xl font-bold text-foreground">WinnStorm Native CRM</h2>
-                        <Badge className="bg-green-600 text-white">
+                        <Badge className="bg-orange-600 text-white">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Active
                         </Badge>
@@ -452,7 +452,7 @@ const CrmIntegrationsPage: React.FC = () => {
                   </div>
                   <Button 
                     onClick={() => navigate('/clients')}
-                    className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                     data-testid="button-manage-clients"
                   >
                     <Home className="w-4 h-4 mr-2" />
@@ -640,7 +640,7 @@ const CrmIntegrationsPage: React.FC = () => {
                       >
                         <div className="flex items-start gap-3">
                           {log.status === 'success' ? (
-                            <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                            <CheckCircle className="w-5 h-5 text-orange-500 mt-0.5" />
                           ) : log.status === 'failed' ? (
                             <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
                           ) : (
@@ -668,7 +668,7 @@ const CrmIntegrationsPage: React.FC = () => {
                         <div className="text-right">
                           <Badge
                             variant={log.status === 'success' ? 'default' : 'destructive'}
-                            className={log.status === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}
+                            className={log.status === 'success' ? 'bg-orange-600 hover:bg-orange-700' : ''}
                           >
                             {log.status}
                           </Badge>
