@@ -21,13 +21,14 @@ import {
   CostEstimate,
   RoofSection
 } from '@shared/schema';
-import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database } from 'lucide-react';
+import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database, MessageCircle, X } from 'lucide-react';
 import { ThermalAnalysis } from './thermal-analysis';
 import { GoogleMapsDrawing } from './google-maps-drawing';
 import { AIInspectionAssistant } from './ai-inspection-assistant';
 import { MobileWorkflowNav } from './mobile-workflow-nav';
 import { EducationalTooltip } from './educational-tooltip';
 import { CameraCapture } from './camera-capture';
+import { StormyChat } from './stormy-chat';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -67,6 +68,7 @@ const WORKFLOW_STEPS = [
 
 export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflowProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showStormy, setShowStormy] = useState(true);
   const [reportData, setReportData] = useState<WinnReportData>({
     propertyId,
     inspectionDate: new Date(),
