@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddressAutocomplete } from '@/components/address-autocomplete';
 
 interface Client {
   id: number;
@@ -129,6 +130,9 @@ export default function ClientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newClientAddress, setNewClientAddress] = useState('');
+  const [newClientCity, setNewClientCity] = useState('');
+  const [newClientState, setNewClientState] = useState('');
 
   const filteredClients = mockClients.filter(client => {
     const matchesSearch = 
@@ -231,16 +235,49 @@ export default function ClientsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="address" className="text-slate-300">Address</Label>
-                      <Input id="address" placeholder="123 Main St" className="bg-slate-800 border-slate-700" data-testid="input-client-address" />
+                      <AddressAutocomplete
+                        id="address"
+                        value={newClientAddress}
+                        onChange={(address, placeDetails) => {
+                          setNewClientAddress(address);
+                          if (placeDetails?.address_components) {
+                            const cityComponent = placeDetails.address_components.find(
+                              c => c.types.includes('locality')
+                            );
+                            const stateComponent = placeDetails.address_components.find(
+                              c => c.types.includes('administrative_area_level_1')
+                            );
+                            if (cityComponent) setNewClientCity(cityComponent.long_name);
+                            if (stateComponent) setNewClientState(stateComponent.short_name);
+                          }
+                        }}
+                        placeholder="123 Main St"
+                        className="bg-slate-800 border-slate-700"
+                        data-testid="input-client-address"
+                      />
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="city" className="text-slate-300">City</Label>
-                        <Input id="city" placeholder="Dallas" className="bg-slate-800 border-slate-700" data-testid="input-client-city" />
+                        <Input 
+                          id="city" 
+                          placeholder="Dallas" 
+                          className="bg-slate-800 border-slate-700" 
+                          data-testid="input-client-city"
+                          value={newClientCity}
+                          onChange={(e) => setNewClientCity(e.target.value)}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="state" className="text-slate-300">State</Label>
-                        <Input id="state" placeholder="TX" className="bg-slate-800 border-slate-700" data-testid="input-client-state" />
+                        <Input 
+                          id="state" 
+                          placeholder="TX" 
+                          className="bg-slate-800 border-slate-700" 
+                          data-testid="input-client-state"
+                          value={newClientState}
+                          onChange={(e) => setNewClientState(e.target.value)}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="status" className="text-slate-300">Status</Label>

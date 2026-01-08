@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { AddressAutocomplete } from './address-autocomplete';
 import { 
   MapPin, 
   Edit3, 
@@ -399,10 +399,20 @@ export function GoogleMapsDrawing({
           <div className="flex gap-2">
             <div className="flex-1">
               <Label htmlFor="address">Property Address</Label>
-              <Input
+              <AddressAutocomplete
                 id="address"
                 value={address}
-                onChange={(e) => onAddressChange(e.target.value)}
+                onChange={(newAddress, placeDetails) => {
+                  onAddressChange(newAddress);
+                  if (placeDetails?.geometry?.location) {
+                    const lat = placeDetails.geometry.location.lat();
+                    const lng = placeDetails.geometry.location.lng();
+                    if (mapInstanceRef.current) {
+                      mapInstanceRef.current.setCenter({ lat, lng });
+                      mapInstanceRef.current.setZoom(19);
+                    }
+                  }
+                }}
                 placeholder="Enter property address..."
                 className="mt-1"
                 data-testid="input-address"

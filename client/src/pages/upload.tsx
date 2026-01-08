@@ -30,6 +30,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { uploadFile } from '@/lib/firebase';
 import { queryClient } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
+import { AddressAutocomplete } from '@/components/address-autocomplete';
 
 interface FileUploadItem {
   id: string;
@@ -225,11 +226,12 @@ const UploadPage = () => {
                   className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-3"
                   placeholder="Property Name (e.g. Office Complex)"
                 />
-                <Input
+                <AddressAutocomplete
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(newAddress) => setAddress(newAddress)}
                   className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Address"
+                  data-testid="input-upload-address"
                 />
               </div>
 
