@@ -328,12 +328,22 @@ export default function TeamPortal() {
                     <SelectTrigger className="bg-[#1a1a1a] border-[#3a3a3a] text-white" data-testid="select-category">
                       <SelectValue placeholder="Select category (optional)" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2a2a2a] border-[#3a3a3a]">
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
+                    <SelectContent 
+                      className="bg-[#2a2a2a] border-[#3a3a3a] z-[9999] max-h-[300px]" 
+                      position="popper"
+                      side="bottom"
+                      sideOffset={5}
+                      align="start"
+                    >
+                      {categories.length > 0 ? (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id.toString()}>
+                            {cat.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="general">General</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
