@@ -21,7 +21,7 @@ import {
   CostEstimate,
   RoofSection
 } from '@shared/schema';
-import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database, MessageCircle, X } from 'lucide-react';
+import { Plus, Upload, Camera, MapPin, AlertTriangle, FileText, Database, MessageCircle, X, Sparkles } from 'lucide-react';
 import { ThermalAnalysis } from './thermal-analysis';
 import { GoogleMapsDrawing } from './google-maps-drawing';
 import { AIInspectionAssistant } from './ai-inspection-assistant';
@@ -30,6 +30,7 @@ import { EducationalTooltip } from './educational-tooltip';
 import { CameraCapture } from './camera-capture';
 import { StormyChat } from './stormy-chat';
 import { StormyAvatar } from './stormy-avatar';
+import { BulkImageAnalysis } from './bulk-image-analysis';
 
 interface WinnReportWorkflowProps {
   propertyId: number;
@@ -58,6 +59,7 @@ interface WinnReportData {
 
 const WORKFLOW_STEPS = [
   { id: 'building-info', title: 'Building Information', icon: MapPin },
+  { id: 'bulk-analysis', title: 'AI Bulk Analysis', icon: Sparkles },
   { id: 'roof-system', title: 'Roof System Details', icon: Database },
   { id: 'weather', title: 'Weather Conditions', icon: Database },
   { id: 'thermal', title: 'Thermal Analysis', icon: Camera },
@@ -359,7 +361,199 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
           </div>
         );
 
-      case 1: // Weather Conditions
+      case 1: // AI Bulk Analysis
+        return (
+          <div className="space-y-6">
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Sparkles className="h-5 w-5 text-orange-500" />
+                  Stormy AI Bulk Image Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upload a ZIP file containing all your inspection photos. Stormy will analyze each image using AI vision 
+                  and automatically populate issues, components, and findings in your report.
+                </p>
+                <BulkImageAnalysis
+                  propertyAddress={reportData.buildingInfo.address || 'Unknown Address'}
+                  onIssuesDetected={(detectedIssues) => {
+                    const newIssues: DetailedIssue[] = detectedIssues.map((issue, idx) => ({
+                      id: `ai-issue-${Date.now()}-${idx}`,
+                      title: issue.title,
+                      description: issue.description,
+                      severity: issue.severity === 'critical' ? 'critical' : issue.severity as any,
+                      category: issue.category,
+                      location: issue.location,
+                      recommendedAction: '',
+                      urgency: issue.severity === 'critical' ? 'immediate' : 'routine' as any,
+                      images: [],
+                      thermalImages: [],
+                      discoveredDate: new Date(),
+                      reportedBy: 'Stormy AI',
+                    }));
+                    setReportData(prev => ({
+                      ...prev,
+                      issues: [...prev.issues, ...newIssues]
+                    }));
+                  }}
+                  onComponentsDetected={(detectedComponents) => {
+                    const newComponents: RoofComponent[] = detectedComponents.map((comp, idx) => ({
+                      id: `ai-comp-${Date.now()}-${idx}`,
+                      name: comp.name,
+                      type: comp.type as RoofComponent['type'],
+                      condition: comp.condition as RoofComponent['condition'],
+                      notes: comp.notes,
+                      images: [],
+                      thermalData: [],
+                    }));
+                    setReportData(prev => ({
+                      ...prev,
+                      roofComponents: [...prev.roofComponents, ...newComponents]
+                    }));
+                  }}
+                  onSummaryGenerated={(summary) => {
+                    setReportData(prev => ({
+                      ...prev,
+                      executiveSummary: summary,
+                    }));
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-500/5 dark:to-amber-500/5 border-orange-200 dark:border-orange-500/20">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <StormyAvatar size={32} />
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
+                    <p className="font-medium mb-1">Pro Tip from Stormy:</p>
+                    <p>
+                      Organize your photos in folders by area (roof, gutters, siding) for better categorization. 
+                      I'll automatically detect damage patterns, thermal anomalies, and affected components across all your images.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 2: // Roof System Details
+        return (
+          <div className="space-y-6">
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Database className="h-5 w-5 text-orange-500" />
+                  Roof System Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-foreground">Primary Roof Type</Label>
+                    <Select
+                      value={reportData.roofSystemDetails?.primaryMaterial || ''}
+                      onValueChange={(value) => setReportData(prev => ({ 
+                        ...prev, 
+                        roofSystemDetails: { ...prev.roofSystemDetails, primaryMaterial: value }
+                      }))}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-border">
+                        <SelectValue placeholder="Select roof type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tpo">TPO Membrane</SelectItem>
+                        <SelectItem value="epdm">EPDM Rubber</SelectItem>
+                        <SelectItem value="pvc">PVC Membrane</SelectItem>
+                        <SelectItem value="bur">Built-Up Roofing</SelectItem>
+                        <SelectItem value="mod-bit">Modified Bitumen</SelectItem>
+                        <SelectItem value="metal">Metal Roofing</SelectItem>
+                        <SelectItem value="asphalt-shingle">Asphalt Shingles</SelectItem>
+                        <SelectItem value="clay-tile">Clay Tile</SelectItem>
+                        <SelectItem value="concrete-tile">Concrete Tile</SelectItem>
+                        <SelectItem value="slate">Slate</SelectItem>
+                        <SelectItem value="wood-shake">Wood Shake</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-foreground">Roof Age (years)</Label>
+                    <Input
+                      type="number"
+                      value={reportData.roofSystemDetails?.age || ''}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        roofSystemDetails: { ...prev.roofSystemDetails, age: parseInt(e.target.value) }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="Estimated age"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-foreground">Roof Type</Label>
+                    <Select
+                      value={reportData.roofSystemDetails?.roofType || ''}
+                      onValueChange={(value) => setReportData(prev => ({ 
+                        ...prev, 
+                        roofSystemDetails: { ...prev.roofSystemDetails, roofType: value as any }
+                      }))}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-border">
+                        <SelectValue placeholder="Roof type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flat">Flat</SelectItem>
+                        <SelectItem value="low_slope">Low Slope</SelectItem>
+                        <SelectItem value="steep_slope">Steep Slope</SelectItem>
+                        <SelectItem value="pitched">Pitched</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-foreground">Condition</Label>
+                    <Select
+                      value={reportData.roofSystemDetails?.condition || ''}
+                      onValueChange={(value) => setReportData(prev => ({ 
+                        ...prev, 
+                        roofSystemDetails: { ...prev.roofSystemDetails, condition: value as any }
+                      }))}
+                    >
+                      <SelectTrigger className="bg-background text-foreground border-border">
+                        <SelectValue placeholder="Select condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="excellent">Excellent</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                        <SelectItem value="poor">Poor</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-foreground">Warranty Info</Label>
+                    <Input
+                      value={reportData.roofSystemDetails?.warrantyInfo || ''}
+                      onChange={(e) => setReportData(prev => ({ 
+                        ...prev, 
+                        roofSystemDetails: { ...prev.roofSystemDetails, warrantyInfo: e.target.value }
+                      }))}
+                      className="bg-background text-foreground border-border"
+                      placeholder="Warranty details"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 3: // Weather Conditions
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -425,7 +619,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
           </div>
         );
 
-      case 2: // Thermal Analysis
+      case 4: // Thermal Analysis
         return (
           <ThermalAnalysis
             location={reportData.buildingInfo?.address || "Unknown location"}
@@ -444,7 +638,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
           />
         );
 
-      case 3: // Roof Components
+      case 5: // Roof Components
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -558,7 +752,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
           </div>
         );
 
-      case 4: // Issues & Findings
+      case 6: // Issues & Findings
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -683,7 +877,199 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
           </div>
         );
 
-      case 5: // Review & Generate
+      case 7: // Cost Estimates
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-foreground font-semibold">Cost Estimates</h3>
+              <Button 
+                data-testid="button-add-cost-estimate"
+                onClick={() => {
+                  const newEstimate: CostEstimate = {
+                    itemDescription: '',
+                    quantity: 1,
+                    unit: 'each',
+                    unitCost: 0,
+                    totalCost: 0,
+                    priority: 'within_1_year',
+                    laborHours: 0,
+                  };
+                  setReportData(prev => ({
+                    ...prev,
+                    costEstimates: [...prev.costEstimates, newEstimate]
+                  }));
+                }} 
+                className="bg-orange-500 hover:bg-orange-600 text-white touch-target"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Estimate
+              </Button>
+            </div>
+            
+            {reportData.costEstimates.length === 0 && (
+              <Card className="bg-card border-border border-dashed">
+                <CardContent className="p-6 text-center">
+                  <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">
+                    No cost estimates yet. Click "Add Estimate" to add repair or replacement costs.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            
+            <div className="space-y-4">
+              {reportData.costEstimates.map((estimate, index) => (
+                <Card key={index} className="bg-card border-border">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <Badge variant="outline" className="text-orange-500 border-orange-500">
+                        Item #{index + 1}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newEstimates = reportData.costEstimates.filter((_, i) => i !== index);
+                          setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                        }}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="md:col-span-2">
+                        <Label className="text-foreground">Item Description</Label>
+                        <Input
+                          value={estimate.itemDescription}
+                          onChange={(e) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].itemDescription = e.target.value;
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                          className="bg-card text-foreground border-border"
+                          placeholder="e.g., TPO membrane replacement, Flashing repair"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Quantity</Label>
+                        <Input
+                          type="number"
+                          value={estimate.quantity}
+                          onChange={(e) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].quantity = parseFloat(e.target.value) || 0;
+                            newEstimates[index].totalCost = newEstimates[index].quantity * newEstimates[index].unitCost;
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                          className="bg-card text-foreground border-border"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Unit</Label>
+                        <Select
+                          value={estimate.unit}
+                          onValueChange={(value) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].unit = value;
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                        >
+                          <SelectTrigger className="bg-card text-foreground border-border">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sq_ft">sq ft</SelectItem>
+                            <SelectItem value="sq">squares (100 sq ft)</SelectItem>
+                            <SelectItem value="linear_ft">linear ft</SelectItem>
+                            <SelectItem value="each">each</SelectItem>
+                            <SelectItem value="hour">hour</SelectItem>
+                            <SelectItem value="lump_sum">lump sum</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Unit Cost ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={estimate.unitCost}
+                          onChange={(e) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].unitCost = parseFloat(e.target.value) || 0;
+                            newEstimates[index].totalCost = newEstimates[index].quantity * newEstimates[index].unitCost;
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                          className="bg-card text-foreground border-border"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Total Cost ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={estimate.totalCost}
+                          readOnly
+                          className="bg-muted text-foreground border-border font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Priority</Label>
+                        <Select
+                          value={estimate.priority}
+                          onValueChange={(value) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].priority = value as CostEstimate['priority'];
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                        >
+                          <SelectTrigger className="bg-card text-foreground border-border">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="immediate">Immediate</SelectItem>
+                            <SelectItem value="within_1_year">Within 1 Year</SelectItem>
+                            <SelectItem value="within_5_years">Within 5 Years</SelectItem>
+                            <SelectItem value="monitoring">Monitoring Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-foreground">Labor Hours (optional)</Label>
+                        <Input
+                          type="number"
+                          value={estimate.laborHours || ''}
+                          onChange={(e) => {
+                            const newEstimates = [...reportData.costEstimates];
+                            newEstimates[index].laborHours = parseFloat(e.target.value) || 0;
+                            setReportData(prev => ({ ...prev, costEstimates: newEstimates }));
+                          }}
+                          className="bg-card text-foreground border-border"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            {reportData.costEstimates.length > 0 && (
+              <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/10 border-orange-200 dark:border-orange-500/30">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-foreground">Total Estimated Cost:</span>
+                    <span className="text-2xl font-bold text-orange-500">
+                      ${reportData.costEstimates.reduce((sum, e) => sum + (e.totalCost || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case 8: // Review & Generate
         return (
           <div className="space-y-6">
             <div className="text-center">

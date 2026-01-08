@@ -3167,5 +3167,186 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
+  // ============================================
+  // ZIP Upload & Bulk Analysis Routes
+  // ============================================
+  
+  const zipUpload = multer({ 
+    storage: multer.memoryStorage(), 
+    limits: { fileSize: 100 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/zip' || 
+          file.mimetype === 'application/x-zip-compressed' ||
+          file.originalname.toLowerCase().endsWith('.zip')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only ZIP files are allowed'));
+      }
+    }
+  });
+
+  app.post("/api/upload/zip", requireAuth, zipUpload.single('file'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "ZIP file is required" });
+      }
+
+      const { extractImagesFromZip } = await import('./zip-upload-service');
+      const extractionResult = await extractImagesFromZip(req.file.buffer);
+
+      if (!extractionResult.success) {
+        return res.status(400).json({ message: extractionResult.error || "Failed to extract ZIP" });
+      }
+
+      const propertyId = req.body.propertyId ? parseInt(req.body.propertyId) : null;
+      
+      res.json({
+        success: true,
+        totalFiles: extractionResult.totalFiles,
+        imagesExtracted: extractionResult.extractedImages.length,
+        skippedFiles: extractionResult.skippedFiles,
+        images: extractionResult.extractedImages.map(img => ({
+          filename: img.filename,
+          category: img.category,
+          size: img.size,
+          mimeType: img.mimeType,
+        })),
+        propertyId,
+      });
+    } catch (error: any) {
+      console.error('Error processing ZIP upload:', error);
+      res.status(500).json({ message: error.message || "Failed to process ZIP file" });
+    }
+  });
+
+  app.post("/api/upload/zip/analyze", requireAuth, zipUpload.single('file'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "ZIP file is required" });
+      }
+
+      const { extractImagesFromZip, analyzeBulkImages } = await import('./zip-upload-service');
+      
+      const extractionResult = await extractImagesFromZip(req.file.buffer);
+
+      if (!extractionResult.success) {
+        return res.status(400).json({ message: extractionResult.error || "Failed to extract ZIP" });
+      }
+
+      if (extractionResult.extractedImages.length === 0) {
+        return res.status(400).json({ message: "No valid images found in ZIP file" });
+      }
+
+      const propertyAddress = req.body.propertyAddress || 'Unknown property';
+      const analysisResult = await analyzeBulkImages(
+        extractionResult.extractedImages,
+        `Property inspection images for: ${propertyAddress}`
+      );
+
+      res.json({
+        success: true,
+        extraction: {
+          totalFiles: extractionResult.totalFiles,
+          imagesExtracted: extractionResult.extractedImages.length,
+          skippedFiles: extractionResult.skippedFiles,
+        },
+        analysis: analysisResult,
+      });
+    } catch (error: any) {
+      console.error('Error analyzing ZIP upload:', error);
+      res.status(500).json({ message: error.message || "Failed to analyze images" });
+    }
+  });
+
+  app.post("/api/stormy/analyze-images", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const { images, propertyContext } = req.body;
+      
+      if (!images || !Array.isArray(images) || images.length === 0) {
+        return res.status(400).json({ message: "Images array is required" });
+      }
+
+      const { analyzeBulkImages } = await import('./zip-upload-service');
+      
+      interface ImageInput {
+        filename: string;
+        originalPath: string;
+        mimeType: string;
+        size: number;
+        base64Data: string;
+        category?: string;
+      }
+      
+      const extractedImages: ImageInput[] = images.map((img: any) => ({
+        filename: img.filename || 'unknown.jpg',
+        originalPath: img.originalPath || img.filename || 'unknown.jpg',
+        mimeType: img.mimeType || 'image/jpeg',
+        size: img.size || 0,
+        base64Data: img.base64Data || img.data,
+        category: img.category,
+      }));
+
+      const analysisResult = await analyzeBulkImages(extractedImages, propertyContext);
+
+      res.json({
+        success: true,
+        analysis: analysisResult,
+      });
+    } catch (error: any) {
+      console.error('Error analyzing images:', error);
+      res.status(500).json({ message: error.message || "Failed to analyze images" });
+    }
+  });
+
+  app.post("/api/stormy/generate-report-summary", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const { bulkAnalysis, propertyAddress } = req.body;
+      
+      if (!bulkAnalysis) {
+        return res.status(400).json({ message: "Bulk analysis results are required" });
+      }
+
+      const approvedDocs = await storage.getApprovedKnowledgeDocuments();
+      const knowledgeContext = approvedDocs
+        .slice(0, 5)
+        .map(doc => `${doc.title}: ${doc.content || ''}`);
+
+      const { generateStormyReportFromAnalysis } = await import('./zip-upload-service');
+      const reportPrompt = await generateStormyReportFromAnalysis(
+        bulkAnalysis,
+        propertyAddress || 'Unknown property',
+        knowledgeContext
+      );
+
+      const stormyService = await import('./stormy-ai-service');
+      const reportSummary = await stormyService.sendMessage({
+        userId: userId.toString(),
+        message: reportPrompt,
+        contextType: 'inspection',
+      });
+
+      res.json({
+        success: true,
+        summary: reportSummary.message.content,
+        conversationId: reportSummary.conversationId,
+      });
+    } catch (error: any) {
+      console.error('Error generating report summary:', error);
+      res.status(500).json({ message: error.message || "Failed to generate report summary" });
+    }
+  });
+
   return httpServer;
 }

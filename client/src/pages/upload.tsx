@@ -19,11 +19,18 @@ import {
   Button 
 } from '@/components/ui/button';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import {
   ArrowLeft, 
   Upload as UploadIcon, 
   CloudUpload, 
   Check, 
-  Image
+  Image,
+  FileArchive
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -31,6 +38,7 @@ import { uploadFile } from '@/lib/firebase';
 import { queryClient } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
 import { AddressAutocomplete } from '@/components/address-autocomplete';
+import { ZipUpload } from '@/components/zip-upload';
 
 interface FileUploadItem {
   id: string;
@@ -213,52 +221,97 @@ const UploadPage = () => {
             </div>
           </div>
 
-          {/* Upload Form */}
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="mb-6">
-                <Label className="block text-neutral-darker text-sm font-medium mb-2">
-                  Property Information
-                </Label>
-                <Input
-                  value={propertyName}
-                  onChange={(e) => setPropertyName(e.target.value)}
-                  className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-3"
-                  placeholder="Property Name (e.g. Office Complex)"
-                />
-                <AddressAutocomplete
-                  value={address}
-                  onChange={(newAddress) => setAddress(newAddress)}
-                  className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Address"
-                  data-testid="input-upload-address"
-                />
-              </div>
+          {/* Upload Mode Tabs */}
+          <Tabs defaultValue="zip" className="mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="zip" className="flex items-center gap-2" data-testid="tab-zip-upload">
+                <FileArchive className="h-4 w-4" />
+                ZIP Batch Upload
+              </TabsTrigger>
+              <TabsTrigger value="single" className="flex items-center gap-2" data-testid="tab-single-upload">
+                <Image className="h-4 w-4" />
+                Single Images
+              </TabsTrigger>
+            </TabsList>
 
-              <div className="mb-6">
-                <Label className="block text-neutral-darker text-sm font-medium mb-2">
-                  Upload Thermal Images
-                </Label>
-                {/* Drag and Drop Area */}
-                <div
-                  className="border-2 border-dashed border-neutral-medium rounded-lg p-8 text-center cursor-pointer hover:bg-neutral-light transition"
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  <CloudUpload className="h-12 w-12 text-neutral-dark mx-auto" />
-                  <p className="mt-2 text-neutral-darker font-medium">Drag & drop files or click to browse</p>
-                  <p className="text-sm text-neutral-dark mt-1">Supports JPEG, PNG and MP4 from FLIR-compatible devices</p>
-                  <input
-                    ref={fileInputRef}
-                    id="file-upload"
-                    type="file"
-                    className="hidden"
-                    multiple
-                    accept=".jpg,.jpeg,.png,.mp4"
-                    onChange={handleFileSelect}
-                  />
-                </div>
+            <TabsContent value="zip">
+              <ZipUpload 
+                propertyAddress={address} 
+                onAnalysisComplete={(analysis) => {
+                  toast({
+                    title: "AI Analysis Complete",
+                    description: `Analyzed ${analysis.totalImages} images. Found damage in ${analysis.summary.totalDamageDetected} images.`,
+                  });
+                }}
+              />
+              <Card className="mt-4">
+                <CardContent className="p-4">
+                  <div className="mb-4">
+                    <Label className="block text-neutral-darker text-sm font-medium mb-2">
+                      Property Address (optional)
+                    </Label>
+                    <AddressAutocomplete
+                      value={address}
+                      onChange={(newAddress) => setAddress(newAddress)}
+                      className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter property address for context"
+                      data-testid="input-zip-upload-address"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Upload a ZIP file containing all your inspection photos. Stormy AI will analyze each image, detect damage patterns, and generate a comprehensive assessment.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="single">
+              {/* Single Image Upload Form */}
+              <Card className="mb-6">
+                <CardContent className="p-4">
+                  <div className="mb-6">
+                    <Label className="block text-neutral-darker text-sm font-medium mb-2">
+                      Property Information
+                    </Label>
+                    <Input
+                      value={propertyName}
+                      onChange={(e) => setPropertyName(e.target.value)}
+                      className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-3"
+                      placeholder="Property Name (e.g. Office Complex)"
+                    />
+                    <AddressAutocomplete
+                      value={address}
+                      onChange={(newAddress) => setAddress(newAddress)}
+                      className="w-full p-3 border border-neutral-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Address"
+                      data-testid="input-upload-address"
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <Label className="block text-neutral-darker text-sm font-medium mb-2">
+                      Upload Thermal Images
+                    </Label>
+                    {/* Drag and Drop Area */}
+                    <div
+                      className="border-2 border-dashed border-neutral-medium rounded-lg p-8 text-center cursor-pointer hover:bg-neutral-light transition"
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                    >
+                      <CloudUpload className="h-12 w-12 text-neutral-dark mx-auto" />
+                      <p className="mt-2 text-neutral-darker font-medium">Drag & drop files or click to browse</p>
+                      <p className="text-sm text-neutral-dark mt-1">Supports JPEG, PNG and MP4 from FLIR-compatible devices</p>
+                      <input
+                        ref={fileInputRef}
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.mp4"
+                        onChange={handleFileSelect}
+                      />
+                    </div>
 
                 {/* File List */}
                 {files.length > 0 && (
@@ -361,6 +414,8 @@ const UploadPage = () => {
               </Button>
             </CardContent>
           </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       
