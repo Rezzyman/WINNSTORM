@@ -37,8 +37,8 @@ if (SITE_PASSWORD) {
   log('Site password protection enabled (home page only)');
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 // Session middleware for admin and team authentication
 const sessionSecret = process.env.SESSION_SECRET;
