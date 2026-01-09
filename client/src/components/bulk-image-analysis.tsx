@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { StormyAvatar } from './stormy-avatar';
 import { apiRequest } from '@/lib/queryClient';
+import { getAuth } from 'firebase/auth';
 
 interface ImageAnalysisResult {
   filename: string;
@@ -100,6 +101,19 @@ export function BulkImageAnalysis({
       const formData = new FormData();
       formData.append('propertyAddress', propertyAddress);
       
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      let authHeaders: HeadersInit = {};
+      
+      if (currentUser) {
+        try {
+          const idToken = await currentUser.getIdToken();
+          authHeaders = { 'Authorization': `Bearer ${idToken}` };
+        } catch (error) {
+          console.warn('Failed to get auth token:', error);
+        }
+      }
+      
       const isZipUpload = files.length === 1 && (
         files[0].type === 'application/zip' || 
         files[0].type === 'application/x-zip-compressed' ||
@@ -115,11 +129,20 @@ export function BulkImageAnalysis({
           method: 'POST',
           body: formData,
           credentials: 'include',
+          headers: authHeaders,
         });
         
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Analysis failed');
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            throw new Error(error.message || 'Analysis failed');
+          } else {
+            if (response.status === 401) {
+              throw new Error('Please log in to use image analysis');
+            }
+            throw new Error(`Server error (${response.status}): Please try again`);
+          }
         }
         
         return response.json();
@@ -133,11 +156,20 @@ export function BulkImageAnalysis({
           method: 'POST',
           body: formData,
           credentials: 'include',
+          headers: authHeaders,
         });
         
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Analysis failed');
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            throw new Error(error.message || 'Analysis failed');
+          } else {
+            if (response.status === 401) {
+              throw new Error('Please log in to use image analysis');
+            }
+            throw new Error(`Server error (${response.status}): Please try again`);
+          }
         }
         
         return response.json();
