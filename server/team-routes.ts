@@ -48,7 +48,7 @@ const allowedMimeTypes = [
 
 const knowledgeUpload = multer({
   storage: knowledgeStorage,
-  limits: { fileSize: 200 * 1024 * 1024 },
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB max
   fileFilter: (req, file, cb) => {
     if (allowedMimeTypes.includes(file.mimetype) || 
         file.mimetype.startsWith('text/') || 

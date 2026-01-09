@@ -69,7 +69,7 @@ const allowedMimeTypes = [
 const knowledgeUpload = multer({
   storage: knowledgeStorage,
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB max for video files
+    fileSize: 500 * 1024 * 1024, // 500MB max for video files
   },
   fileFilter: (req, file, cb) => {
     if (allowedMimeTypes.includes(file.mimetype) || 
