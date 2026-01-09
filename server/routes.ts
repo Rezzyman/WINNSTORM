@@ -1318,6 +1318,10 @@ Keep the tone professional and technical but accessible.`;
       if (!stripeSecretKey) {
         return res.status(500).json({ message: "Stripe is not configured" });
       }
+      
+      // Log which key type is being used (without exposing the key)
+      const keyType = stripeSecretKey.startsWith('sk_test_') ? 'test' : 'live';
+      console.log(`Using Stripe ${keyType} key for subscription creation`);
 
       const stripe = new Stripe(stripeSecretKey, {
         apiVersion: '2025-10-29.clover',

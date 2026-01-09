@@ -255,7 +255,23 @@ export default function Subscribe() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements 
+              stripe={stripePromise} 
+              options={{ 
+                clientSecret,
+                appearance: {
+                  theme: 'night',
+                  variables: {
+                    colorPrimary: '#f97316',
+                    colorBackground: '#1c1c1c',
+                    colorText: '#ffffff',
+                    colorDanger: '#ef4444',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    borderRadius: '6px',
+                  },
+                },
+              }}
+            >
               <SubscribeForm planName={planName} isSetupMode={isSetupMode} />
             </Elements>
           </CardContent>
