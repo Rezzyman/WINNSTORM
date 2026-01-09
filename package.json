@@ -20,6 +20,7 @@
     "@capacitor/geolocation": "^7.1.6",
     "@capacitor/ios": "^7.4.4",
     "@capacitor/preferences": "^7.0.2",
+    "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@googlemaps/js-api-loader": "^1.16.10",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",

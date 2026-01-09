@@ -1,34 +1,49 @@
 import OpenAI from "openai";
+import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const openai = new OpenAI();
 
-export const STORMY_VOICE = "nova";
-export const VOICE_MODEL = "tts-1";
-export const VOICE_MODEL_HD = "tts-1-hd";
+const elevenlabs = new ElevenLabsClient({
+  apiKey: process.env.ELEVENLABS_API_KEY,
+});
+
+export const STORMY_VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam - a warm, engaging male voice
+export const ELEVEN_LABS_MODEL = "eleven_multilingual_v2";
 
 export async function textToSpeech(
   text: string,
   options: {
-    voice?: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
-    model?: "tts-1" | "tts-1-hd";
-    speed?: number;
+    voiceId?: string;
+    stability?: number;
+    similarityBoost?: number;
   } = {}
 ): Promise<Buffer> {
-  const { voice = STORMY_VOICE, model = VOICE_MODEL, speed = 1.0 } = options;
+  const { 
+    voiceId = STORMY_VOICE_ID, 
+    stability = 0.5, 
+    similarityBoost = 0.75 
+  } = options;
 
   try {
-    const response = await openai.audio.speech.create({
-      model,
-      voice,
-      input: text,
-      speed,
-      response_format: "mp3",
+    const audio = await elevenlabs.textToSpeech.convert(voiceId, {
+      text: text,
+      modelId: ELEVEN_LABS_MODEL,
+      voiceSettings: {
+        stability,
+        similarityBoost,
+      },
     });
 
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    const chunks: Buffer[] = [];
+    const reader = audio.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(Buffer.from(value));
+    }
+    return Buffer.concat(chunks);
   } catch (error: any) {
-    console.error("Text-to-speech error:", error);
+    console.error("Eleven Labs text-to-speech error:", error);
     throw new Error(`Failed to generate speech: ${error.message}`);
   }
 }
@@ -90,10 +105,7 @@ export async function processVoiceMessage(
     contextType: imageUrl ? "damage" : "general",
   });
 
-  const audioResponseBuffer = await textToSpeech(result.message.content, {
-    voice: STORMY_VOICE,
-    speed: 1.05,
-  });
+  const audioResponseBuffer = await textToSpeech(result.message.content);
 
   return {
     transcription,
@@ -110,7 +122,7 @@ export async function generateStormyGreeting(): Promise<Buffer> {
   ];
   
   const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-  return textToSpeech(greeting, { voice: STORMY_VOICE, speed: 1.0 });
+  return textToSpeech(greeting);
 }
 
 export async function speakStormyResponse(text: string): Promise<Buffer> {
@@ -122,8 +134,20 @@ export async function speakStormyResponse(text: string): Promise<Buffer> {
     .replace(/\n/g, " ")
     .substring(0, 4096);
 
-  return textToSpeech(cleanedText, {
-    voice: STORMY_VOICE,
-    speed: 1.05,
-  });
+  return textToSpeech(cleanedText);
+}
+
+export async function getAvailableVoices() {
+  try {
+    const voices = await elevenlabs.voices.getAll();
+    return voices.voices?.map(v => ({
+      voiceId: v.voiceId,
+      name: v.name,
+      category: v.category,
+      description: v.description,
+    })) || [];
+  } catch (error: any) {
+    console.error("Failed to fetch voices:", error);
+    return [];
+  }
 }
