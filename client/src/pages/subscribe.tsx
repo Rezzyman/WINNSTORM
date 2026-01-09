@@ -12,6 +12,11 @@ import { SEO } from '@/components/seo';
 
 // Load Stripe public key - only VITE_ prefixed variables are exposed to frontend
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+if (!stripePublicKey) {
+  console.error('VITE_STRIPE_PUBLIC_KEY is not configured. Payment processing will not work.');
+} else {
+  console.log('Stripe public key loaded:', stripePublicKey.substring(0, 12) + '...');
+}
 const stripePromise = stripePublicKey
   ? loadStripe(stripePublicKey)
   : null;
@@ -88,12 +93,16 @@ const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMod
       
       <div className="min-h-[200px]">
         <PaymentElement 
-          onReady={() => setIsElementReady(true)}
-          onLoadError={(error) => {
-            console.error('PaymentElement load error:', error);
+          onReady={() => {
+            console.log('PaymentElement ready');
+            setIsElementReady(true);
+          }}
+          onLoadError={(event) => {
+            console.error('PaymentElement load error:', event);
+            console.error('Error details:', JSON.stringify(event.error, null, 2));
             toast({
               title: "Payment Form Error",
-              description: "Failed to load payment form. Please refresh the page.",
+              description: `Failed to load payment form: ${event.error?.message || 'Unknown error'}. Please refresh the page.`,
               variant: "destructive",
             });
           }}
