@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers = parsed.headers;
         rows = parsed.rows;
       } else {
-        const parsed = await parseExcelFile(file.buffer);
+        const parsed = parseExcelFile(file.buffer);
         headers = parsed.headers;
         rows = parsed.rows;
       }
@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const content = file.buffer.toString('utf-8');
         rows = parseCSVFile(content).rows;
       } else {
-        rows = (await parseExcelFile(file.buffer)).rows;
+        rows = parseExcelFile(file.buffer).rows;
       }
 
       const mappedRows = applyColumnMapping(rows, mapping as ColumnMapping);
@@ -377,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const content = file.buffer.toString('utf-8');
         rows = parseCSVFile(content).rows;
       } else {
-        rows = (await parseExcelFile(file.buffer)).rows;
+        rows = parseExcelFile(file.buffer).rows;
       }
 
       const mappedRows = applyColumnMapping(rows, mapping as ColumnMapping);
