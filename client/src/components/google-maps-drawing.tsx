@@ -103,21 +103,45 @@ export function GoogleMapsDrawing({
     cleanupCurrentDrawing();
   }, [cleanupCurrentDrawing, removeClickListener]);
 
+  // Listen for Google Maps auth failures
+  useEffect(() => {
+    const handleAuthError = () => {
+      console.error('[GoogleMapsDrawing] Google Maps authentication error detected');
+      setMapError('Google Maps API key error - domain not authorized');
+      setIsLoading(false);
+    };
+
+    // Google Maps fires this callback on auth failures
+    (window as any).gm_authFailure = handleAuthError;
+
+    return () => {
+      delete (window as any).gm_authFailure;
+    };
+  }, []);
+
   useEffect(() => {
     mountedRef.current = true;
     let isCancelled = false;
     
     const initMap = async () => {
-      if (mapInstanceRef.current || initializingRef.current) {
-        if (mapInstanceRef.current) {
-          setIsLoading(false);
-        }
+      console.log('[GoogleMapsDrawing] Starting map initialization...');
+      
+      if (mapInstanceRef.current) {
+        console.log('[GoogleMapsDrawing] Map already initialized');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (initializingRef.current) {
+        console.log('[GoogleMapsDrawing] Already initializing, waiting...');
         return;
       }
       
       initializingRef.current = true;
 
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      console.log('[GoogleMapsDrawing] API key present:', !!apiKey);
+      
       if (!apiKey) {
         setMapError('Google Maps API key not configured');
         setIsLoading(false);
@@ -125,61 +149,91 @@ export function GoogleMapsDrawing({
         return;
       }
       
-      const loader = new Loader({
-        apiKey,
-        version: 'weekly',
-        libraries: ['places', 'geometry']
-      });
-
       try {
-        await loader.load();
+        const google = (window as any).google;
         
-        if (isCancelled || !mountedRef.current) return;
+        // Check if Google Maps is already loaded
+        if (google?.maps?.Map) {
+          console.log('[GoogleMapsDrawing] Google Maps already loaded, creating map...');
+        } else {
+          console.log('[GoogleMapsDrawing] Loading Google Maps via Loader...');
+          const loader = new Loader({
+            apiKey,
+            version: 'weekly',
+            libraries: ['places', 'geometry']
+          });
+          await loader.load();
+          console.log('[GoogleMapsDrawing] Loader completed');
+        }
+        
+        if (isCancelled || !mountedRef.current) {
+          console.log('[GoogleMapsDrawing] Cancelled during load');
+          return;
+        }
         
         const container = mapContainerRef.current;
         if (!container) {
+          console.log('[GoogleMapsDrawing] No container ref found');
           setIsLoading(false);
           initializingRef.current = false;
           return;
         }
 
-        const google = (window as any).google;
+        const googleApi = (window as any).google;
+        console.log('[GoogleMapsDrawing] Creating map instance...');
         
-        const mapInstance = new google.maps.Map(container, {
+        const mapInstance = new googleApi.maps.Map(container, {
           center: { lat: 39.8283, lng: -98.5795 },
           zoom: 4,
           mapTypeId: 'satellite',
           tilt: 0,
           mapTypeControl: true,
           mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: google.maps.ControlPosition.TOP_CENTER,
+            style: googleApi.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+            position: googleApi.maps.ControlPosition.TOP_CENTER,
             mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain']
           }
         });
 
         mapInstanceRef.current = mapInstance;
-        geocoderRef.current = new google.maps.Geocoder();
+        geocoderRef.current = new googleApi.maps.Geocoder();
+        
+        console.log('[GoogleMapsDrawing] Map created successfully');
         
         if (isCancelled || !mountedRef.current) return;
         
         setIsLoading(false);
         initializingRef.current = false;
       } catch (error) {
-        console.error('Error loading Google Maps:', error);
+        console.error('[GoogleMapsDrawing] Error loading Google Maps:', error);
         if (!isCancelled && mountedRef.current) {
-          setMapError('Failed to load Google Maps');
+          setMapError('Failed to load Google Maps: ' + (error as Error).message);
           setIsLoading(false);
         }
         initializingRef.current = false;
       }
     };
 
-    initMap();
+    // Small delay to ensure container is mounted
+    const timer = setTimeout(() => {
+      initMap();
+    }, 100);
+    
+    // Fallback: if still loading after 10 seconds, show error
+    const fallbackTimer = setTimeout(() => {
+      if (isLoading && !mapInstanceRef.current) {
+        console.log('[GoogleMapsDrawing] Fallback timeout - map failed to load');
+        setMapError('Map loading timed out. Please refresh the page.');
+        setIsLoading(false);
+        initializingRef.current = false;
+      }
+    }, 10000);
     
     return () => {
       isCancelled = true;
       mountedRef.current = false;
+      clearTimeout(timer);
+      clearTimeout(fallbackTimer);
       
       // Clean up overlays first
       removeClickListener();
@@ -507,12 +561,23 @@ export function GoogleMapsDrawing({
             )}
             {mapError && (
               <div className="absolute inset-0 bg-background flex items-center justify-center z-10 rounded-lg">
-                <div className="text-center p-6">
+                <div className="text-center p-6 max-w-md">
                   <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{mapError}</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Map functionality requires a Google Maps API key
-                  </p>
+                  <p className="text-foreground font-medium mb-2">Map Loading Issue</p>
+                  <p className="text-sm text-muted-foreground">{mapError}</p>
+                  {mapError.includes('Referer') || mapError.includes('API key') ? (
+                    <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg text-left">
+                      <p className="text-xs text-orange-400 font-medium mb-1">Action Required:</p>
+                      <p className="text-xs text-muted-foreground">
+                        The Google Maps API key needs to have this domain added to its allowed referrers in the Google Cloud Console. 
+                        Contact your administrator to update the API key restrictions.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Please refresh the page or check your internet connection.
+                    </p>
+                  )}
                 </div>
               </div>
             )}

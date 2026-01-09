@@ -68,6 +68,21 @@ export async function getOrCreateConversation(
 ): Promise<AIConversation> {
   const existingConversations = await storage.getAIConversationsByUser(userId);
   
+  // Validate propertyId exists in database before linking
+  let validPropertyId: number | undefined = undefined;
+  if (propertyId) {
+    try {
+      const property = await storage.getProperty(propertyId);
+      if (property) {
+        validPropertyId = propertyId;
+      } else {
+        console.log(`[Stormy] Property ID ${propertyId} not found, creating conversation without property link`);
+      }
+    } catch (e) {
+      console.log(`[Stormy] Error checking property ${propertyId}, creating conversation without property link`);
+    }
+  }
+  
   if (inspectionId) {
     const inspectionConvo = existingConversations.find(
       c => c.relatedInspectionId === inspectionId && c.status === 'active'
@@ -75,9 +90,9 @@ export async function getOrCreateConversation(
     if (inspectionConvo) return inspectionConvo;
   }
   
-  if (propertyId && !inspectionId) {
+  if (validPropertyId && !inspectionId) {
     const propertyConvo = existingConversations.find(
-      c => c.relatedPropertyId === propertyId && !c.relatedInspectionId && c.status === 'active'
+      c => c.relatedPropertyId === validPropertyId && !c.relatedInspectionId && c.status === 'active'
     );
     if (propertyConvo) return propertyConvo;
   }
@@ -85,12 +100,12 @@ export async function getOrCreateConversation(
   const generalConvo = existingConversations.find(
     c => c.contextType === 'general' && c.status === 'active' && !c.relatedPropertyId && !c.relatedInspectionId
   );
-  if (generalConvo && !propertyId && !inspectionId) return generalConvo;
+  if (generalConvo && !validPropertyId && !inspectionId) return generalConvo;
 
   const newConversation: InsertAIConversation = {
     userId,
-    title: inspectionId ? `Inspection #${inspectionId}` : propertyId ? `Property #${propertyId}` : 'General Chat',
-    relatedPropertyId: propertyId,
+    title: inspectionId ? `Inspection #${inspectionId}` : validPropertyId ? `Property #${validPropertyId}` : 'General Chat',
+    relatedPropertyId: validPropertyId,
     relatedInspectionId: inspectionId,
     contextType,
     status: 'active'

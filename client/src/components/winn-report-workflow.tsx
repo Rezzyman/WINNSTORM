@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ import { MobileWorkflowNav } from './mobile-workflow-nav';
 import { EducationalTooltip } from './educational-tooltip';
 import { CameraCapture } from './camera-capture';
 import { StormyAvatar } from './stormy-avatar';
+import { StormyChat } from './stormy-chat';
 import { BulkImageAnalysis } from './bulk-image-analysis';
 
 interface WinnReportWorkflowProps {
@@ -70,6 +72,13 @@ const WORKFLOW_STEPS = [
 
 export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflowProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showStormy, setShowStormy] = useState(true);
+  
+  const { data: property } = useQuery({
+    queryKey: ['/api/properties', propertyId],
+    enabled: !!propertyId,
+  });
+
   const [reportData, setReportData] = useState<WinnReportData>({
     propertyId,
     inspectionDate: new Date(),
@@ -108,6 +117,31 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
   });
 
   const progressPercentage = ((currentStep + 1) / WORKFLOW_STEPS.length) * 100;
+
+  useEffect(() => {
+    if (property) {
+      const buildingInfo = property.building_info || property.buildingInfo || {};
+      const roofDetails = property.roof_system_details || property.roofSystemDetails || {};
+      setReportData(prev => ({
+        ...prev,
+        buildingInfo: {
+          ...prev.buildingInfo,
+          address: property.address || buildingInfo.address || '',
+          propertyType: buildingInfo.type || buildingInfo.propertyType || 'commercial',
+          yearBuilt: buildingInfo.yearBuilt || prev.buildingInfo.yearBuilt,
+          squareFootage: buildingInfo.squareFootage || 0,
+          stories: buildingInfo.stories || 1,
+          ownerName: property.owner_name || buildingInfo.ownerName || '',
+          ownerContact: property.owner_phone || buildingInfo.ownerContact || '',
+        },
+        roofSystemDetails: {
+          ...prev.roofSystemDetails,
+          roofType: roofDetails.roofType || 'flat',
+          age: roofDetails.roofAge || 0,
+        }
+      }));
+    }
+  }, [property]);
 
   const nextStep = () => {
     if (currentStep < WORKFLOW_STEPS.length - 1) {
@@ -1212,17 +1246,36 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
         {/* AI Assistant Panel - Takes 1/3 of the width */}
         <div className="xl:col-span-1">
           <div className="sticky top-6 space-y-4">
-            {/* AI Inspection Assistant - Single Stormy Interface */}
-            <AIInspectionAssistant
-              currentStep={WORKFLOW_STEPS[currentStep]?.id}
-              propertyData={reportData.buildingInfo}
-              thermalData={reportData.thermalReadings}
-              roofSections={reportData.buildingInfo.roofSections}
-              weatherData={reportData.weatherConditions}
-              issues={reportData.issues}
-              components={reportData.roofComponents}
-              onGuidanceReceived={() => {}}
-            />
+            {/* Stormy AI Chat */}
+            <Card className="border-orange-500/20 bg-background/50 backdrop-blur-sm shadow-xl overflow-hidden">
+              <CardHeader 
+                className="flex flex-row items-center justify-between pb-2 space-y-0 bg-orange-500/5 cursor-pointer hover:bg-orange-500/10 transition-colors"
+                onClick={() => setShowStormy(!showStormy)}
+              >
+                <div className="flex items-center gap-2">
+                  <StormyAvatar size={32} />
+                  <CardTitle className="text-base font-semibold">Stormy AI Coach</CardTitle>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 hover:bg-orange-500/10 hover:text-orange-500"
+                  onClick={(e) => { e.stopPropagation(); setShowStormy(!showStormy); }}
+                >
+                  <X className={`h-4 w-4 transition-transform duration-200 ${showStormy ? 'rotate-0' : 'rotate-45'}`} />
+                </Button>
+              </CardHeader>
+              {showStormy && (
+                <CardContent className="p-0">
+                  <StormyChat 
+                    propertyId={propertyId} 
+                    contextType="inspection" 
+                    position="inline"
+                    initialOpen={true}
+                  />
+                </CardContent>
+              )}
+            </Card>
           </div>
         </div>
       </div>

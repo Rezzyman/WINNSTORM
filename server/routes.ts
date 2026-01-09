@@ -202,10 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(properties);
   });
 
-  app.get("/api/properties/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) return;
-    
+  app.get("/api/properties/:id", optionalAuth, async (req: AuthenticatedRequest, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid property ID" });
@@ -2921,15 +2918,14 @@ Keep the tone professional and technical but accessible.`;
   // ==========================================
   
   const stormyService = await import('./stormy-ai-service');
+  
+  // Demo user ID for unauthenticated access (for demos)
+  const DEMO_USER_ID = 'demo-user-stormy';
 
-  // Get user's conversations
-  app.get("/api/stormy/conversations", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Get user's conversations (allows demo access)
+  app.get("/api/stormy/conversations", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
+      const userId = req.user?.uid || DEMO_USER_ID;
       const conversations = await stormyService.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
@@ -2938,8 +2934,8 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Get specific conversation with messages
-  app.get("/api/stormy/conversations/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Get specific conversation with messages (allows demo access)
+  app.get("/api/stormy/conversations/:id", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const conversationId = parseInt(req.params.id);
       const messages = await stormyService.getConversationHistory(conversationId);
@@ -2955,13 +2951,10 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Send message to Stormy
-  app.post("/api/stormy/message", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Send message to Stormy (allows demo access)
+  app.post("/api/stormy/message", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
+      const userId = req.user?.uid || DEMO_USER_ID;
 
       const { message, conversationId, attachments, propertyId, inspectionId, contextType } = req.body;
 
@@ -2986,13 +2979,10 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Analyze image directly
-  app.post("/api/stormy/analyze-image", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Analyze image directly (allows demo access)
+  app.post("/api/stormy/analyze-image", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
+      const userId = req.user?.uid || DEMO_USER_ID;
 
       const { imageUrl, imageType, additionalContext } = req.body;
 
@@ -3014,13 +3004,10 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Get or create conversation for context
-  app.post("/api/stormy/conversations", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Get or create conversation for context (allows demo access)
+  app.post("/api/stormy/conversations", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
+      const userId = req.user?.uid || DEMO_USER_ID;
 
       const { propertyId, inspectionId, contextType } = req.body;
       
@@ -3038,14 +3025,10 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Get user's AI memory/preferences
-  app.get("/api/stormy/memory", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Get user's AI memory/preferences (allows demo access)
+  app.get("/api/stormy/memory", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
+      const userId = req.user?.uid || DEMO_USER_ID;
       const memory = await stormyService.getUserMemory(userId);
       res.json(memory || { preferences: {} });
     } catch (error) {
@@ -3054,14 +3037,10 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Update user's AI preferences
-  app.patch("/api/stormy/memory", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Update user's AI preferences (allows demo access)
+  app.patch("/api/stormy/memory", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
+      const userId = req.user?.uid || DEMO_USER_ID;
       const { preferences, summary } = req.body;
       const memory = await stormyService.updateUserMemory(userId, preferences || {}, summary);
       res.json(memory);
@@ -3077,8 +3056,8 @@ Keep the tone professional and technical but accessible.`;
 
   const voiceService = await import('./voice-service');
 
-  // Text-to-speech for Stormy responses
-  app.post("/api/stormy/voice/speak", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Text-to-speech for Stormy responses (allows demo access)
+  app.post("/api/stormy/voice/speak", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { text } = req.body;
 
@@ -3099,8 +3078,8 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Speech-to-text for voice input
-  app.post("/api/stormy/voice/transcribe", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Speech-to-text for voice input (allows demo access)
+  app.post("/api/stormy/voice/transcribe", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.body || !Buffer.isBuffer(req.body)) {
         return res.status(400).json({ message: "Audio data is required" });
@@ -3117,12 +3096,9 @@ Keep the tone professional and technical but accessible.`;
   // Full voice conversation - transcribe, process with Stormy, and return audio response
   const voiceUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
   
-  app.post("/api/stormy/voice/chat", requireAuth, voiceUpload.single('audio'), async (req: AuthenticatedRequest, res) => {
+  app.post("/api/stormy/voice/chat", optionalAuth, voiceUpload.single('audio'), async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid;
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
+      const userId = req.user?.uid || DEMO_USER_ID;
 
       const contentType = req.headers['content-type'] || '';
       let audioBuffer: Buffer;
@@ -3164,8 +3140,8 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Get Stormy's greeting audio
-  app.get("/api/stormy/voice/greeting", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Get Stormy's greeting audio (allows demo access)
+  app.get("/api/stormy/voice/greeting", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const audioBuffer = await voiceService.generateStormyGreeting();
 
@@ -3277,10 +3253,9 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  app.post("/api/stormy/analyze-images", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/stormy/analyze-images", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId || 1; // Demo fallback to user ID 1
 
       const { images, propertyContext } = req.body;
       
@@ -3320,10 +3295,9 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  app.post("/api/stormy/generate-report-summary", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/stormy/generate-report-summary", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId || 1; // Demo fallback to user ID 1
 
       const { bulkAnalysis, propertyAddress } = req.body;
       
