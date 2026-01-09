@@ -57,11 +57,11 @@ interface LoadingOverlayComponentProps {
 
 const LoadingOverlayComponent = ({ isVisible, message, submessage }: LoadingOverlayComponentProps) => {
   return (
-    <div className={`fixed inset-0 bg-neutral-darker bg-opacity-80 z-50 flex items-center justify-center ${isVisible ? '' : 'hidden'}`}>
-      <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+    <div className={`fixed inset-0 bg-black/80 z-50 flex items-center justify-center ${isVisible ? '' : 'hidden'}`}>
+      <div className="bg-card border border-border p-8 rounded-lg shadow-2xl flex flex-col items-center max-w-md">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-neutral-darker font-medium">{message}</p>
-        <p className="text-sm text-neutral-dark mt-2">{submessage}</p>
+        <p className="mt-4 text-foreground font-semibold text-lg">{message}</p>
+        <p className="text-sm text-muted-foreground mt-2 text-center">{submessage}</p>
       </div>
     </div>
   );
@@ -92,11 +92,11 @@ export const LoadingOverlay = () => {
   }, []);
 
   return (
-    <div className={`fixed inset-0 bg-neutral-darker bg-opacity-80 z-50 flex items-center justify-center ${isVisible ? '' : 'hidden'}`}>
-      <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+    <div className={`fixed inset-0 bg-black/80 z-50 flex items-center justify-center ${isVisible ? '' : 'hidden'}`}>
+      <div className="bg-card border border-border p-8 rounded-lg shadow-2xl flex flex-col items-center max-w-md">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-neutral-darker font-medium">{message}</p>
-        <p className="text-sm text-neutral-dark mt-2">{submessage}</p>
+        <p className="mt-4 text-foreground font-semibold text-lg">{message}</p>
+        <p className="text-sm text-muted-foreground mt-2 text-center">{submessage}</p>
       </div>
     </div>
   );
