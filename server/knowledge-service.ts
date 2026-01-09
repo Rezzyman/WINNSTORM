@@ -51,8 +51,8 @@ function chunkText(text: string, chunkSize: number = CHUNK_SIZE, overlap: number
 async function generateEmbedding(text: string): Promise<number[] | null> {
   const apiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   if (!apiKey) {
-    console.error('OpenAI API key not configured - cannot generate embeddings');
-    throw new Error('OpenAI API key not configured');
+    console.log('OpenAI API key not configured - embeddings disabled, using keyword fallback');
+    return null;
   }
   
   try {
@@ -61,9 +61,13 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
       input: text.substring(0, 8000),
     });
     return response.data[0]?.embedding || null;
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.status === 400 || error?.message?.includes('not supported')) {
+      console.log('Embeddings endpoint not supported - falling back to keyword matching');
+      return null;
+    }
     console.error('Error generating embedding:', error);
-    throw error;
+    return null;
   }
 }
 

@@ -1272,6 +1272,8 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
                     contextType="inspection" 
                     position="inline"
                     initialOpen={true}
+                    workflowStep={WORKFLOW_STEPS[currentStep].id}
+                    workflowData={reportData}
                   />
                 </CardContent>
               )}

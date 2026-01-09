@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { StormyAvatar } from './stormy-avatar';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { getStepWelcomeMessage, getQuickActionsForStep, type UserExperienceLevel } from '@/lib/stormy-guidance';
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,9 @@ interface StormyChatProps {
   contextType?: 'general' | 'inspection' | 'thermal' | 'damage';
   initialOpen?: boolean;
   position?: 'bottom-right' | 'inline' | 'modal';
+  workflowStep?: string;
+  workflowData?: any;
+  onStepGuidanceRequested?: (step: string) => void;
 }
 
 interface MessageAttachment {
@@ -63,7 +67,10 @@ export function StormyChat({
   inspectionId,
   contextType = 'general',
   initialOpen = false,
-  position = 'bottom-right'
+  position = 'bottom-right',
+  workflowStep,
+  workflowData,
+  onStepGuidanceRequested
 }: StormyChatProps) {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -81,6 +88,29 @@ export function StormyChat({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const prevStepRef = useRef<string | undefined>(undefined);
+  const [quickActions, setQuickActions] = useState<Array<{label: string; message: string}>>([]);
+  const userLevel: UserExperienceLevel = 'intermediate';
+
+  useEffect(() => {
+    if (workflowStep && workflowStep !== prevStepRef.current) {
+      prevStepRef.current = workflowStep;
+      
+      const actions = getQuickActionsForStep(workflowStep, userLevel);
+      setQuickActions(actions);
+      
+      const welcomeMessage = getStepWelcomeMessage(workflowStep, userLevel);
+      if (welcomeMessage && conversationId) {
+        sendMessageMutation.mutate({
+          message: `I'm now on the "${workflowStep}" step. ${welcomeMessage}`,
+          conversationId: conversationId || undefined,
+          propertyId,
+          inspectionId,
+          contextType
+        });
+      }
+    }
+  }, [workflowStep]);
 
   const handleVoiceResponse = useCallback((text: string) => {
     queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations'] });
@@ -104,6 +134,13 @@ export function StormyChat({
     messages: ConversationMessage[];
   }>({
     queryKey: ['/api/stormy/conversations', conversationId],
+    queryFn: async () => {
+      const response = await fetch(`/api/stormy/conversations/${conversationId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch conversation');
+      return response.json();
+    },
     enabled: !!conversationId
   });
 
@@ -123,12 +160,13 @@ export function StormyChat({
       });
     },
     onSuccess: (result) => {
+      const newConversationId = result.conversationId || conversationId;
       if (result.conversationId && !conversationId) {
         setConversationId(result.conversationId);
       }
       queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations'] });
-      if (conversationId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations', conversationId] });
+      if (newConversationId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/stormy/conversations', newConversationId] });
       }
       setMessage('');
       setAttachments([]);
@@ -364,19 +402,35 @@ export function StormyChat({
               </div>
               <h3 className="font-semibold text-lg mb-2">Hi, I'm Stormy!</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                Your AI inspection assistant. I can help with thermal analysis, 
-                damage assessment, and guide you through the Winn Methodology.
+                {workflowStep 
+                  ? `I'm here to guide you through the "${workflowStep}" step using the Winn Methodology. Ask me anything!`
+                  : 'Your AI inspection assistant. I can help with thermal analysis, damage assessment, and guide you through the Winn Methodology.'}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mt-4">
-                <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("What's the Winn Methodology?")}>
-                  <Sparkles className="h-3 w-3 mr-1" /> Winn Methodology
-                </Badge>
-                <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("How do I analyze thermal images?")}>
-                  <Thermometer className="h-3 w-3 mr-1" /> Thermal Analysis
-                </Badge>
-                <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("Help me identify hail damage")}>
-                  <Cloud className="h-3 w-3 mr-1" /> Damage Types
-                </Badge>
+                {quickActions.length > 0 ? (
+                  quickActions.slice(0, 3).map((action, idx) => (
+                    <Badge 
+                      key={idx} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-muted text-xs"
+                      onClick={() => setMessage(action.message)}
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" /> {action.label}
+                    </Badge>
+                  ))
+                ) : (
+                  <>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("What's the Winn Methodology?")}>
+                      <Sparkles className="h-3 w-3 mr-1" /> Winn Methodology
+                    </Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("How do I analyze thermal images?")}>
+                      <Thermometer className="h-3 w-3 mr-1" /> Thermal Analysis
+                    </Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => setMessage("Help me identify hail damage")}>
+                      <Cloud className="h-3 w-3 mr-1" /> Damage Types
+                    </Badge>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -505,7 +559,21 @@ export function StormyChat({
         </div>
       )}
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex-shrink-0">
+        {quickActions.length > 0 && conversationData?.messages?.length && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {quickActions.slice(0, 3).map((action, idx) => (
+              <Badge 
+                key={idx} 
+                variant="outline" 
+                className="cursor-pointer hover:bg-muted text-[10px] px-2 py-0.5"
+                onClick={() => setMessage(action.message)}
+              >
+                {action.label}
+              </Badge>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-2 mb-3">
           <div className="flex items-center gap-2">
             <Switch
