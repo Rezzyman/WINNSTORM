@@ -3253,6 +3253,90 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
+  app.post("/api/upload/images/analyze", optionalAuth, zipUpload.array('files', 50), async (req: AuthenticatedRequest, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "At least one image file is required" });
+      }
+
+      const { analyzeBulkImages } = await import('./zip-upload-service');
+      
+      const SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.tif'];
+      const path = await import('path');
+      
+      const getMimeType = (filename: string): string => {
+        const ext = path.extname(filename).toLowerCase();
+        const mimeTypes: Record<string, string> = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.gif': 'image/gif',
+          '.webp': 'image/webp',
+          '.bmp': 'image/bmp',
+          '.tiff': 'image/tiff',
+          '.tif': 'image/tiff',
+        };
+        return mimeTypes[ext] || 'application/octet-stream';
+      };
+
+      const categorizeImage = (filepath: string): string => {
+        const lowerPath = filepath.toLowerCase();
+        if (lowerPath.includes('thermal') || lowerPath.includes('flir') || lowerPath.includes('ir_')) return 'thermal';
+        if (lowerPath.includes('roof') || lowerPath.includes('shingle')) return 'roof';
+        if (lowerPath.includes('gutter') || lowerPath.includes('downspout')) return 'gutters';
+        if (lowerPath.includes('siding') || lowerPath.includes('exterior')) return 'siding';
+        if (lowerPath.includes('window') || lowerPath.includes('glass')) return 'windows';
+        if (lowerPath.includes('hvac') || lowerPath.includes('ac_') || lowerPath.includes('condenser')) return 'hvac';
+        if (lowerPath.includes('fence') || lowerPath.includes('gate')) return 'fence';
+        return 'general';
+      };
+
+      const extractedImages = files
+        .filter(file => {
+          const ext = path.extname(file.originalname).toLowerCase();
+          return SUPPORTED_IMAGE_EXTENSIONS.includes(ext);
+        })
+        .map(file => ({
+          filename: file.originalname,
+          originalPath: file.originalname,
+          mimeType: getMimeType(file.originalname),
+          size: file.size,
+          base64Data: file.buffer.toString('base64'),
+          category: categorizeImage(file.originalname),
+        }));
+
+      if (extractedImages.length === 0) {
+        return res.status(400).json({ message: "No valid images found. Supported formats: JPG, PNG, GIF, WEBP, BMP, TIFF" });
+      }
+
+      const propertyAddress = req.body.propertyAddress || 'Unknown property';
+      const analysisResult = await analyzeBulkImages(
+        extractedImages,
+        `Property inspection images for: ${propertyAddress}`
+      );
+
+      res.json({
+        success: true,
+        extraction: {
+          totalFiles: files.length,
+          imagesExtracted: extractedImages.length,
+          skippedFiles: files
+            .filter(file => {
+              const ext = path.extname(file.originalname).toLowerCase();
+              return !SUPPORTED_IMAGE_EXTENSIONS.includes(ext);
+            })
+            .map(f => f.originalname),
+        },
+        analysis: analysisResult,
+      });
+    } catch (error: any) {
+      console.error('Error analyzing image uploads:', error);
+      res.status(500).json({ message: error.message || "Failed to analyze images" });
+    }
+  });
+
   app.post("/api/stormy/analyze-images", optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user?.dbUserId || 1; // Demo fallback to user ID 1

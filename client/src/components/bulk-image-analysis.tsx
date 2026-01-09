@@ -17,7 +17,8 @@ import {
   Wand2,
   ChevronDown,
   ChevronUp,
-  Download
+  Download,
+  Images
 } from 'lucide-react';
 import { StormyAvatar } from './stormy-avatar';
 import { apiRequest } from '@/lib/queryClient';
@@ -95,25 +96,52 @@ export function BulkImageAnalysis({
   const { toast } = useToast();
 
   const analyzeMutation = useMutation({
-    mutationFn: async (file: File) => {
-      setPhase('extracting');
+    mutationFn: async (files: File[]) => {
       const formData = new FormData();
-      formData.append('file', file);
       formData.append('propertyAddress', propertyAddress);
       
-      setPhase('analyzing');
-      const response = await fetch('/api/upload/zip/analyze', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
+      const isZipUpload = files.length === 1 && (
+        files[0].type === 'application/zip' || 
+        files[0].type === 'application/x-zip-compressed' ||
+        files[0].name.toLowerCase().endsWith('.zip')
+      );
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Analysis failed');
+      if (isZipUpload) {
+        setPhase('extracting');
+        formData.append('file', files[0]);
+        
+        setPhase('analyzing');
+        const response = await fetch('/api/upload/zip/analyze', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Analysis failed');
+        }
+        
+        return response.json();
+      } else {
+        setPhase('analyzing');
+        files.forEach((file, index) => {
+          formData.append('files', file);
+        });
+        
+        const response = await fetch('/api/upload/images/analyze', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Analysis failed');
+        }
+        
+        return response.json();
       }
-      
-      return response.json();
     },
     onSuccess: async (data) => {
       setAnalysisResult(data.analysis);
@@ -200,9 +228,8 @@ export function BulkImageAnalysis({
   });
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      analyzeMutation.mutate(file);
+    if (acceptedFiles.length > 0) {
+      analyzeMutation.mutate(acceptedFiles);
     }
   }, [analyzeMutation]);
 
@@ -211,8 +238,14 @@ export function BulkImageAnalysis({
     accept: {
       'application/zip': ['.zip'],
       'application/x-zip-compressed': ['.zip'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp'],
+      'image/bmp': ['.bmp'],
+      'image/tiff': ['.tif', '.tiff'],
     },
-    maxFiles: 1,
+    maxFiles: 50,
     maxSize: 100 * 1024 * 1024,
     disabled: phase !== 'idle' && phase !== 'complete',
   });
@@ -260,7 +293,7 @@ export function BulkImageAnalysis({
               </Badge>
             </span>
             <p className="text-sm font-normal text-gray-500 dark:text-gray-400 mt-1">
-              Upload a ZIP of inspection photos for comprehensive AI analysis
+              Upload inspection photos (ZIP or individual images) for comprehensive AI analysis
             </p>
           </div>
         </CardTitle>
@@ -293,16 +326,22 @@ export function BulkImageAnalysis({
             <div className="space-y-2">
               <CheckCircle2 className="h-10 w-10 text-green-500 mx-auto" />
               <p className="text-gray-700 dark:text-gray-300 font-medium">
-                Analysis complete! Drop another ZIP to re-analyze.
+                Analysis complete! Drop more files to re-analyze.
               </p>
             </div>
           ) : (
             <>
-              <FileArchive className="h-10 w-10 mx-auto text-orange-500 mb-3" />
+              <div className="flex justify-center gap-2 mb-3">
+                <Images className="h-10 w-10 text-orange-500" />
+                <FileArchive className="h-10 w-10 text-orange-500" />
+              </div>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
-                {isDragActive ? 'Drop your ZIP here' : 'Drag & drop a ZIP of inspection photos'}
+                {isDragActive ? 'Drop your files here' : 'Drag & drop inspection photos or a ZIP file'}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Supports JPG, PNG, WEBP, GIF, BMP, TIFF (up to 50 images or 1 ZIP)
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                 Stormy will analyze all images and auto-populate your report
               </p>
             </>
