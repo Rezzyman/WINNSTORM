@@ -287,7 +287,10 @@ export function GoogleMapsDrawing({
   }, [removeClickListener]);
 
   const handleAddressSearch = useCallback(() => {
-    if (!geocoderRef.current || !mapInstanceRef.current || !address) return;
+    if (!geocoderRef.current || !mapInstanceRef.current || !address) {
+      console.log('[GoogleMapsDrawing] Cannot search - missing geocoder, map, or address');
+      return;
+    }
 
     geocoderRef.current.geocode({ address }, (results: any, status: any) => {
       if (status === 'OK' && results && results[0]) {
