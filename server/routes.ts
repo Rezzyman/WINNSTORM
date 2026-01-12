@@ -3160,6 +3160,25 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
+  // Get available ElevenLabs voices (authenticated users)
+  app.get("/api/stormy/voice/voices", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const voices = await voiceService.getAvailableVoices();
+      res.json({
+        voices,
+        currentVoice: {
+          voiceId: voiceService.STORMY_VOICE_ID,
+          name: 'Adam',
+          description: 'Confident, professional male voice'
+        },
+        settings: voiceService.STORMY_VOICE_SETTINGS
+      });
+    } catch (error: any) {
+      console.error('Error fetching voices:', error);
+      res.status(500).json({ message: error.message || "Failed to fetch available voices" });
+    }
+  });
+
   // ============================================
   // ZIP Upload & Bulk Analysis Routes
   // ============================================

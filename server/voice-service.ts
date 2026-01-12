@@ -7,8 +7,16 @@ const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
 });
 
-export const STORMY_VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam - a warm, engaging male voice
+// Voice: Adam - confident, professional male voice
+// Personality: Calm, authoritative, dryly clever
+export const STORMY_VOICE_ID = "pNInz6obpgDQGcFmaJgB";
 export const ELEVEN_LABS_MODEL = "eleven_multilingual_v2";
+
+// Voice settings tuned for Stormy's confident, calm demeanor
+export const STORMY_VOICE_SETTINGS = {
+  stability: 0.65,        // Higher = more consistent, calm delivery
+  similarityBoost: 0.70,  // Balanced for natural but authoritative tone
+};
 
 export async function textToSpeech(
   text: string,
@@ -18,10 +26,10 @@ export async function textToSpeech(
     similarityBoost?: number;
   } = {}
 ): Promise<Buffer> {
-  const { 
-    voiceId = STORMY_VOICE_ID, 
-    stability = 0.5, 
-    similarityBoost = 0.75 
+  const {
+    voiceId = STORMY_VOICE_ID,
+    stability = STORMY_VOICE_SETTINGS.stability,
+    similarityBoost = STORMY_VOICE_SETTINGS.similarityBoost,
   } = options;
 
   try {
@@ -115,12 +123,15 @@ export async function processVoiceMessage(
 }
 
 export async function generateStormyGreeting(): Promise<Buffer> {
+  // Greetings match Stormy's personality: confident, brief, dryly professional
   const greetings = [
-    "Hey there! I'm Stormy, your AI inspection assistant. How can I help you today?",
-    "Hi! Stormy here, ready to help with your damage assessment. What are we looking at?",
-    "Hello! I'm Stormy. Show me what you're inspecting and I'll help you analyze it.",
+    "Stormy here. What are we looking at?",
+    "Ready when you are. Show me the damage.",
+    "Stormy. Let's get to work.",
+    "What have you got for me?",
+    "Alright, walk me through it.",
   ];
-  
+
   const greeting = greetings[Math.floor(Math.random() * greetings.length)];
   return textToSpeech(greeting);
 }
