@@ -1,10 +1,17 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import pgSession from "connect-pg-simple";
+import pg from "pg";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Trust proxy for production (Railway, etc.)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 // Site password protection (HTTP Basic Auth) - ONLY on home page
 const SITE_PASSWORD = process.env.SITE_PASSWORD;
@@ -47,7 +54,9 @@ if (process.env.NODE_ENV === 'production' && !sessionSecret) {
   process.exit(1);
 }
 
-app.use(session({
+// Configure session store - use PostgreSQL in production for persistence
+const PgStore = pgSession(session);
+const sessionConfig: session.SessionOptions = {
   secret: sessionSecret || 'winnstorm-dev-session-' + Date.now(),
   resave: false,
   saveUninitialized: false,
@@ -57,7 +66,23 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
   },
-}));
+};
+
+// Use PostgreSQL session store in production
+if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+  const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+  sessionConfig.store = new PgStore({
+    pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true,
+  });
+  log('Using PostgreSQL session store');
+}
+
+app.use(session(sessionConfig));
 
 app.use((req, res, next) => {
   const start = Date.now();
