@@ -182,7 +182,14 @@ export async function requireAdmin(req: AdminAuthenticatedRequest, res: Response
   // First check for session-based admin auth (password login)
   const sessionEmail = (req.session as any)?.adminEmail;
   const sessionToken = (req.session as any)?.adminToken;
-  
+
+  console.log('requireAdmin check:', {
+    hasSession: !!req.session,
+    sessionId: req.session?.id,
+    sessionEmail: sessionEmail || 'none',
+    hasToken: !!sessionToken
+  });
+
   if (sessionEmail && sessionToken) {
     // Check if email is in admin allowlist
     if (!ADMIN_ALLOWLIST.includes(sessionEmail.toLowerCase())) {

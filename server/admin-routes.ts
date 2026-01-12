@@ -153,16 +153,30 @@ router.post('/login', async (req: Request, res: Response) => {
     });
     
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    
+
     if (req.session) {
       (req.session as any).adminToken = sessionToken;
       (req.session as any).adminEmail = email;
+
+      // Explicitly save session before responding
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Failed to create session' });
+        }
+        res.json({
+          success: true,
+          email,
+          message: 'Login successful'
+        });
+      });
+      return;
     }
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       email,
-      message: 'Login successful' 
+      message: 'Login successful'
     });
   } catch (error) {
     console.error('Admin login error:', error);
