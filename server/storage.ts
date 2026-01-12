@@ -1,5 +1,5 @@
-import { 
-  User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport, 
+import {
+  User, InsertUser, Property, InsertProperty, Scan, InsertScan, Report, InsertReport,
   CrmConfig, InsertCrmConfig, CrmSyncLog, InsertCrmSyncLog, KnowledgeBase, InsertKnowledgeBase,
   InspectionSession, InsertInspectionSession, EvidenceAsset, InsertEvidenceAsset,
   LimitlessTranscript, InsertLimitlessTranscript, InspectorProgress, InsertInspectorProgress,
@@ -11,10 +11,12 @@ import {
   KnowledgeEmbedding, InsertKnowledgeEmbedding, KnowledgeAuditLog, InsertKnowledgeAuditLog,
   AdminCredentials, InsertAdminCredentials,
   TeamCredentials, InsertTeamCredentials,
+  SystemSettings, InsertSystemSettings,
   users, properties, scans, reports, crmConfigs, crmSyncLogs, knowledgeBase,
   inspectionSessions, evidenceAssets, limitlessTranscripts, inspectorProgress, projects, clients,
   scheduledInspections, teamAssignments, damageTemplates, aiConversations, aiMessages, aiMemory,
-  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog, adminCredentials, teamCredentials
+  knowledgeCategories, knowledgeDocuments, knowledgeEmbeddings, knowledgeAuditLog, adminCredentials, teamCredentials,
+  systemSettings
 } from "@shared/schema";
 import { db } from './db';
 import { eq, or, inArray, and, desc, ilike, isNotNull } from 'drizzle-orm';
@@ -1508,6 +1510,52 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error deleting team credentials:', error);
       return false;
+    }
+  }
+
+  // System Settings
+  async getSystemSetting(key: string): Promise<SystemSettings | undefined> {
+    try {
+      const [setting] = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.key, key));
+      return setting;
+    } catch (error) {
+      console.error('Error fetching system setting:', error);
+      return undefined;
+    }
+  }
+
+  async getAllSystemSettings(): Promise<SystemSettings[]> {
+    try {
+      return await db.select().from(systemSettings).orderBy(systemSettings.key);
+    } catch (error) {
+      console.error('Error fetching all system settings:', error);
+      return [];
+    }
+  }
+
+  async upsertSystemSetting(key: string, value: string, description?: string, updatedBy?: string): Promise<SystemSettings> {
+    try {
+      const existing = await this.getSystemSetting(key);
+      if (existing) {
+        const [updated] = await db
+          .update(systemSettings)
+          .set({ value, description, updatedBy, updatedAt: new Date() })
+          .where(eq(systemSettings.key, key))
+          .returning();
+        return updated;
+      } else {
+        const [created] = await db
+          .insert(systemSettings)
+          .values({ key, value, description, updatedBy })
+          .returning();
+        return created;
+      }
+    } catch (error) {
+      console.error('Error upserting system setting:', error);
+      throw error;
     }
   }
 }

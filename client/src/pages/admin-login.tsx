@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Lock, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { SEO } from '@/components/seo';
 import winnstormLogo from '@assets/logo-dark_1765042579232.png';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -162,16 +163,31 @@ const AdminLogin = () => {
                 <Label htmlFor="admin-password" className="block text-white text-sm font-medium mb-2">
                   Password
                 </Label>
-                <Input
-                  type="password"
-                  id="admin-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-12 p-3 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                  data-testid="input-admin-password"
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="admin-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-12 p-3 pr-12 border border-white/20 rounded-none focus:outline-none focus:ring-2 focus:ring-primary bg-white/10 text-white placeholder:text-white/40"
+                    placeholder="••••••••"
+                    disabled={isLoading}
+                    data-testid="input-admin-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                    tabIndex={-1}
+                    data-testid="button-toggle-password"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
               
               <Button

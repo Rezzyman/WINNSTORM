@@ -12,11 +12,11 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { SEO } from '@/components/seo';
-import { 
-  Shield, 
-  Users, 
-  Briefcase, 
-  Building2, 
+import {
+  Shield,
+  Users,
+  Briefcase,
+  Building2,
   UserCheck,
   LogOut,
   RefreshCw,
@@ -29,8 +29,12 @@ import {
   CheckCircle2,
   Clock,
   Trash2,
+  Plus,
+  Bot,
+  Save,
+  RotateCcw,
   Eye,
-  Plus
+  EyeOff
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -120,6 +124,15 @@ const AdminDashboard = () => {
   const [showAddTeamMember, setShowAddTeamMember] = useState(false);
   const [teamMemberForm, setTeamMemberForm] = useState({ name: '', email: '', password: '' });
   const [isCreatingTeamMember, setIsCreatingTeamMember] = useState(false);
+  const [showTeamPassword, setShowTeamPassword] = useState(false);
+
+  // Stormy AI prompt state
+  const [stormyPrompt, setStormyPrompt] = useState('');
+  const [stormyPromptOriginal, setStormyPromptOriginal] = useState('');
+  const [isSavingPrompt, setIsSavingPrompt] = useState(false);
+
+  // User view dialog state
+  const [viewUser, setViewUser] = useState<AdminUser | null>(null);
 
   const getToken = async (): Promise<string | null> => {
     if (!user) return null;
@@ -218,6 +231,58 @@ const AdminDashboard = () => {
     queryKey: ['/api/admin/team-members'],
     enabled: isAuthorized === true,
   });
+
+  // Stormy AI prompt query
+  const { data: stormyPromptData, isLoading: stormyPromptLoading } = useQuery<{prompt: string; isCustom: boolean; updatedAt?: string; updatedBy?: string}>({
+    queryKey: ['/api/admin/settings/stormy-prompt'],
+    enabled: isAuthorized === true,
+  });
+
+  // Load Stormy prompt into state when data arrives
+  useEffect(() => {
+    if (stormyPromptData?.prompt && !stormyPrompt) {
+      setStormyPrompt(stormyPromptData.prompt);
+      setStormyPromptOriginal(stormyPromptData.prompt);
+    }
+  }, [stormyPromptData]);
+
+  const handleSaveStormyPrompt = async () => {
+    if (!stormyPrompt.trim()) {
+      toast({ title: "Prompt cannot be empty", variant: "destructive" });
+      return;
+    }
+    if (stormyPrompt.length < 100) {
+      toast({ title: "Prompt must be at least 100 characters", variant: "destructive" });
+      return;
+    }
+
+    setIsSavingPrompt(true);
+    try {
+      const response = await fetch('/api/admin/settings/stormy-prompt', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ prompt: stormyPrompt }),
+      });
+
+      if (response.ok) {
+        setStormyPromptOriginal(stormyPrompt);
+        toast({ title: "Stormy prompt saved successfully" });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/settings/stormy-prompt'] });
+      } else {
+        const error = await response.json();
+        toast({ title: error.message || "Failed to save prompt", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Failed to save prompt", variant: "destructive" });
+    }
+    setIsSavingPrompt(false);
+  };
+
+  const handleResetStormyPrompt = () => {
+    setStormyPrompt(stormyPromptOriginal);
+    toast({ title: "Changes discarded" });
+  };
 
   const handleUploadDocument = async () => {
     if (!uploadForm.title) {
@@ -389,13 +454,14 @@ const AdminDashboard = () => {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(updates),
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+    onSuccess: async () => {
+      await refetchUsers();
+      await refetchStats();
       toast({ title: "User updated successfully" });
     },
     onError: (error: any) => {
@@ -598,6 +664,10 @@ const AdminDashboard = () => {
               <UserCheck className="h-4 w-4 mr-2" />
               Team Portal
             </TabsTrigger>
+            <TabsTrigger value="stormy" className="rounded-none data-[state=active]:bg-primary">
+              <Bot className="h-4 w-4 mr-2" />
+              Stormy AI
+            </TabsTrigger>
             <TabsTrigger value="system" className="rounded-none data-[state=active]:bg-primary">
               <Settings className="h-4 w-4 mr-2" />
               System
@@ -680,6 +750,7 @@ const AdminDashboard = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="text-primary hover:text-primary/80"
+                                onClick={() => setViewUser(adminUser)}
                                 data-testid={`button-view-user-${adminUser.id}`}
                               >
                                 View
@@ -1009,14 +1080,28 @@ const AdminDashboard = () => {
                       </div>
                       <div>
                         <Label className="text-white/60">Password (min 8 chars)</Label>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          value={teamMemberForm.password}
-                          onChange={(e) => setTeamMemberForm({ ...teamMemberForm, password: e.target.value })}
-                          className="bg-white/5 border-white/20 text-white"
-                          data-testid="input-team-password"
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showTeamPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={teamMemberForm.password}
+                            onChange={(e) => setTeamMemberForm({ ...teamMemberForm, password: e.target.value })}
+                            className="bg-white/5 border-white/20 text-white pr-10"
+                            data-testid="input-team-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowTeamPassword(!showTeamPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                            tabIndex={-1}
+                          >
+                            {showTeamPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
@@ -1110,6 +1195,98 @@ const AdminDashboard = () => {
                     Share this URL with team members. They can log in with the credentials you create here.
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="stormy">
+            <Card className="bg-white/5 border-white/10 rounded-none">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-orange-500" />
+                  Stormy AI Configuration
+                </CardTitle>
+                <CardDescription className="text-white/60">
+                  Customize Stormy's system prompt to adjust its personality, expertise, and responses.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {stormyPromptLoading ? (
+                  <div className="text-center py-8 text-white/60">Loading Stormy configuration...</div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="stormy-prompt" className="text-white">System Prompt</Label>
+                        <span className="text-white/40 text-sm">
+                          {stormyPrompt.length} / 10,000 characters
+                        </span>
+                      </div>
+                      <Textarea
+                        id="stormy-prompt"
+                        value={stormyPrompt}
+                        onChange={(e) => setStormyPrompt(e.target.value)}
+                        placeholder="Enter Stormy's system prompt..."
+                        className="bg-white/5 border-white/20 text-white min-h-[400px] font-mono text-sm"
+                        data-testid="textarea-stormy-prompt"
+                      />
+                      <p className="text-white/40 text-sm">
+                        This prompt defines Stormy's behavior, expertise areas, and personality. Changes take effect within 1 minute.
+                      </p>
+                    </div>
+
+                    {stormyPromptData?.isCustom && (
+                      <div className="p-3 bg-orange-900/20 border border-orange-500/30 rounded-none">
+                        <p className="text-orange-400 text-sm">
+                          Custom prompt active • Last updated: {stormyPromptData.updatedAt ? new Date(stormyPromptData.updatedAt).toLocaleString() : 'Unknown'}
+                          {stormyPromptData.updatedBy && ` by ${stormyPromptData.updatedBy}`}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleSaveStormyPrompt}
+                        disabled={isSavingPrompt || stormyPrompt === stormyPromptOriginal}
+                        className="bg-orange-600 hover:bg-orange-700"
+                        data-testid="button-save-stormy-prompt"
+                      >
+                        {isSavingPrompt ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4 mr-2" />
+                            Save Prompt
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleResetStormyPrompt}
+                        disabled={stormyPrompt === stormyPromptOriginal}
+                        className="text-white border-white/20 hover:bg-white/10"
+                        data-testid="button-reset-stormy-prompt"
+                      >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Discard Changes
+                      </Button>
+                    </div>
+
+                    <div className="p-4 bg-white/5 border border-white/10 space-y-3">
+                      <h4 className="text-white font-medium">Tips for Writing Effective Prompts</h4>
+                      <ul className="text-white/60 text-sm space-y-1 list-disc list-inside">
+                        <li>Define Stormy's core expertise and role clearly at the beginning</li>
+                        <li>Include specific methodologies or processes (like the Winn Methodology)</li>
+                        <li>Add instructions for handling images and thermal analysis</li>
+                        <li>Specify the communication style and tone</li>
+                        <li>Include any compliance or documentation requirements</li>
+                      </ul>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1329,6 +1506,105 @@ const AdminDashboard = () => {
                   Upload Document
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User View Dialog */}
+      <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+        <DialogContent className="bg-[#1A1A1A] border-white/10 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              User Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {viewUser && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/60 text-sm">User ID</Label>
+                  <p className="text-white font-medium">{viewUser.id}</p>
+                </div>
+                <div>
+                  <Label className="text-white/60 text-sm">Admin Status</Label>
+                  <p className="text-white font-medium">
+                    <Badge variant={viewUser.isAdmin ? "default" : "outline"} className={viewUser.isAdmin ? "bg-orange-500" : ""}>
+                      {viewUser.isAdmin ? 'Admin' : 'User'}
+                    </Badge>
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-white/60 text-sm">Email</Label>
+                <p className="text-white font-medium">{viewUser.email}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/60 text-sm">First Name</Label>
+                  <p className="text-white font-medium">{viewUser.firstName || 'Not set'}</p>
+                </div>
+                <div>
+                  <Label className="text-white/60 text-sm">Last Name</Label>
+                  <p className="text-white font-medium">{viewUser.lastName || 'Not set'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/60 text-sm">Role</Label>
+                  <p className="text-white font-medium capitalize">{viewUser.role?.replace('_', ' ') || 'Not set'}</p>
+                </div>
+                <div>
+                  <Label className="text-white/60 text-sm">Certification Level</Label>
+                  <p className="text-white font-medium capitalize">{viewUser.certificationLevel || 'None'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/60 text-sm">Inspection Hours</Label>
+                  <p className="text-white font-medium">{viewUser.inspectionHours || 0}</p>
+                </div>
+                <div>
+                  <Label className="text-white/60 text-sm">Approved DARs</Label>
+                  <p className="text-white font-medium">{viewUser.approvedDARs || 0}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/60 text-sm">Onboarding Completed</Label>
+                  <p className="text-white font-medium">
+                    {viewUser.onboardingCompleted ? (
+                      <span className="text-green-400">Yes</span>
+                    ) : (
+                      <span className="text-yellow-400">No</span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-white/60 text-sm">Created At</Label>
+                  <p className="text-white font-medium">
+                    {viewUser.createdAt ? new Date(viewUser.createdAt).toLocaleDateString() : 'Unknown'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setViewUser(null)}
+              className="border-white/20 text-white hover:bg-white/10"
+              data-testid="button-close-user-view"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

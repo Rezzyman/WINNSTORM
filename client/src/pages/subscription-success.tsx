@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SEO } from '@/components/seo';
+import { useAuth } from '@/hooks/use-auth';
 
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
@@ -16,6 +17,16 @@ export default function SubscriptionSuccess() {
   const [, navigate] = useLocation();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  // Helper to navigate to dashboard (or auth if not logged in)
+  const goToDashboard = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
 
   useEffect(() => {
     // Clear any test user data and ensure fresh login after subscription
@@ -252,10 +263,10 @@ export default function SubscriptionSuccess() {
               We'll send you a confirmation email once complete.
             </p>
             <Button
-              onClick={() => navigate('/dashboard')}
+              onClick={goToDashboard}
               className="w-full h-12"
             >
-              Continue to Dashboard
+              {user ? 'Continue to Dashboard' : 'Sign In to Continue'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </CardContent>
@@ -372,11 +383,11 @@ export default function SubscriptionSuccess() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={() => navigate('/dashboard')}
+                onClick={goToDashboard}
                 className="flex-1 h-12 text-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                 data-testid="button-go-to-dashboard"
               >
-                Go to Dashboard
+                {user ? 'Go to Dashboard' : 'Sign In to Access Dashboard'}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button

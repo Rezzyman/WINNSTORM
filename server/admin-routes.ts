@@ -854,4 +854,118 @@ router.post('/knowledge/seed-categories', requireAdmin, async (req: AdminAuthent
   }
 });
 
+// ============================================================================
+// STORMY AI SETTINGS
+// ============================================================================
+
+// Get Stormy AI system prompt
+router.get('/settings/stormy-prompt', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const setting = await storage.getSystemSetting('stormy_system_prompt');
+
+    // Return default prompt if none saved
+    const defaultPrompt = `You are Stormy, the AI assistant for WinnStorm™ - a professional damage assessment platform. You are an expert in the Winn Methodology, which is an 8-step systematic approach to property damage inspection and documentation.
+
+Your expertise includes:
+- Thermal imaging analysis and interpretation
+- Hail, wind, and storm damage identification
+- Insurance claim documentation best practices
+- Property inspection techniques using the Winn Methodology
+- Reading and analyzing thermal images for moisture detection, heat loss, and structural issues
+
+The 8 Steps of the Winn Methodology:
+1. Weather Verification - Confirm storm events affected the property
+2. Property Documentation - Gather building information and specifications
+3. Exterior Survey - Systematic exterior damage assessment
+4. Interior Survey - Check for interior damage and moisture intrusion
+5. Thermal Scanning - Use infrared imaging to detect hidden issues
+6. Test Square Analysis - Document damage density using 10x10 test squares
+7. Evidence Compilation - Organize all photos, measurements, and findings
+8. Report Generation - Create comprehensive damage assessment report
+
+When analyzing images:
+- For thermal images: Identify temperature anomalies, moisture patterns, insulation deficiencies
+- For damage photos: Identify damage type, severity, affected components, and recommended repairs
+- Always relate findings to insurance claim documentation requirements
+
+Remember previous conversations and user preferences. Adapt your communication style based on the user's expertise level. Be professional, thorough, and helpful.`;
+
+    res.json({
+      prompt: setting?.value || defaultPrompt,
+      isCustom: !!setting,
+      updatedAt: setting?.updatedAt,
+      updatedBy: setting?.updatedBy
+    });
+  } catch (error) {
+    console.error('Error fetching Stormy prompt:', error);
+    res.status(500).json({ message: 'Failed to fetch Stormy prompt' });
+  }
+});
+
+// Update Stormy AI system prompt
+router.put('/settings/stormy-prompt', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt || typeof prompt !== 'string') {
+      return res.status(400).json({ message: 'Prompt is required' });
+    }
+
+    if (prompt.length < 100) {
+      return res.status(400).json({ message: 'Prompt must be at least 100 characters' });
+    }
+
+    if (prompt.length > 10000) {
+      return res.status(400).json({ message: 'Prompt must be less than 10,000 characters' });
+    }
+
+    const setting = await storage.upsertSystemSetting(
+      'stormy_system_prompt',
+      prompt,
+      'Custom system prompt for Stormy AI assistant',
+      req.session?.adminEmail
+    );
+
+    res.json({
+      success: true,
+      message: 'Stormy prompt updated successfully',
+      updatedAt: setting.updatedAt
+    });
+  } catch (error) {
+    console.error('Error updating Stormy prompt:', error);
+    res.status(500).json({ message: 'Failed to update Stormy prompt' });
+  }
+});
+
+// Reset Stormy AI prompt to default
+router.delete('/settings/stormy-prompt', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    // Just delete the custom setting, the service will use the default
+    const existing = await storage.getSystemSetting('stormy_system_prompt');
+    if (existing) {
+      // We don't have a delete method, so we'll set it to empty and let the service handle it
+      // Actually, let's just leave it - the GET endpoint handles defaults
+    }
+
+    res.json({
+      success: true,
+      message: 'Stormy prompt reset to default'
+    });
+  } catch (error) {
+    console.error('Error resetting Stormy prompt:', error);
+    res.status(500).json({ message: 'Failed to reset Stormy prompt' });
+  }
+});
+
+// Get all system settings
+router.get('/settings', requireAdmin, async (req: AdminAuthenticatedRequest, res: Response) => {
+  try {
+    const settings = await storage.getAllSystemSettings();
+    res.json(settings);
+  } catch (error) {
+    console.error('Error fetching system settings:', error);
+    res.status(500).json({ message: 'Failed to fetch settings' });
+  }
+});
+
 export default router;

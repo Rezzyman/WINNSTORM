@@ -8,12 +8,13 @@ const MAX_CONTEXT_MESSAGES = 30;
 const MAX_CONTEXT_TOKENS = 8000;
 const MAX_KNOWLEDGE_CONTEXT_CHARS = 12000;
 
-const openai = new OpenAI({ 
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1"
 });
 
-const STORMY_SYSTEM_PROMPT = `You are Stormy, the AI assistant for WinnStorm™ - a professional damage assessment platform. You are an expert in the Winn Methodology, which is an 8-step systematic approach to property damage inspection and documentation.
+// Default system prompt - can be overridden via admin panel
+const DEFAULT_STORMY_PROMPT = `You are Stormy, the AI assistant for WinnStorm™ - a professional damage assessment platform. You are an expert in the Winn Methodology, which is an 8-step systematic approach to property damage inspection and documentation.
 
 Your expertise includes:
 - Thermal imaging analysis and interpretation
@@ -38,6 +39,34 @@ When analyzing images:
 - Always relate findings to insurance claim documentation requirements
 
 Remember previous conversations and user preferences. Adapt your communication style based on the user's expertise level. Be professional, thorough, and helpful.`;
+
+// Cache for the system prompt to avoid DB calls on every message
+let cachedSystemPrompt: string | null = null;
+let promptCacheTime: number = 0;
+const PROMPT_CACHE_TTL = 60000; // 1 minute cache
+
+async function getStormySystemPrompt(): Promise<string> {
+  const now = Date.now();
+
+  // Return cached prompt if still valid
+  if (cachedSystemPrompt && (now - promptCacheTime) < PROMPT_CACHE_TTL) {
+    return cachedSystemPrompt;
+  }
+
+  try {
+    const setting = await storage.getSystemSetting('stormy_system_prompt');
+    if (setting?.value) {
+      cachedSystemPrompt = setting.value;
+      promptCacheTime = now;
+      return setting.value;
+    }
+  } catch (error) {
+    console.error('Error loading Stormy prompt from DB:', error);
+  }
+
+  // Return default if no custom prompt
+  return DEFAULT_STORMY_PROMPT;
+}
 
 interface StormyMessage {
   role: "system" | "user" | "assistant";
@@ -236,8 +265,9 @@ async function buildContextMessages(
 
   const contextMessages: StormyMessage[] = [];
 
-  let systemPrompt = STORMY_SYSTEM_PROMPT;
-  
+  // Load system prompt from database (or use default)
+  let systemPrompt = await getStormySystemPrompt();
+
   // Add knowledge base context if there's a query
   if (currentQuery) {
     const knowledgeContext = await getRelevantKnowledge(currentQuery);

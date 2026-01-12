@@ -2379,3 +2379,23 @@ export const insertTeamCredentialsSchema = createInsertSchema(teamCredentials).o
 
 export type TeamCredentials = typeof teamCredentials.$inferSelect;
 export type InsertTeamCredentials = z.infer<typeof insertTeamCredentialsSchema>;
+
+// System Settings - Store configurable settings like Stormy AI prompt
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedBy: text("updated_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type SystemSettings = typeof systemSettings.$inferSelect;
+export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
