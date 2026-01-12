@@ -7,10 +7,12 @@ const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
 });
 
-// Voice: Adam - confident, professional male voice
-// Personality: Calm, authoritative, dryly clever
-export const STORMY_VOICE_ID = "pNInz6obpgDQGcFmaJgB";
-export const ELEVEN_LABS_MODEL = "eleven_multilingual_v2";
+// Voice: Jedidiah - confident, authoritative male voice
+// Personality: Calm, professional, dryly clever
+export const STORMY_VOICE_ID = "Cb8NLd0sUB8jI4MW2f9M";
+
+// Use turbo model for faster response times (2-3x faster than multilingual)
+export const ELEVEN_LABS_MODEL = "eleven_turbo_v2_5";
 
 // Voice settings tuned for Stormy's confident, calm demeanor
 export const STORMY_VOICE_SETTINGS = {
@@ -111,6 +113,7 @@ export async function processVoiceMessage(
     conversationId,
     attachments,
     contextType: imageUrl ? "damage" : "general",
+    voiceMode: true, // Use faster model for voice interactions
   });
 
   const audioResponseBuffer = await textToSpeech(result.message.content);

@@ -4,6 +4,8 @@ import type { AIConversation, AIMessage, AIMemory, InsertAIConversation, InsertA
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const STORMY_MODEL = "gpt-5";
+// Fast model for voice interactions - lower latency, still capable
+const STORMY_VOICE_MODEL = "gpt-4o-mini";
 const MAX_CONTEXT_MESSAGES = 30;
 const MAX_CONTEXT_TOKENS = 8000;
 const MAX_KNOWLEDGE_CONTEXT_CHARS = 12000;
@@ -81,6 +83,7 @@ export interface SendMessageOptions {
   propertyId?: number;
   inspectionId?: number;
   contextType?: string;
+  voiceMode?: boolean; // Use faster model for voice interactions
 }
 
 export interface StormyResponse {
@@ -328,7 +331,10 @@ async function buildContextMessages(
 }
 
 export async function sendMessage(options: SendMessageOptions): Promise<StormyResponse> {
-  const { userId, message, attachments, propertyId, inspectionId, contextType } = options;
+  const { userId, message, attachments, propertyId, inspectionId, contextType, voiceMode } = options;
+
+  // Use faster model for voice interactions
+  const modelToUse = voiceMode ? STORMY_VOICE_MODEL : STORMY_MODEL;
   
   const startTime = Date.now();
 
@@ -384,9 +390,9 @@ export async function sendMessage(options: SendMessageOptions): Promise<StormyRe
 
   try {
     const response = await openai.chat.completions.create({
-      model: STORMY_MODEL,
+      model: modelToUse,
       messages: messagesForAPI as any,
-      max_completion_tokens: 2048,
+      max_completion_tokens: voiceMode ? 512 : 2048, // Shorter responses for voice
     });
 
     const assistantContent = response.choices[0]?.message?.content || "I apologize, I couldn't generate a response. Please try again.";
@@ -396,7 +402,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<StormyRe
       conversationId,
       role: 'assistant',
       content: assistantContent,
-      model: STORMY_MODEL,
+      model: modelToUse,
       attachments: null,
       metadata: {
         promptTokens: response.usage?.prompt_tokens || 0,
