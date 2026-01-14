@@ -137,8 +137,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Serve the app - use PORT env var or default to 3000 for local dev
-  const port = parseInt(process.env.PORT || "3000", 10);
+  // Serve the app - use PORT env var or default to 5000 for Replit
+  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
