@@ -11,8 +11,11 @@ const elevenlabs = new ElevenLabsClient({
 // Personality: Calm, professional, dryly clever
 export const STORMY_VOICE_ID = "Cb8NLd0sUB8jI4MW2f9M";
 
-// Use turbo model for faster response times (2-3x faster than multilingual)
-export const ELEVEN_LABS_MODEL = "eleven_turbo_v2_5";
+// Use flash model for fastest response times
+export const ELEVEN_LABS_MODEL = "eleven_flash_v2_5";
+
+// Minimal voice prompt for fast responses
+const VOICE_SYSTEM_PROMPT = `You are Stormy, a confident roof damage expert. Keep responses under 2 sentences. Be direct, professional, and brief. No markdown.`;
 
 // Voice settings tuned for Stormy's confident, calm demeanor
 export const STORMY_VOICE_SETTINGS = {
@@ -97,30 +100,45 @@ export async function processVoiceMessage(
   response: string;
   audioBuffer: Buffer;
 }> {
-  const stormyService = await import("./stormy-ai-service");
-
+  // Fast path: Direct OpenAI call with minimal prompt (skips DB, memory, etc.)
   const { text: transcription } = await speechToText(audioBuffer, {
-    prompt: "This is a damage assessment inspection conversation about roofs, hail damage, thermal imaging, and the Winn Methodology.",
+    prompt: "Roof damage, hail, thermal imaging, Winn Methodology.",
   });
 
-  const attachments = imageUrl
-    ? [{ type: "image" as const, url: imageUrl }]
-    : undefined;
+  // Build messages for fast response
+  const messages: Array<{role: "system" | "user"; content: any}> = [
+    { role: "system", content: VOICE_SYSTEM_PROMPT },
+  ];
 
-  const result = await stormyService.sendMessage({
-    userId,
-    message: transcription,
-    conversationId,
-    attachments,
-    contextType: imageUrl ? "damage" : "general",
-    voiceMode: true, // Use faster model for voice interactions
+  // If image provided, include it
+  if (imageUrl) {
+    messages.push({
+      role: "user",
+      content: [
+        { type: "text", text: transcription },
+        { type: "image_url", image_url: { url: imageUrl } }
+      ]
+    });
+  } else {
+    messages.push({ role: "user", content: transcription });
+  }
+
+  // Direct OpenAI call - fastest path
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: messages as any,
+    max_tokens: 150, // Very short responses for voice
+    temperature: 0.7,
   });
 
-  const audioResponseBuffer = await textToSpeech(result.message.content);
+  const response = completion.choices[0]?.message?.content || "I didn't catch that. Try again.";
+
+  // Generate speech
+  const audioResponseBuffer = await textToSpeech(response);
 
   return {
     transcription,
-    response: result.message.content,
+    response,
     audioBuffer: audioResponseBuffer,
   };
 }
