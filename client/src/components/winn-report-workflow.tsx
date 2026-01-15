@@ -1194,9 +1194,9 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
       </div>
 
       {/* Main Content Grid: Workflow Steps + AI Assistant */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Workflow Content - Takes 2/3 of the width */}
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
           <Card className="bg-card border-border shadow-lg">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center">
@@ -1244,7 +1244,7 @@ export const WinnReportWorkflow = ({ propertyId, onComplete }: WinnReportWorkflo
         </div>
 
         {/* AI Assistant Panel - Takes 1/3 of the width */}
-        <div className="xl:col-span-1">
+        <div className="lg:col-span-1">
           <div className="sticky top-6 space-y-4">
             {/* Stormy AI Chat */}
             <Card className="border-orange-500/20 bg-background/50 backdrop-blur-sm shadow-xl overflow-hidden">
