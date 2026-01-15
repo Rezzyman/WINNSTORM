@@ -1310,15 +1310,23 @@ Keep the tone professional and technical but accessible.`;
   });
 
   // Stripe subscription routes
-  app.post("/api/create-subscription", async (req, res) => {
+  app.post("/api/create-subscription", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       // Prefer testing keys for development, fall back to production keys
       const stripeSecretKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
-      
+
       if (!stripeSecretKey) {
         return res.status(500).json({ message: "Stripe is not configured" });
       }
-      
+
       // Log which key type is being used (without exposing the key)
       const keyType = stripeSecretKey.startsWith('sk_test_') ? 'test' : 'live';
       console.log(`Using Stripe ${keyType} key for subscription creation`);
@@ -1327,7 +1335,7 @@ Keep the tone professional and technical but accessible.`;
         apiVersion: '2025-10-29.clover',
       });
 
-      const { plan, email } = req.body;
+      const { plan } = req.body;
 
       // Map plan names to Stripe price IDs (configured in Stripe Dashboard)
       // For development without price IDs, we'll create ad-hoc prices
@@ -1339,22 +1347,22 @@ Keep the tone professional and technical but accessible.`;
 
       // Plan pricing in cents for development mode
       const planPricing: Record<string, number> = {
-        'starter': 4900,        // $49/month
-        'professional': 14900,  // $149/month
-        'enterprise': 49900     // $499/month
+        'starter': 29900,       // $299/month (matches frontend pricing)
+        'professional': 59900,  // $599/month (matches frontend pricing)
+        'enterprise': 99900     // $999/month
       };
 
       const planLower = plan?.toLowerCase() || 'starter';
       let priceId = priceMap[planLower];
-      
+
       // If no price ID is configured, create an ad-hoc price for development
       if (!priceId) {
         console.log(`No Stripe price ID for plan: ${plan}. Creating ad-hoc price for development.`);
-        
+
         // First create or get a product
         const products = await stripe.products.list({ limit: 1 });
         let productId: string;
-        
+
         if (products.data.length > 0) {
           productId = products.data[0].id;
         } else {
@@ -1364,33 +1372,57 @@ Keep the tone professional and technical but accessible.`;
           });
           productId = product.id;
         }
-        
+
         // Create a price for this subscription
         const price = await stripe.prices.create({
           product: productId,
-          unit_amount: planPricing[planLower] || 4900,
+          unit_amount: planPricing[planLower] || 29900,
           currency: 'usd',
           recurring: { interval: 'month' },
         });
         priceId = price.id;
       }
 
-      // Create a customer with email if provided
-      const customer = await stripe.customers.create({
-        email: email || undefined,
-        metadata: {
-          plan: plan,
-        },
-      });
+      // Use existing Stripe customer ID or create new one
+      let customerId = user.stripeCustomerId;
+
+      if (!customerId) {
+        // Create a new Stripe customer linked to the user
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: {
+            userId: userId.toString(),
+            plan: planLower,
+          },
+        });
+        customerId = customer.id;
+
+        // Save Stripe customer ID to user
+        await storage.updateUser(userId, { stripeCustomerId: customerId });
+        console.log(`Created Stripe customer ${customerId} for user ${userId}`);
+      } else {
+        // Update existing customer metadata with new plan
+        await stripe.customers.update(customerId, {
+          metadata: {
+            userId: userId.toString(),
+            plan: planLower,
+          },
+        });
+        console.log(`Using existing Stripe customer ${customerId} for user ${userId}`);
+      }
 
       // Create a PaymentIntent for the subscription using the invoice approach
       // First create an incomplete subscription, then finalize the invoice
       const subscription = await stripe.subscriptions.create({
-        customer: customer.id,
+        customer: customerId,
         items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
-        payment_settings: { 
+        payment_settings: {
           save_default_payment_method: 'on_subscription',
+        },
+        metadata: {
+          userId: userId.toString(),
+          plan: planLower,
         },
         expand: ['latest_invoice.payment_intent'],
       });
@@ -1434,12 +1466,14 @@ Keep the tone professional and technical but accessible.`;
       // Validate we have a proper PaymentIntent with client_secret
       if (!paymentIntent || typeof paymentIntent === 'string' || !paymentIntent.client_secret) {
         // Fall back to creating a setup intent for the customer
-        console.log('Creating setup intent as fallback for customer:', customer.id);
+        console.log('Creating setup intent as fallback for customer:', customerId);
         const setupIntent = await stripe.setupIntents.create({
-          customer: customer.id,
+          customer: customerId,
           payment_method_types: ['card'],
           metadata: {
             subscriptionId: subscription.id,
+            userId: userId.toString(),
+            plan: planLower,
           },
         });
 
@@ -1456,10 +1490,167 @@ Keep the tone professional and technical but accessible.`;
       });
     } catch (error) {
       console.error('Stripe subscription creation error:', error);
-      res.status(500).json({ 
-        message: "Failed to create subscription", 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: "Failed to create subscription",
+        error: (error as Error).message
       });
+    }
+  });
+
+  // Stripe webhook endpoint for subscription lifecycle events
+  app.post("/api/stripe/webhook", async (req, res) => {
+    const stripeSecretKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripeSecretKey) {
+      console.error('Stripe webhook: Missing Stripe secret key');
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    if (!webhookSecret) {
+      console.error('Stripe webhook: Missing webhook secret - set STRIPE_WEBHOOK_SECRET');
+      return res.status(500).json({ error: 'Webhook secret not configured' });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-10-29.clover' });
+    const sig = req.headers['stripe-signature'] as string;
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log(`Stripe webhook received: ${event.type}`);
+
+    // Helper function to get tier from price ID
+    const getTierFromPriceId = (priceId: string | undefined): string | null => {
+      if (!priceId) return null;
+      const priceToTier: Record<string, string> = {
+        [process.env.STRIPE_PRICE_STARTER || '']: 'starter',
+        [process.env.STRIPE_PRICE_PROFESSIONAL || '']: 'professional',
+        [process.env.STRIPE_PRICE_ENTERPRISE || '']: 'enterprise',
+      };
+      return priceToTier[priceId] || null;
+    };
+
+    try {
+      switch (event.type) {
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated': {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+
+          const user = await storage.getUserByStripeCustomerId(customerId);
+          if (!user) {
+            console.log('No user found for Stripe customer:', customerId);
+            break;
+          }
+
+          const priceId = subscription.items.data[0]?.price?.id;
+          let tier = getTierFromPriceId(priceId);
+
+          // If no tier from price ID, try to get from subscription metadata
+          if (!tier && subscription.metadata?.plan) {
+            tier = subscription.metadata.plan.toLowerCase();
+          }
+
+          await storage.updateUser(user.id, {
+            subscriptionId: subscription.id,
+            subscriptionStatus: subscription.status,
+            subscriptionTier: tier,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          });
+
+          console.log(`Updated subscription for user ${user.id}: status=${subscription.status}, tier=${tier}`);
+          break;
+        }
+
+        case 'customer.subscription.deleted': {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+
+          const user = await storage.getUserByStripeCustomerId(customerId);
+          if (!user) {
+            console.log('No user found for Stripe customer:', customerId);
+            break;
+          }
+
+          await storage.updateUser(user.id, {
+            subscriptionStatus: 'canceled',
+            subscriptionTier: null,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          });
+
+          console.log(`Subscription canceled for user ${user.id}`);
+          break;
+        }
+
+        case 'invoice.payment_succeeded': {
+          const invoice = event.data.object as Stripe.Invoice;
+          if (!invoice.subscription) break;
+
+          const customerId = invoice.customer as string;
+          const user = await storage.getUserByStripeCustomerId(customerId);
+
+          if (user) {
+            await storage.updateUser(user.id, {
+              subscriptionStatus: 'active',
+            });
+            console.log(`Payment succeeded for user ${user.id}`);
+          }
+          break;
+        }
+
+        case 'invoice.payment_failed': {
+          const invoice = event.data.object as Stripe.Invoice;
+          const customerId = invoice.customer as string;
+
+          const user = await storage.getUserByStripeCustomerId(customerId);
+          if (user) {
+            await storage.updateUser(user.id, {
+              subscriptionStatus: 'past_due',
+            });
+            console.log(`Payment failed for user ${user.id}, marked as past_due`);
+          }
+          break;
+        }
+
+        default:
+          console.log(`Unhandled webhook event type: ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook handler error:', error);
+      res.status(500).json({ error: 'Webhook handler failed' });
+    }
+  });
+
+  // Subscription status endpoint
+  app.get("/api/subscription/status", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req, res);
+      if (!userId) return;
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        hasSubscription: !!user.subscriptionId,
+        status: user.subscriptionStatus || null,
+        tier: user.subscriptionTier || null,
+        currentPeriodEnd: user.currentPeriodEnd || null,
+        stripeCustomerId: user.stripeCustomerId || null,
+      });
+    } catch (error) {
+      console.error('Subscription status error:', error);
+      res.status(500).json({ message: "Failed to fetch subscription status" });
     }
   });
 

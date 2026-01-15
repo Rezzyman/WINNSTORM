@@ -26,6 +26,7 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   
@@ -181,6 +182,16 @@ export class DatabaseStorage implements IStorage {
       return updatedUser as User || undefined;
     } catch (error) {
       console.error('Error updating user:', error);
+      return undefined;
+    }
+  }
+
+  async getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.stripeCustomerId, stripeCustomerId));
+      return user as User || undefined;
+    } catch (error) {
+      console.error('Error fetching user by Stripe customer ID:', error);
       return undefined;
     }
   }

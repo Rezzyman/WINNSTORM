@@ -295,3 +295,144 @@ export async function requireAdmin(req: AdminAuthenticatedRequest, res: Response
 export function isAdminEmail(email: string): boolean {
   return ADMIN_ALLOWLIST.includes(email.toLowerCase());
 }
+
+// Subscription tier types and middleware
+export type SubscriptionTier = 'starter' | 'professional' | 'enterprise';
+
+const TIER_HIERARCHY: Record<SubscriptionTier, number> = {
+  'starter': 1,
+  'professional': 2,
+  'enterprise': 3,
+};
+
+export interface SubscriptionInfo {
+  tier: SubscriptionTier | null;
+  status: string | null;
+  currentPeriodEnd: Date | null;
+}
+
+export interface SubscriptionAuthenticatedRequest extends AuthenticatedRequest {
+  subscription?: SubscriptionInfo;
+}
+
+/**
+ * Middleware to require an active subscription with optional minimum tier
+ * @param minimumTier - Optional minimum tier required (starter, professional, enterprise)
+ * @returns Express middleware function
+ */
+export function requireSubscription(minimumTier?: SubscriptionTier) {
+  return async (req: SubscriptionAuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        message: 'Authentication required',
+        code: 'AUTH_REQUIRED',
+      });
+      return;
+    }
+
+    const idToken = authHeader.substring(7);
+
+    try {
+      const decodedToken = await verifyFirebaseToken(idToken);
+      if (!decodedToken) {
+        res.status(401).json({
+          message: 'Invalid or expired token',
+          code: 'INVALID_TOKEN',
+        });
+        return;
+      }
+
+      const dbUserId = await getOrCreateDbUser(decodedToken);
+      if (!dbUserId) {
+        res.status(500).json({
+          message: 'Failed to verify user',
+          code: 'USER_VERIFICATION_FAILED',
+        });
+        return;
+      }
+
+      const user = await storage.getUser(dbUserId);
+      if (!user) {
+        res.status(404).json({
+          message: 'User not found',
+          code: 'USER_NOT_FOUND',
+        });
+        return;
+      }
+
+      // Attach user info to request
+      req.user = {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        name: decodedToken.name,
+        picture: decodedToken.picture,
+        dbUserId: dbUserId,
+      };
+
+      // Attach subscription info to request
+      const subscriptionTier = user.subscriptionTier as SubscriptionTier | null;
+      const subscriptionStatus = user.subscriptionStatus;
+      const currentPeriodEnd = user.currentPeriodEnd;
+
+      req.subscription = {
+        tier: subscriptionTier,
+        status: subscriptionStatus,
+        currentPeriodEnd: currentPeriodEnd,
+      };
+
+      // Check if subscription is active
+      const isActive = subscriptionStatus === 'active' || subscriptionStatus === 'trialing';
+
+      // If no minimum tier specified, just require any active subscription
+      if (!minimumTier) {
+        if (isActive && subscriptionTier) {
+          next();
+          return;
+        }
+        res.status(403).json({
+          message: 'Active subscription required',
+          code: 'SUBSCRIPTION_REQUIRED',
+          currentTier: subscriptionTier,
+          currentStatus: subscriptionStatus,
+        });
+        return;
+      }
+
+      // Check for active subscription
+      if (!isActive || !subscriptionTier) {
+        res.status(403).json({
+          message: 'Active subscription required',
+          code: 'SUBSCRIPTION_REQUIRED',
+          requiredTier: minimumTier,
+          currentTier: subscriptionTier,
+          currentStatus: subscriptionStatus,
+        });
+        return;
+      }
+
+      // Check tier hierarchy
+      const userTierLevel = TIER_HIERARCHY[subscriptionTier] || 0;
+      const requiredTierLevel = TIER_HIERARCHY[minimumTier];
+
+      if (userTierLevel < requiredTierLevel) {
+        res.status(403).json({
+          message: `This feature requires ${minimumTier} tier or higher`,
+          code: 'TIER_INSUFFICIENT',
+          requiredTier: minimumTier,
+          currentTier: subscriptionTier,
+        });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Subscription auth error:', error);
+      res.status(500).json({
+        message: 'Authentication error',
+        code: 'AUTH_ERROR',
+      });
+    }
+  };
+}

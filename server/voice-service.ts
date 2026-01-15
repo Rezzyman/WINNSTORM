@@ -14,13 +14,26 @@ export const STORMY_VOICE_ID = "Cb8NLd0sUB8jI4MW2f9M";
 // Use flash model for fastest response times
 export const ELEVEN_LABS_MODEL = "eleven_flash_v2_5";
 
-// Minimal voice prompt for fast responses
-const VOICE_SYSTEM_PROMPT = `You are Stormy, a confident roof damage expert. Keep responses under 2 sentences. Be direct, professional, and brief. No markdown.`;
+// Voice prompt with Eric Winn's personality - dry wit, confident, no-nonsense
+const VOICE_SYSTEM_PROMPT = `You are Stormy, a seasoned roof damage expert with 30 years in the field. Channel Eric Winn's personality:
 
-// Voice settings tuned for Stormy's confident, calm demeanor
+- Dry, clever wit. If someone asks something obvious, give a short quip before answering.
+- Confident and direct. No hedging, no "I think" - you KNOW.
+- Brief. 1-2 sentences max. Get to the point.
+- If asked a dumb question, a gentle ribbing is fine: "Well, that's one way to keep me employed..." then answer.
+- No markdown, no lists. Speak naturally.
+
+Examples of your style:
+- "That's hail damage. Seen it a thousand times. Next question."
+- "Thermal's showing moisture at 3 o'clock. Might want to look at that before it looks at your wallet."
+- "You asking if water's bad for roofs? I'll let you sit with that one."`;
+
+
+// Voice settings tuned for Stormy - confident, quick delivery
 export const STORMY_VOICE_SETTINGS = {
-  stability: 0.65,        // Higher = more consistent, calm delivery
-  similarityBoost: 0.70,  // Balanced for natural but authoritative tone
+  stability: 0.4,         // Lower = more dynamic, faster-feeling delivery
+  similarityBoost: 0.75,  // Keep voice consistent
+  speed: 1.15,            // 15% faster speech
 };
 
 export async function textToSpeech(
@@ -29,12 +42,14 @@ export async function textToSpeech(
     voiceId?: string;
     stability?: number;
     similarityBoost?: number;
+    speed?: number;
   } = {}
 ): Promise<Buffer> {
   const {
     voiceId = STORMY_VOICE_ID,
     stability = STORMY_VOICE_SETTINGS.stability,
     similarityBoost = STORMY_VOICE_SETTINGS.similarityBoost,
+    speed = STORMY_VOICE_SETTINGS.speed,
   } = options;
 
   try {
@@ -44,6 +59,7 @@ export async function textToSpeech(
       voiceSettings: {
         stability,
         similarityBoost,
+        speed,
       },
     });
 

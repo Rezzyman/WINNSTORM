@@ -44,6 +44,9 @@ if (SITE_PASSWORD) {
   log('Site password protection enabled (home page only)');
 }
 
+// Stripe webhook needs raw body for signature verification - must be before express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 

@@ -29,8 +29,12 @@ import {
   insertRiskRegionSchema,
   insertRiskDataExportSchema,
 } from "@shared/schema";
+import { requireAuth, requireSubscription, SubscriptionAuthenticatedRequest } from "./auth";
 
 const router = Router();
+
+// Apply authentication to all innovation routes
+router.use(requireAuth);
 
 // Validation helper
 function validateBody<T>(schema: z.ZodSchema<T>, body: unknown): { success: true; data: T } | { success: false; error: string } {
@@ -90,10 +94,10 @@ router.post("/modules/:moduleId/enable", async (req: Request, res: Response) => 
 });
 
 // ============================================================================
-// PREDICTIVE CLAIM OUTCOME ENGINE
+// PREDICTIVE CLAIM OUTCOME ENGINE (requires Professional tier)
 // ============================================================================
 
-router.post("/claims/outcomes", async (req: Request, res: Response) => {
+router.post("/claims/outcomes", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertClaimOutcomeSchema, req.body);
     if (!validation.success) {
@@ -106,7 +110,7 @@ router.post("/claims/outcomes", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/claims/outcomes", async (req: Request, res: Response) => {
+router.get("/claims/outcomes", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { insurerName, claimType } = req.query;
     const outcomes = await predictiveClaimEngine.getClaimOutcomes({
@@ -119,7 +123,7 @@ router.get("/claims/outcomes", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/claims/predict", async (req: Request, res: Response) => {
+router.post("/claims/predict", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { projectId, insurerName, claimData } = req.body;
     const prediction = await predictiveClaimEngine.predictClaimOutcome(
@@ -133,7 +137,7 @@ router.post("/claims/predict", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/claims/predictions/:projectId", async (req: Request, res: Response) => {
+router.get("/claims/predictions/:projectId", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const predictions = await predictiveClaimEngine.getPredictionHistory(
       parseInt(req.params.projectId)
@@ -144,7 +148,7 @@ router.get("/claims/predictions/:projectId", async (req: Request, res: Response)
   }
 });
 
-router.get("/claims/insurer-patterns", async (req: Request, res: Response) => {
+router.get("/claims/insurer-patterns", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { insurerName } = req.query;
     const patterns = await predictiveClaimEngine.getInsurerPatterns(
@@ -157,10 +161,10 @@ router.get("/claims/insurer-patterns", async (req: Request, res: Response) => {
 });
 
 // ============================================================================
-// STORMY FIELD CO-PILOT
+// STORMY FIELD CO-PILOT (requires Starter tier)
 // ============================================================================
 
-router.post("/copilot/sessions", async (req: Request, res: Response) => {
+router.post("/copilot/sessions", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertFieldCopilotSessionSchema, req.body);
     if (!validation.success) {
@@ -173,7 +177,7 @@ router.post("/copilot/sessions", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/copilot/sessions/active/:userId", async (req: Request, res: Response) => {
+router.get("/copilot/sessions/active/:userId", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const session = await fieldCopilotService.getActiveSession(req.params.userId);
     res.json(session);
@@ -182,7 +186,7 @@ router.get("/copilot/sessions/active/:userId", async (req: Request, res: Respons
   }
 });
 
-router.post("/copilot/sessions/:sessionId/end", async (req: Request, res: Response) => {
+router.post("/copilot/sessions/:sessionId/end", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const session = await fieldCopilotService.endSession(parseInt(req.params.sessionId));
     res.json(session);
@@ -191,7 +195,7 @@ router.post("/copilot/sessions/:sessionId/end", async (req: Request, res: Respon
   }
 });
 
-router.post("/copilot/guidance", async (req: Request, res: Response) => {
+router.post("/copilot/guidance", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const { sessionId, visualContext, currentStep } = req.body;
     const guidance = await fieldCopilotService.getGuidanceForContext(
@@ -205,7 +209,7 @@ router.post("/copilot/guidance", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/copilot/wearables", async (req: Request, res: Response) => {
+router.post("/copilot/wearables", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertWearableDeviceSchema, req.body);
     if (!validation.success) {
@@ -218,7 +222,7 @@ router.post("/copilot/wearables", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/copilot/wearables/:userId", async (req: Request, res: Response) => {
+router.get("/copilot/wearables/:userId", requireSubscription('starter'), async (req: Request, res: Response) => {
   try {
     const devices = await fieldCopilotService.getUserWearables(req.params.userId);
     res.json(devices);
@@ -228,10 +232,10 @@ router.get("/copilot/wearables/:userId", async (req: Request, res: Response) => 
 });
 
 // ============================================================================
-// SMART SENSOR NETWORK (IoT)
+// SMART SENSOR NETWORK (IoT) (requires Professional tier)
 // ============================================================================
 
-router.post("/iot/devices", async (req: Request, res: Response) => {
+router.post("/iot/devices", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertIotDeviceSchema, req.body);
     if (!validation.success) {
@@ -244,7 +248,7 @@ router.post("/iot/devices", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/iot/devices/property/:propertyId", async (req: Request, res: Response) => {
+router.get("/iot/devices/property/:propertyId", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const devices = await iotSensorService.getPropertyDevices(
       parseInt(req.params.propertyId)
@@ -255,7 +259,7 @@ router.get("/iot/devices/property/:propertyId", async (req: Request, res: Respon
   }
 });
 
-router.post("/iot/readings", async (req: Request, res: Response) => {
+router.post("/iot/readings", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertSensorReadingSchema, req.body);
     if (!validation.success) {
@@ -268,7 +272,7 @@ router.post("/iot/readings", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/iot/readings/:deviceId", async (req: Request, res: Response) => {
+router.get("/iot/readings/:deviceId", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const hours = parseInt(req.query.hours as string) || 24;
     const readings = await iotSensorService.getDeviceReadings(
@@ -281,10 +285,10 @@ router.get("/iot/readings/:deviceId", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/iot/alerts", async (req: Request, res: Response) => {
+router.get("/iot/alerts", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
-    const propertyId = req.query.propertyId 
-      ? parseInt(req.query.propertyId as string) 
+    const propertyId = req.query.propertyId
+      ? parseInt(req.query.propertyId as string)
       : undefined;
     const alerts = await iotSensorService.getUnacknowledgedAlerts(propertyId);
     res.json(alerts);
@@ -293,7 +297,7 @@ router.get("/iot/alerts", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/iot/alerts/:alertId/acknowledge", async (req: Request, res: Response) => {
+router.post("/iot/alerts/:alertId/acknowledge", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { acknowledgedBy } = req.body;
     const alert = await iotSensorService.acknowledgeAlert(
@@ -307,10 +311,10 @@ router.post("/iot/alerts/:alertId/acknowledge", async (req: Request, res: Respon
 });
 
 // ============================================================================
-// DRONE INTEGRATION
+// DRONE INTEGRATION (requires Professional tier)
 // ============================================================================
 
-router.post("/drones/pilots", async (req: Request, res: Response) => {
+router.post("/drones/pilots", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertDronePilotSchema, req.body);
     if (!validation.success) {
@@ -323,7 +327,7 @@ router.post("/drones/pilots", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/drones/assets", async (req: Request, res: Response) => {
+router.post("/drones/assets", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertDroneAssetSchema, req.body);
     if (!validation.success) {
@@ -336,7 +340,7 @@ router.post("/drones/assets", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/drones/assets/available", async (req: Request, res: Response) => {
+router.get("/drones/assets/available", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const ownerId = req.query.ownerId 
       ? parseInt(req.query.ownerId as string) 
@@ -348,7 +352,7 @@ router.get("/drones/assets/available", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/drones/flights", async (req: Request, res: Response) => {
+router.post("/drones/flights", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertFlightSessionSchema, req.body);
     if (!validation.success) {
@@ -361,7 +365,7 @@ router.post("/drones/flights", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/drones/flights/:sessionId/start", async (req: Request, res: Response) => {
+router.post("/drones/flights/:sessionId/start", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const session = await droneIntegrationService.startFlight(
       parseInt(req.params.sessionId)
@@ -372,7 +376,7 @@ router.post("/drones/flights/:sessionId/start", async (req: Request, res: Respon
   }
 });
 
-router.post("/drones/flights/:sessionId/complete", async (req: Request, res: Response) => {
+router.post("/drones/flights/:sessionId/complete", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const session = await droneIntegrationService.completeFlight(
       parseInt(req.params.sessionId),
@@ -384,13 +388,13 @@ router.post("/drones/flights/:sessionId/complete", async (req: Request, res: Res
   }
 });
 
-router.get("/drones/flights", async (req: Request, res: Response) => {
+router.get("/drones/flights", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
-    const propertyId = req.query.propertyId 
-      ? parseInt(req.query.propertyId as string) 
+    const propertyId = req.query.propertyId
+      ? parseInt(req.query.propertyId as string)
       : undefined;
-    const pilotId = req.query.pilotId 
-      ? parseInt(req.query.pilotId as string) 
+    const pilotId = req.query.pilotId
+      ? parseInt(req.query.pilotId as string)
       : undefined;
     const flights = await droneIntegrationService.getFlightHistory(propertyId, pilotId);
     res.json(flights);
@@ -400,10 +404,10 @@ router.get("/drones/flights", async (req: Request, res: Response) => {
 });
 
 // ============================================================================
-// INSURANCE CARRIER CONSOLE
+// INSURANCE CARRIER CONSOLE (requires Enterprise tier)
 // ============================================================================
 
-router.post("/carriers", async (req: Request, res: Response) => {
+router.post("/carriers", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertCarrierAccountSchema, req.body);
     if (!validation.success) {
@@ -416,7 +420,7 @@ router.post("/carriers", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/carriers/users", async (req: Request, res: Response) => {
+router.post("/carriers/users", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertCarrierUserSchema, req.body);
     if (!validation.success) {
@@ -429,7 +433,7 @@ router.post("/carriers/users", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/carriers/submissions", async (req: Request, res: Response) => {
+router.post("/carriers/submissions", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertCarrierClaimSubmissionSchema, req.body);
     if (!validation.success) {
@@ -442,7 +446,7 @@ router.post("/carriers/submissions", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/carriers/:carrierId/submissions", async (req: Request, res: Response) => {
+router.get("/carriers/:carrierId/submissions", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string;
     const submissions = await carrierConsoleService.getCarrierSubmissions(
@@ -455,7 +459,7 @@ router.get("/carriers/:carrierId/submissions", async (req: Request, res: Respons
   }
 });
 
-router.patch("/carriers/submissions/:submissionId", async (req: Request, res: Response) => {
+router.patch("/carriers/submissions/:submissionId", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const { status, decision, approvedAmount } = req.body;
     const submission = await carrierConsoleService.updateSubmissionStatus(
@@ -470,7 +474,7 @@ router.patch("/carriers/submissions/:submissionId", async (req: Request, res: Re
   }
 });
 
-router.post("/carriers/ai-summary", async (req: Request, res: Response) => {
+router.post("/carriers/ai-summary", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const summary = await carrierConsoleService.generateAISummary(req.body.projectData);
     res.json({ summary });
@@ -480,10 +484,10 @@ router.post("/carriers/ai-summary", async (req: Request, res: Response) => {
 });
 
 // ============================================================================
-// CONTRACTOR MARKETPLACE
+// CONTRACTOR MARKETPLACE (requires Professional tier)
 // ============================================================================
 
-router.post("/contractors", async (req: Request, res: Response) => {
+router.post("/contractors", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertContractorProfileSchema, req.body);
     if (!validation.success) {
@@ -496,7 +500,7 @@ router.post("/contractors", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/contractors/search", async (req: Request, res: Response) => {
+router.get("/contractors/search", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { specialties, serviceArea, minRating } = req.query;
     const contractors = await contractorMarketplaceService.searchContractors({
@@ -510,7 +514,7 @@ router.get("/contractors/search", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/contractors/jobs", async (req: Request, res: Response) => {
+router.post("/contractors/jobs", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertRepairJobSchema, req.body);
     if (!validation.success) {
@@ -523,7 +527,7 @@ router.post("/contractors/jobs", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/contractors/jobs", async (req: Request, res: Response) => {
+router.get("/contractors/jobs", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const jobs = await contractorMarketplaceService.getOpenJobs();
     res.json(jobs);
@@ -532,7 +536,7 @@ router.get("/contractors/jobs", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/contractors/bids", async (req: Request, res: Response) => {
+router.post("/contractors/bids", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertContractorBidSchema, req.body);
     if (!validation.success) {
@@ -545,7 +549,7 @@ router.post("/contractors/bids", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/contractors/jobs/:jobId/bids", async (req: Request, res: Response) => {
+router.get("/contractors/jobs/:jobId/bids", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const bids = await contractorMarketplaceService.getJobBids(
       parseInt(req.params.jobId)
@@ -556,7 +560,7 @@ router.get("/contractors/jobs/:jobId/bids", async (req: Request, res: Response) 
   }
 });
 
-router.post("/contractors/bids/:bidId/accept", async (req: Request, res: Response) => {
+router.post("/contractors/bids/:bidId/accept", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const { jobId } = req.body;
     await contractorMarketplaceService.acceptBid(
@@ -569,7 +573,7 @@ router.post("/contractors/bids/:bidId/accept", async (req: Request, res: Respons
   }
 });
 
-router.post("/contractors/referrals", async (req: Request, res: Response) => {
+router.post("/contractors/referrals", requireSubscription('professional'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertReferralFeeSchema, req.body);
     if (!validation.success) {
@@ -583,10 +587,10 @@ router.post("/contractors/referrals", async (req: Request, res: Response) => {
 });
 
 // ============================================================================
-// REGIONAL RISK INTELLIGENCE
+// REGIONAL RISK INTELLIGENCE (requires Enterprise tier)
 // ============================================================================
 
-router.post("/risk/regions", async (req: Request, res: Response) => {
+router.post("/risk/regions", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertRiskRegionSchema, req.body);
     if (!validation.success) {
@@ -599,7 +603,7 @@ router.post("/risk/regions", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/risk/regions", async (req: Request, res: Response) => {
+router.get("/risk/regions", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const state = req.query.state as string;
     const regions = await riskIntelligenceService.getRegions(state);
@@ -609,7 +613,7 @@ router.get("/risk/regions", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/risk/assessments", async (req: Request, res: Response) => {
+router.post("/risk/assessments", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const { regionId, periodStart, periodEnd } = req.body;
     const assessment = await riskIntelligenceService.calculateRiskAssessment(
@@ -623,7 +627,7 @@ router.post("/risk/assessments", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/risk/assessments/:regionId", async (req: Request, res: Response) => {
+router.get("/risk/assessments/:regionId", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const assessments = await riskIntelligenceService.getRegionRiskAssessments(
       parseInt(req.params.regionId)
@@ -634,7 +638,7 @@ router.get("/risk/assessments/:regionId", async (req: Request, res: Response) =>
   }
 });
 
-router.post("/risk/exports", async (req: Request, res: Response) => {
+router.post("/risk/exports", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const validation = validateBody(insertRiskDataExportSchema, req.body);
     if (!validation.success) {
@@ -647,7 +651,7 @@ router.post("/risk/exports", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/risk/exports/:carrierId", async (req: Request, res: Response) => {
+router.get("/risk/exports/:carrierId", requireSubscription('enterprise'), async (req: Request, res: Response) => {
   try {
     const exports = await riskIntelligenceService.getCarrierExports(
       parseInt(req.params.carrierId)

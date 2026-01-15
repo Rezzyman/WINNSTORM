@@ -21,6 +21,12 @@ export const users = pgTable("users", {
   onboardingCompleted: boolean("onboarding_completed").default(false),
   isAdmin: boolean("is_admin").default(false), // Admin panel access flag
   createdAt: timestamp("created_at").defaultNow(),
+  // Stripe subscription fields
+  stripeCustomerId: text("stripe_customer_id"),
+  subscriptionId: text("subscription_id"),
+  subscriptionStatus: text("subscription_status"), // 'active', 'trialing', 'past_due', 'canceled', 'unpaid', 'incomplete'
+  subscriptionTier: text("subscription_tier"), // 'starter', 'professional', 'enterprise'
+  currentPeriodEnd: timestamp("current_period_end"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

@@ -28,6 +28,27 @@ export default function SubscriptionSuccess() {
     }
   };
 
+  // Sync subscription status with backend after successful payment
+  const syncSubscriptionStatus = async () => {
+    if (!user) return;
+
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/subscription/status', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Subscription synced:', data);
+      }
+    } catch (error) {
+      console.error('Failed to sync subscription status:', error);
+    }
+  };
+
   useEffect(() => {
     // Clear any test user data and ensure fresh login after subscription
     localStorage.removeItem('testUser');
@@ -171,6 +192,13 @@ export default function SubscriptionSuccess() {
 
     verifyPayment();
   }, []);
+
+  // Sync subscription status when payment succeeds
+  useEffect(() => {
+    if (paymentStatus === 'succeeded' && user) {
+      syncSubscriptionStatus();
+    }
+  }, [paymentStatus, user]);
 
   // Loading state
   if (paymentStatus === 'loading') {
