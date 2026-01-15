@@ -2,6 +2,13 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb, doublePrecis
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session table (managed by connect-pg-simple, included here to prevent Drizzle from deleting it)
+export const userSessions = pgTable("user_sessions", {
+  sid: text("sid").primaryKey(),
+  sess: jsonb("sess").notNull(),
+  expire: timestamp("expire", { precision: 6 }).notNull(),
+});
+
 // User Schema - Updated for WinnStorm™ Consultant Management
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
