@@ -21,6 +21,8 @@ import {
 import innovationRoutes from './innovation-routes';
 import adminRoutes from './admin-routes';
 import teamRoutes from './team-routes';
+import { sendReportEmail } from './email-service';
+import { generateWinnReport, generateExecutiveSummary } from './pdf-report-service';
 
 function getAuthenticatedUserId(req: AuthenticatedRequest, res: Response): number | null {
   if (!req.user?.dbUserId) {
@@ -455,46 +457,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = getAuthenticatedUserId(req, res);
       if (!userId) return;
-      
+
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
         return res.status(400).json({ message: "Invalid scan ID" });
       }
-      
-      const { email } = req.body;
+
+      const { email, recipientName } = req.body;
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
-      
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
       // Get the scan
       const scan = await storage.getScan(scanId);
       if (!scan) {
         return res.status(404).json({ message: "Scan not found" });
       }
-      
-      // Create a report
+
+      // Verify ownership
+      if (scan.userId !== userId) {
+        return res.status(403).json({ message: "Access denied - you do not own this scan" });
+      }
+
+      // Get the property
+      const property = await storage.getProperty(scan.propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      // Generate executive summary
+      const executiveSummary = await generateExecutiveSummary({ property, scan });
+
+      // Build thermal analysis if available
+      let thermalAnalysis = undefined;
+      if (scan.thermalImageUrl && scan.issues && scan.issues.length > 0) {
+        thermalAnalysis = {
+          overallAssessment: `Thermal analysis detected ${scan.issues.length} issue(s) during the assessment. ` +
+            `${scan.issues.filter(i => i.severity === 'critical').length > 0 ? 'Critical issues requiring immediate attention were identified.' : 'No critical issues were found.'}`,
+          anomalies: scan.issues.map(issue => ({
+            type: issue.title,
+            severity: issue.severity,
+            location: 'See thermal image',
+            description: issue.description,
+          })),
+        };
+      }
+
+      // Generate the PDF report
+      const pdfBuffer = await generateWinnReport({
+        property,
+        scan,
+        executiveSummary,
+        thermalAnalysis,
+      });
+
+      // Send the email with PDF attachment
+      const emailResult = await sendReportEmail(
+        email,
+        recipientName || 'Property Owner',
+        property.address,
+        'Thermal Roof Assessment',
+        pdfBuffer
+      );
+
+      if (!emailResult.success) {
+        console.error('Email send failed:', emailResult.error);
+        return res.status(500).json({
+          message: "Report generated but email delivery failed. Please try again.",
+          error: emailResult.error
+        });
+      }
+
+      // Create a report record
       const reportData = insertReportSchema.parse({
         scanId,
         title: "Thermal Roof Assessment",
-        pdfUrl: "", // In MVP, we don't actually generate a PDF
+        pdfUrl: "", // PDF is sent via email, not stored
         sentTo: email,
         userId: userId
       });
-      
+
       const report = await storage.createReport(reportData);
-      
-      // In a real implementation, you would generate the PDF and send an email here
-      
+
       res.status(201).json({
-        message: "Report sent successfully",
-        report
+        message: "Report generated and sent successfully",
+        report,
+        emailSent: true
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid report data", errors: error.format() });
       }
-      console.error(error);
-      res.status(500).json({ message: "Failed to send report" });
+      console.error('Report send error:', error);
+      res.status(500).json({ message: "Failed to generate and send report" });
     }
   });
 
@@ -521,9 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
-      
-      const { generateWinnReport, generateExecutiveSummary } = await import('./pdf-report-service');
-      
+
       const executiveSummary = await generateExecutiveSummary({ property, scan });
       
       let thermalAnalysis = undefined;
@@ -651,20 +710,20 @@ Keep the tone professional and technical but accessible.`;
       });
     } catch (error) {
       console.error('Error generating AI executive summary:', error);
-      
-      const { generateExecutiveSummary } = await import('./pdf-report-service');
+
+      // Fallback to template-based summary
       const scan = await storage.getScan(parseInt(req.params.scanId));
       const property = scan ? await storage.getProperty(scan.propertyId) : null;
-      
+
       if (scan && property) {
         const fallbackSummary = await generateExecutiveSummary({ property, scan });
-        return res.json({ 
+        return res.json({
           summary: fallbackSummary,
           generatedAt: new Date().toISOString(),
           fallback: true
         });
       }
-      
+
       res.status(500).json({ message: "Failed to generate executive summary" });
     }
   });
@@ -1537,11 +1596,14 @@ Keep the tone professional and technical but accessible.`;
       return priceToTier[priceId] || null;
     };
 
+    // Extended type for subscription with period end (Stripe API returns this but v19 types don't include it)
+    type SubscriptionWithPeriod = Stripe.Subscription & { current_period_end?: number };
+
     try {
       switch (event.type) {
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object as SubscriptionWithPeriod;
           const customerId = subscription.customer as string;
 
           const user = await storage.getUserByStripeCustomerId(customerId);
@@ -1562,7 +1624,9 @@ Keep the tone professional and technical but accessible.`;
             subscriptionId: subscription.id,
             subscriptionStatus: subscription.status,
             subscriptionTier: tier,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            currentPeriodEnd: subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : null,
           });
 
           console.log(`Updated subscription for user ${user.id}: status=${subscription.status}, tier=${tier}`);
@@ -1570,7 +1634,7 @@ Keep the tone professional and technical but accessible.`;
         }
 
         case 'customer.subscription.deleted': {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object as SubscriptionWithPeriod;
           const customerId = subscription.customer as string;
 
           const user = await storage.getUserByStripeCustomerId(customerId);
@@ -1582,7 +1646,9 @@ Keep the tone professional and technical but accessible.`;
           await storage.updateUser(user.id, {
             subscriptionStatus: 'canceled',
             subscriptionTier: null,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            currentPeriodEnd: subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : null,
           });
 
           console.log(`Subscription canceled for user ${user.id}`);

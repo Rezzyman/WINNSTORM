@@ -91,25 +91,25 @@ export const ReportPreview = ({ property, scan, onSend, onDownload }: ReportPrev
             {/* Report Content Preview */}
             <div className="space-y-3 mb-4">
               <div>
-                <h4 className="font-semibold text-neutral-darker">Roof Health Score: {scan.healthScore}/100</h4>
+                <h4 className="font-semibold text-neutral-darker">Roof Health Score: {scan.healthScore ?? 'N/A'}/100</h4>
                 <div className="w-full bg-neutral-medium rounded-full h-2 mt-1">
-                  <div className={`${getScoreColor(scan.healthScore)} h-2 rounded-full`} style={{ width: `${scan.healthScore}%` }}></div>
+                  <div className={`${getScoreColor(scan.healthScore ?? 0)} h-2 rounded-full`} style={{ width: `${scan.healthScore ?? 0}%` }}></div>
                 </div>
                 <p className="text-xs text-neutral-dark mt-1">
-                  {scan.healthScore >= 80 ? 'Good: No immediate action required' : 
-                   scan.healthScore >= 60 ? 'Warning: Maintenance recommended' : 
+                  {(scan.healthScore ?? 0) >= 80 ? 'Good: No immediate action required' :
+                   (scan.healthScore ?? 0) >= 60 ? 'Warning: Maintenance recommended' :
                    'Critical: Immediate attention required'}
                 </p>
               </div>
 
               {includes.summary && (
                 <p className="text-sm text-neutral-dark">
-                  Assessment summary and thermal analysis for the commercial property located at {property.address}. 
+                  Assessment summary and thermal analysis for the commercial property located at {property.address}.
                   Scan performed on {formatDate(new Date(scan.date))} using {scan.deviceType || 'thermal imaging equipment'}.
                 </p>
               )}
 
-              {includes.thermalImages && (
+              {includes.thermalImages && scan.thermalImageUrl && (
                 <div className="w-full rounded-lg overflow-hidden">
                   <img src={scan.thermalImageUrl} alt="Thermal imaging of the roof" className="w-full h-auto" />
                 </div>

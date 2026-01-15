@@ -937,7 +937,7 @@ router.put('/settings/stormy-prompt', requireAdmin, async (req: AdminAuthenticat
       'stormy_system_prompt',
       prompt,
       'Custom system prompt for Stormy AI assistant',
-      req.session?.adminEmail
+      (req.session as any)?.adminEmail
     );
 
     res.json({

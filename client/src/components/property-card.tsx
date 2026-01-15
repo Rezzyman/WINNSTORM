@@ -30,9 +30,9 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Card className="overflow-hidden cursor-pointer border border-border hover:border-primary transition-colors shadow-md" onClick={() => navigate(`/property/${property.id}`)}>
       <div className="h-48 w-full overflow-hidden">
-        <img 
-          src={property.imageUrl} 
-          alt={property.name} 
+        <img
+          src={property.imageUrl || '/placeholder-property.jpg'}
+          alt={property.name}
           className="w-full h-full object-cover"
         />
       </div>
@@ -40,12 +40,14 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-foreground">{property.name}</h3>
           <Badge variant="outline" className={getScoreColor(75)}>
-            {property.overallCondition}
+            {property.overallCondition || 'Unknown'}
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm mb-3">{property.address}</p>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Last scan: {formatDate(new Date(property.lastInspectionDate))}</span>
+          <span className="text-muted-foreground">
+            Last scan: {property.lastInspectionDate ? formatDate(new Date(property.lastInspectionDate)) : 'Not yet inspected'}
+          </span>
           <span className="text-primary font-medium">View Details →</span>
         </div>
       </CardContent>

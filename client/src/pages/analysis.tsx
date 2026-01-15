@@ -187,9 +187,9 @@ const Analysis = () => {
                   <Skeleton className="w-full h-8 rounded-lg" />
                 </>
               ) : (
-                scan && (
-                  <ThermalSlider 
-                    standardImage={scan.standardImageUrl} 
+                scan && scan.standardImageUrl && scan.thermalImageUrl && (
+                  <ThermalSlider
+                    standardImage={scan.standardImageUrl}
                     thermalImage={scan.thermalImageUrl}
                     alt={`Thermal scan of ${property?.name}`}
                   />

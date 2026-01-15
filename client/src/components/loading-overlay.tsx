@@ -86,8 +86,8 @@ export const LoadingOverlay = () => {
     };
 
     return () => {
-      delete window.showLoading;
-      delete window.hideLoading;
+      window.showLoading = undefined as any;
+      window.hideLoading = undefined as any;
     };
   }, []);
 
