@@ -1,14 +1,39 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// CAPACITOR_BUNDLED=true  -> Uses bundled assets (for UI testing)
+// CAPACITOR_LOCAL=true    -> Connects to localhost:3000 (for dev with backend)
+// Neither                 -> Connects to winnstorm.com (production)
+const useBundled = process.env.CAPACITOR_BUNDLED === 'true';
+const useLocalServer = process.env.CAPACITOR_LOCAL === 'true';
+
+const getServerConfig = () => {
+  if (useBundled) {
+    // Use bundled assets - no server URL
+    return { appendUserAgent: 'Capacitor WinnStorm' };
+  }
+  if (useLocalServer) {
+    // Local development - connects to your local server
+    return {
+      url: 'http://localhost:3000',
+      cleartext: true,
+      androidScheme: 'http',
+      appendUserAgent: 'Capacitor WinnStorm'
+    };
+  }
+  // Production - connects to winnstorm.com
+  return {
+    url: 'https://winnstorm.com',
+    cleartext: false,
+    androidScheme: 'https',
+    appendUserAgent: 'Capacitor WinnStorm'
+  };
+};
+
 const config: CapacitorConfig = {
   appId: 'com.winnstorm.inspector',
   appName: 'WinnStorm',
-  webDir: 'dist/public',
-  server: {
-    url: 'https://winnstorm.com',
-    cleartext: false,
-    androidScheme: 'https'
-  },
+  webDir: 'dist/mobile',
+  server: getServerConfig(),
   plugins: {
     Camera: {
       presentationStyle: 'fullscreen',

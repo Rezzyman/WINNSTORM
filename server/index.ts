@@ -53,26 +53,35 @@ if (SITE_PASSWORD) {
     if (req.path !== '/') {
       return next();
     }
-    
+
+    // Bypass password protection for mobile apps (Capacitor)
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileApp = userAgent.includes('Capacitor') ||
+                        userAgent.includes('WinnStorm') ||
+                        req.headers['x-capacitor-app'] === 'true';
+    if (isMobileApp) {
+      return next();
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Basic ')) {
       res.setHeader('WWW-Authenticate', 'Basic realm="WinnStorm Access"');
       return res.status(401).send('Authentication required');
     }
-    
+
     const base64Credentials = authHeader.split(' ')[1];
     const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
     const [username, password] = credentials.split(':');
-    
+
     // Accept any username with the correct password
     if (password === SITE_PASSWORD) {
       return next();
     }
-    
+
     res.setHeader('WWW-Authenticate', 'Basic realm="WinnStorm Access"');
     return res.status(401).send('Invalid credentials');
   });
-  log('Site password protection enabled (home page only)');
+  log('Site password protection enabled (home page only, mobile apps bypassed)');
 }
 
 // Stripe webhook needs raw body for signature verification - must be before express.json()
