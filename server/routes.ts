@@ -11,7 +11,7 @@ import {
 import { analyzeThermalImage, generateThermalReport } from "./thermal-analysis";
 import { crmManager } from './crm-integrations';
 import { getAIAssistance, analyzeInspectionData, AIAssistantRequest, analyzeInspectionImage, getStepCoaching, parseTranscript, ImageAnalysisRequest } from './ai-assistant';
-import { requireAuth, optionalAuth, AuthenticatedRequest } from './auth';
+import { requireAuth, optionalAuth, requireSubscription, AuthenticatedRequest, SubscriptionAuthenticatedRequest } from './auth';
 import Stripe from 'stripe';
 import multer from 'multer';
 import { 
@@ -218,10 +218,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(property);
   });
 
-  app.post("/api/properties", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: Creating properties requires active subscription
+  app.post("/api/properties", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
       
       // Extract and validate relevant fields
       const { name, address, imageUrls, scanType, notes, captureDate } = req.body;
@@ -452,11 +453,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(scans);
   });
 
-  // Report routes
-  app.post("/api/reports/send/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // Report routes - PAYWALL: Sending reports requires subscription
+  app.post("/api/reports/send/:scanId", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
 
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
@@ -559,10 +560,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/download/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: Downloading reports requires subscription
+  app.get("/api/reports/download/:scanId", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
       
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
@@ -619,11 +621,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Executive Summary Generation
-  app.post("/api/reports/executive-summary/:scanId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  // AI Executive Summary Generation - PAYWALL: Requires subscription
+  app.post("/api/reports/executive-summary/:scanId", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = getAuthenticatedUserId(req, res);
-      if (!userId) return;
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
       
       const scanId = parseInt(req.params.scanId);
       if (isNaN(scanId)) {
@@ -3212,10 +3214,11 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Send message to Stormy (allows demo access)
-  app.post("/api/stormy/message", optionalAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: Stormy AI chat requires active subscription
+  app.post("/api/stormy/message", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid || DEMO_USER_ID;
+      const userId = req.user?.uid;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
 
       const { message, conversationId, attachments, propertyId, inspectionId, contextType } = req.body;
 
@@ -3240,10 +3243,11 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  // Analyze image directly (allows demo access)
-  app.post("/api/stormy/analyze-image", optionalAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: AI image analysis requires subscription
+  app.post("/api/stormy/analyze-image", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.uid || DEMO_USER_ID;
+      const userId = req.user?.uid;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
 
       const { imageUrl, imageType, additionalContext } = req.body;
 
@@ -3617,9 +3621,11 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  app.post("/api/stormy/analyze-images", optionalAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: Bulk image analysis requires subscription
+  app.post("/api/stormy/analyze-images", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.dbUserId || 1; // Demo fallback to user ID 1
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
 
       const { images, propertyContext } = req.body;
       
@@ -3659,9 +3665,11 @@ Keep the tone professional and technical but accessible.`;
     }
   });
 
-  app.post("/api/stormy/generate-report-summary", optionalAuth, async (req: AuthenticatedRequest, res) => {
+  // PAYWALL: AI report summary requires subscription
+  app.post("/api/stormy/generate-report-summary", requireSubscription('starter'), async (req: SubscriptionAuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.dbUserId || 1; // Demo fallback to user ID 1
+      const userId = req.user?.dbUserId;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
 
       const { bulkAnalysis, propertyAddress } = req.body;
       
