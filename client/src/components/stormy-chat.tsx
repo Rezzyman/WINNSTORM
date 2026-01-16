@@ -694,7 +694,7 @@ export function StormyChat({
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <StormyAvatar size={32} />
-            Stormy AI Assistant
+            Stormy AI Coach
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -716,7 +716,7 @@ export function StormyChat({
           <DialogHeader className="p-4 border-b">
             <DialogTitle className="flex items-center gap-2">
               <StormyAvatar size={32} />
-              Stormy AI Assistant
+              Stormy AI Coach
             </DialogTitle>
           </DialogHeader>
           {chatContent}
