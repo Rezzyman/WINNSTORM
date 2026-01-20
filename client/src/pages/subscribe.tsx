@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, ArrowLeft, AlertCircle, LogIn } from 'lucide-react';
 import { SEO } from '@/components/seo';
 
 // Load Stripe public key - only VITE_ prefixed variables are exposed to frontend
@@ -146,12 +147,51 @@ const SubscribeForm = ({ planName, isSetupMode }: { planName: string; isSetupMod
 export default function Subscribe() {
   const [match, params] = useRoute('/subscribe/:plan');
   const [, navigate] = useLocation();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSetupMode, setIsSetupMode] = useState(false);
 
   const planName = params?.plan || 'Professional';
+
+  // Show login prompt if not authenticated
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5 text-orange-500" />
+              Sign In Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              Please sign in or create an account to subscribe to the <span className="font-semibold capitalize">{planName}</span> plan.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => navigate(`/login?redirect=/subscribe/${planName}`)}
+                className="w-full bg-orange-500 hover:bg-orange-600"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In to Subscribe
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/pricing')}
+                className="w-full"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Pricing
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Check if Stripe is configured
   if (!stripePromise) {
@@ -183,6 +223,9 @@ export default function Subscribe() {
   }
 
   useEffect(() => {
+    // Only create subscription if authenticated
+    if (!isAuthenticated || authLoading) return;
+
     // Create subscription as soon as the page loads
     apiRequest('/api/create-subscription', {
       method: 'POST',
@@ -198,7 +241,7 @@ export default function Subscribe() {
         setError(err.message || 'Failed to initialize payment');
         setIsLoading(false);
       });
-  }, [planName]);
+  }, [planName, isAuthenticated, authLoading]);
 
   if (error) {
     return (
