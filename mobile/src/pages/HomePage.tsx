@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Camera, MessageCircle, ChevronRight, MapPin, Clock, Zap } from 'lucide-react';
+import { Camera, MessageCircle, ChevronRight, MapPin, Clock, Zap, Ruler, Compass, Thermometer } from 'lucide-react';
 import { cn, hapticFeedback, formatDate } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 import { demoInspections, demoStats, type DemoInspection } from '@/lib/demo-data';
@@ -95,6 +95,36 @@ export default function HomePage() {
           <QuickStat icon={Zap} label="Today" value={String(demoStats.today)} color="primary" />
           <QuickStat icon={Clock} label="Pending" value={String(demoStats.pending)} color="amber" />
           <QuickStat icon={MapPin} label="Nearby" value={String(demoStats.nearbyJobs)} color="blue" />
+        </div>
+      </div>
+
+      {/* Inspector Tools */}
+      <div className="px-5 mb-6">
+        <h3 className="text-lg font-semibold text-white mb-3">Inspector Tools</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <ToolButton
+            icon={Ruler}
+            label="Pitch Detector"
+            onClick={() => {
+              hapticFeedback('medium');
+              navigate('/tools/pitch');
+            }}
+            color="green"
+          />
+          <ToolButton
+            icon={Compass}
+            label="Compass"
+            onClick={() => hapticFeedback('light')}
+            color="blue"
+            comingSoon
+          />
+          <ToolButton
+            icon={Thermometer}
+            label="Temp Log"
+            onClick={() => hapticFeedback('light')}
+            color="red"
+            comingSoon
+          />
         </div>
       </div>
 
@@ -194,5 +224,38 @@ function StatusBadge({ status }: { status: string }) {
     <span className={cn('text-xs font-medium px-2 py-1 rounded-full', config.bg, config.text)}>
       {config.label}
     </span>
+  );
+}
+
+function ToolButton({ icon: Icon, label, onClick, color, comingSoon }: {
+  icon: typeof Ruler;
+  label: string;
+  onClick: () => void;
+  color: 'green' | 'blue' | 'red' | 'purple';
+  comingSoon?: boolean;
+}) {
+  const colorClasses = {
+    green: 'bg-green-500/20 text-green-400',
+    blue: 'bg-blue-500/20 text-blue-400',
+    red: 'bg-red-500/20 text-red-400',
+    purple: 'bg-purple-500/20 text-purple-400',
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={comingSoon}
+      className={cn(
+        'bg-slate-800 rounded-2xl p-4 text-center border border-slate-700',
+        'active:scale-95 transition-transform',
+        comingSoon && 'opacity-50'
+      )}
+    >
+      <div className={cn('w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center', colorClasses[color])}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <p className="text-white text-xs font-medium">{label}</p>
+      {comingSoon && <p className="text-slate-500 text-[10px]">Coming Soon</p>}
+    </button>
   );
 }

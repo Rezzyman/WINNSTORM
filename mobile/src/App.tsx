@@ -5,6 +5,7 @@ import CameraPage from './pages/CameraPage';
 import StormyPage from './pages/StormyPage';
 import InspectionsPage from './pages/InspectionsPage';
 import PropertyPage from './pages/PropertyPage';
+import PitchDetectorPage from './pages/PitchDetectorPage';
 import BottomNav from './components/BottomNav';
 import { AuthProvider } from './lib/auth-context';
 
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/stormy" component={StormyPage} />
             <Route path="/inspections" component={InspectionsPage} />
             <Route path="/property/:id" component={PropertyPage} />
+            <Route path="/tools/pitch" component={PitchDetectorPage} />
             <Route>
               <div className="h-full flex items-center justify-center">
                 <p className="text-slate-400">Page not found</p>

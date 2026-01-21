@@ -17,8 +17,8 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="bg-slate-800/95 backdrop-blur-lg border-t border-slate-700 pb-[env(safe-area-inset-bottom,8px)]">
-      <div className="flex items-center justify-around h-12">
+    <nav className="bg-slate-800/95 backdrop-blur-lg border-t border-slate-700 pb-1">
+      <div className="flex items-center justify-around h-11">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location === path || (path !== '/' && location.startsWith(path));
           return (
