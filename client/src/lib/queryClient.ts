@@ -1,6 +1,11 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { auth } from "./firebase";
 
+// API base URL for split deployment (Vercel frontend + Railway backend)
+// In development or same-origin deployment, this is empty
+// In split deployment, set VITE_API_URL to the backend URL
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 async function getAuthHeaders(): Promise<HeadersInit> {
   const currentUser = auth.currentUser;
   if (currentUser) {
@@ -25,8 +30,9 @@ async function throwIfResNotOk(res: Response) {
 
 export async function apiRequest(url: string, options?: RequestInit): Promise<any> {
   const authHeaders = await getAuthHeaders();
-  
-  const res = await fetch(url, {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
+
+  const res = await fetch(fullUrl, {
     credentials: "include",
     ...options,
     headers: {
@@ -45,8 +51,9 @@ export async function apiRequestRaw(
   data?: unknown | undefined,
 ): Promise<Response> {
   const authHeaders = await getAuthHeaders();
-  
-  const res = await fetch(url, {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
+
+  const res = await fetch(fullUrl, {
     method,
     headers: {
       ...authHeaders,
@@ -67,8 +74,10 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const authHeaders = await getAuthHeaders();
-    
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
+
+    const res = await fetch(fullUrl, {
       credentials: "include",
       headers: authHeaders,
     });

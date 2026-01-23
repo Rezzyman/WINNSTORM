@@ -93,6 +93,15 @@ import fs from "fs";
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
+  // Health check endpoint for Railway/monitoring
+  app.get("/api/health", (req, res) => {
+    res.status(200).json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      version: "1.0.0"
+    });
+  });
+
   // Branding Kit Download Route
   app.get("/download/branding-kit", (req, res) => {
     const filePath = path.join(process.cwd(), "client/public/winnstorm-branding-kit.zip");

@@ -9,6 +9,35 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// CORS configuration for split deployment (Vercel frontend + Railway backend)
+const ALLOWED_ORIGINS = [
+  'https://winnstorm.com',
+  'https://www.winnstorm.com',
+  'https://winnstorm.vercel.app',
+  process.env.FRONTEND_URL,
+  // Development
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://localhost:5173',
+].filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Capacitor-App');
+  }
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
 // Rate limiting configuration
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
