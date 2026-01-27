@@ -314,7 +314,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
-    const [newProperty] = await db.insert(properties).values([property]).returning();
+    const [newProperty] = await db.insert(properties).values(property).returning();
     return {
       ...newProperty,
       scans: [],
@@ -360,7 +360,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createScan(scan: InsertScan): Promise<Scan> {
-    const [newScan] = await db.insert(scans).values([scan]).returning();
+    const [newScan] = await db.insert(scans).values(scan).returning();
     return newScan as Scan;
   }
 
@@ -703,7 +703,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEvidenceAsset(asset: InsertEvidenceAsset): Promise<EvidenceAsset> {
-    const [newAsset] = await db.insert(evidenceAssets).values(asset).returning();
+    const [newAsset] = await db.insert(evidenceAssets).values(asset as any).returning();
     return newAsset;
   }
 
@@ -999,7 +999,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDamageTemplate(template: InsertDamageTemplate): Promise<DamageTemplate> {
-    const [newTemplate] = await db.insert(damageTemplates).values(template).returning();
+    const [newTemplate] = await db.insert(damageTemplates).values(template as any).returning();
     return newTemplate;
   }
 
@@ -1087,7 +1087,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAIMessage(message: InsertAIMessage): Promise<AIMessage> {
-    const [newMessage] = await db.insert(aiMessages).values(message).returning();
+    const [newMessage] = await db.insert(aiMessages).values(message as any).returning();
     return newMessage;
   }
 
@@ -1112,7 +1112,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAIMemory(memory: InsertAIMemory): Promise<AIMemory> {
-    const [newMemory] = await db.insert(aiMemory).values(memory).returning();
+    const [newMemory] = await db.insert(aiMemory).values(memory as any).returning();
     return newMemory;
   }
 
@@ -1266,7 +1266,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createKnowledgeDocument(data: InsertKnowledgeDocument): Promise<KnowledgeDocument> {
-    const [document] = await db.insert(knowledgeDocuments).values(data).returning();
+    const [document] = await db.insert(knowledgeDocuments).values(data as any).returning();
     return document;
   }
 
@@ -1337,7 +1337,7 @@ export class DatabaseStorage implements IStorage {
 
   // Knowledge Embeddings
   async createKnowledgeEmbedding(data: InsertKnowledgeEmbedding): Promise<KnowledgeEmbedding> {
-    const [embedding] = await db.insert(knowledgeEmbeddings).values(data).returning();
+    const [embedding] = await db.insert(knowledgeEmbeddings).values(data as any).returning();
     return embedding;
   }
 

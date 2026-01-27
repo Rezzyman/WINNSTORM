@@ -1668,7 +1668,7 @@ Keep the tone professional and technical but accessible.`;
 
         case 'invoice.payment_succeeded': {
           const invoice = event.data.object as Stripe.Invoice;
-          if (!invoice.subscription) break;
+          if (!(invoice as any).subscription) break;
 
           const customerId = invoice.customer as string;
           const user = await storage.getUserByStripeCustomerId(customerId);

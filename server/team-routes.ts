@@ -191,7 +191,7 @@ router.post('/upload', requireTeamAuth, knowledgeUpload.single('file'), async (r
       mimeType: req.file.mimetype,
       tags: tags ? JSON.parse(tags) : null,
       sourceUrl: sourceUrl || null,
-      uploadedBy: req.teamMember?.email || 'team-member',
+      uploadedBy: null, // Team uploads don't have a user ID
       isActive: true,
     };
     
@@ -200,8 +200,8 @@ router.post('/upload', requireTeamAuth, knowledgeUpload.single('file'), async (r
     await storage.createKnowledgeAuditLog({
       documentId: document.id,
       action: 'uploaded',
-      performedBy: req.teamMember?.email || 'team-member',
-      details: { source: 'team_portal', originalFileName: req.file.originalname }
+      userEmail: req.teamMember?.email || 'team-member',
+      notes: `Uploaded via team portal: ${req.file.originalname}`
     });
     
     res.json({
@@ -217,8 +217,8 @@ router.post('/upload', requireTeamAuth, knowledgeUpload.single('file'), async (r
 
 router.get('/documents', requireTeamAuth, async (req: TeamAuthenticatedRequest, res) => {
   try {
-    const allDocs = await storage.getKnowledgeDocuments(100, 0);
-    const myDocs = allDocs.filter(doc => doc.uploadedBy === req.teamMember?.email);
+    const allDocs = await storage.getAllKnowledgeDocuments({});
+    const myDocs = allDocs.filter((doc: any) => doc.uploadedBy === req.teamMember?.email);
     
     res.json(myDocs);
   } catch (error) {
@@ -229,7 +229,7 @@ router.get('/documents', requireTeamAuth, async (req: TeamAuthenticatedRequest, 
 
 router.get('/categories', requireTeamAuth, async (req: TeamAuthenticatedRequest, res) => {
   try {
-    const categories = await storage.getKnowledgeCategories();
+    const categories = await storage.getAllKnowledgeCategories();
     res.json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
