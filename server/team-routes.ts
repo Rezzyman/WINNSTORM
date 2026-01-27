@@ -179,30 +179,28 @@ router.post('/upload', requireTeamAuth, knowledgeUpload.single('file'), async (r
       return res.status(400).json({ message: 'Title, category, and document type are required' });
     }
     
-    const documentData: InsertKnowledgeDocument = {
+    const documentData = {
       title,
       description: description || null,
       categoryId: parseInt(category) || null,
       documentType,
-      fileName: req.file.filename,
-      originalFileName: req.file.originalname,
-      filePath: req.file.path,
+      fileName: req.file.originalname,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
-      tags: tags ? JSON.parse(tags) : null,
-      sourceUrl: sourceUrl || null,
-      uploadedBy: null, // Team uploads don't have a user ID
-      isActive: true,
+      fileUrl: req.file.path,
+      content: null,
+      metadata: {
+        tags: tags ? JSON.parse(tags) : [],
+        sourceUrl: sourceUrl || null,
+        originalFileName: req.file.originalname,
+      },
+      isActive: false, // Pending approval
     };
-    
-    const document = await storage.createKnowledgeDocument(documentData);
-    
-    await storage.createKnowledgeAuditLog({
-      documentId: document.id,
-      action: 'uploaded',
-      userEmail: req.teamMember?.email || 'team-member',
-      notes: `Uploaded via team portal: ${req.file.originalname}`
-    });
+
+    const document = await storage.createKnowledgeDocument(documentData as any);
+
+    // Skip audit log for team uploads since we don't have a userId
+    console.log(`Team upload: ${req.teamMember?.email} uploaded ${req.file.originalname}`);
     
     res.json({
       success: true,

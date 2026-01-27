@@ -314,7 +314,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
-    const [newProperty] = await db.insert(properties).values(property).returning();
+    const [newProperty] = await db.insert(properties).values(property as any).returning();
     return {
       ...newProperty,
       scans: [],
@@ -360,7 +360,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createScan(scan: InsertScan): Promise<Scan> {
-    const [newScan] = await db.insert(scans).values(scan).returning();
+    const [newScan] = await db.insert(scans).values(scan as any).returning();
     return newScan as Scan;
   }
 
