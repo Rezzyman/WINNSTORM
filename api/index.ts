@@ -1,15 +1,26 @@
-// Vercel Serverless Function - Express API Handler
+// Vercel Serverless Function - Full Express App
 import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import pgSession from "connect-pg-simple";
 import pg from "pg";
-import { registerRoutes } from "../server/routes";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 
 // Trust proxy for Vercel
 app.set('trust proxy', 1);
+
+// Rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', apiLimiter);
 
 // Stripe webhook needs raw body - must be before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
@@ -26,14 +37,13 @@ const sessionConfig: session.SessionOptions = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax',
   },
 };
 
-// Use PostgreSQL session store
 if (process.env.DATABASE_URL) {
   const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
@@ -48,8 +58,32 @@ if (process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
-// Register all routes
-registerRoutes(app);
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString(), env: !!process.env.DATABASE_URL });
+});
 
-// Export for Vercel
+// Dynamic import and route registration
+let routesRegistered = false;
+
+const initRoutes = async () => {
+  if (routesRegistered) return;
+
+  try {
+    // Import routes module
+    const { registerRoutes } = await import("../server/routes.js");
+    await registerRoutes(app);
+    routesRegistered = true;
+    console.log("Routes registered successfully");
+  } catch (error) {
+    console.error("Failed to register routes:", error);
+  }
+};
+
+// Initialize routes on first request
+app.use(async (req, res, next) => {
+  await initRoutes();
+  next();
+});
+
 export default app;
